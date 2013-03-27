@@ -1,0 +1,5 @@
+<li><%= daily_summary[:entry_date] %> :  <%= daily_summary[:total_hours] %> 
+<% unless session["#{@session_user.id}_active_users"].blank? %>
+-<%= daily_summary[:username] %>
+<% end %>
+</li>

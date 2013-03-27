@@ -1,0 +1,11 @@
+<h1>Select a user to remove</h1>
+<p>Please be sure! Removing a user removes all their time entries and administrative rights.</p>
+
+<% form_tag url_for(:controller => :time_entry, :action => :clear_user) do %>
+  <ul>
+    <% @users.each do |u|%>
+      <li><%= radio_button_tag('user_id', u.id) %> <%= label_tag("user_id_#{u.id}",u.username) %></li>
+    <% end %>
+  </ul>
+  <p><%= submit_tag('Remove a user and all their time entries') %></p>
+<% end %>

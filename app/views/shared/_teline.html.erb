@@ -1,0 +1,26 @@
+<% unless @date_shown.include?(teline.entry_date) %>
+  <tr>
+    <td colspan="5" class="entry_date"><%= teline.entry_date %></td>
+  </tr>
+  <% @date_shown << teline.entry_date %>
+<% end %>
+<tr class="entry" id="entry-<%= teline.id %>">
+  <td>
+    <%= link_to_remote(icon(:time_delete), {:url => {:action => :delete, :id => teline},:update => {:success => 'entries', :failure => 'entry-error'}}, :title => 'Delete this entry' ) %>
+    <%= link_to_remote(icon(:time_add), {:url => {:action => :clone, :id => teline},:update => {:success => 'entry-form', :failure => 'entry-error'}}, :title => 'Clone this entry' ) %>
+    <% if teline.user.id == @session_user.id %>
+      <%= link_to_remote(icon(:time_go), {:url => {:action => :entry_form, :id => teline},:update => {:success => 'entry-form', :failure => 'entry-error'}}, :title => 'Edit this entry' ) %>
+    <% end %>
+  </td>
+  <td class="category"><%= h teline.category %></td>
+  <td class="project"><%= h teline.project %></td>
+  <td class="decimal_time"><% unless teline.decimal_time.blank? %>
+    <%= h teline.decimal_time %> hours
+  <% end %></td>
+<% unless session["#{@session_user.id}_active_users"].blank? %>
+  <td><%= h teline.user.username %></td>
+<% end %>
+</tr>
+<tr>
+  <td colspan="5" class="description"><%= h teline.description %></td>
+</td>
