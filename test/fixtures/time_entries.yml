@@ -1,0 +1,26 @@
+te1:
+  id: 1
+  user_id: 1
+  category: Sysadmin
+  project: Updates
+  decimal_time: 1.5
+  description: aptitude is the bomb
+  entry_date: 2009-04-5
+  
+te2:
+  id: 2
+  user_id: 1
+  category: Sysadmin
+  project: Updates
+  decimal_time: 2.5
+  description: reboot.
+  entry_date: 2009-04-6
+
+te3:
+  id: 3
+  user_id: 1
+  category: Project
+  project: Herdict
+  decimal_time: 1
+  description: debugging.
+  entry_date: 2009-04-7
