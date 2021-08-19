@@ -10,3 +10,4 @@ db/schema.rb
 .DS_Store
 log/*
 *.svn/*
+.env
