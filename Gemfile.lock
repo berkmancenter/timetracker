@@ -22,6 +22,9 @@ GEM
       rest-client (>= 0.5)
     domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
+    dotenv (2.0.1)
+    dotenv-rails (2.0.1)
+      dotenv (= 2.0.1)
     executable-hooks (1.3.2)
     fastercsv (1.5.5)
     ferret (0.11.8.7)
@@ -93,6 +96,7 @@ DEPENDENCIES
   carmen (= 0.2.13)
   couchrest (= 0.35)
   domain_name (= 0.5.20170404)
+  dotenv-rails
   executable-hooks (= 1.3.2)
   fastercsv (= 1.5.5)
   ferret (= 0.11.8.7)
