@@ -1,7 +1,5 @@
-<% if flash[messages.to_sym] -%>
-  <div id="<%= messages %>">
-    <%= flash[messages.to_sym] %>
-    <%= javascript_tag(visual_effect(:pulsate, messages)) %>
-  </div>
-  <% flash[messages.to_sym] = nil -%>
-<% end %>
+<div id="flash">
+  <% flash.each do |key, value| -%>
+    <div id="flash_<%= key %>"><%= value %></div>
+  <% end -%>
+</div>

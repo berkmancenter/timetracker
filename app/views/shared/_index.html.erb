@@ -1,31 +1,39 @@
-<%= javascript_tag("
-new Ajax.Updater('months', '#{url_for(:action => :months)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-new Ajax.Updater('days', '#{url_for(:action => :days, :month => @year_month)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-new Ajax.Updater('popular_categories', '#{url_for(:action => :popular_categories)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-new Ajax.Updater('popular_projects', '#{url_for(:action => :popular_projects)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-"
-                  ) %>
-  <h1>Time!</h1>
+<h1>Time!</h1>
 
-  <div id="entry-form">
-    <%= render :partial => 'shared/teedit' %>
-  </div><!-- /#entry-form -->
-  <div id="entry-error" class="error" style="display: none;"></div>
-  <% unless entries.blank? %>
-    <table id="entry-list" cellpadding="0" cellspacing="0">
-      <tr>
-        <th>&nbsp;</th>
-        <th>Category</th>
-        <th>Project</th>
-        <th>Hours</th>
-        <% unless session["#{@session_user.id}_active_users"].blank? %>
-          <th>User</th>
-        <% end %>
-      </tr>
-      <% @date_shown = [] %>
-      <%= render :partial => 'shared/teline', :collection => entries, :locals => {:new_entry => new_time_entry} %>
-    </table>
-  <% end %>
-  <% unless new_time_entry.blank? %>
-    <%= javascript_tag("Effect.Pulsate('entry-#{new_time_entry}');") %>
-  <% end %>
+<div id="entry-form">
+  <%= render 'shared/teedit' %>
+</div><!-- /#entry-form -->
+<div id="entry-error" class="error" style="display: none;"></div>
+<% unless entries.blank? %>
+  <table id="entry-list" cellpadding="0" cellspacing="0">
+    <tr>
+      <th>&nbsp;</th>
+      <th>Category</th>
+      <th>Project</th>
+      <th>Hours</th>
+      <% unless session["#{@session_user.id}_active_users"].blank? %>
+        <th>User</th>
+      <% end %>
+    </tr>
+    <% @date_shown = [] %>
+    <%= render partial: 'shared/teline', collection: entries, locals: { :new_entry => new_time_entry } %>
+  </table>
+<% end %>
+
+<% unless new_time_entry.blank? %>
+  <script type="text/javascript">
+    $('#entry-<%= new_time_entry %>').addClass('pulsing');
+    setTimeout(() => {
+      $('#entry-<%= new_time_entry %>').removeClass('pulsing');
+    }, 3000);
+  </script>
+<% end %>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    update_content('#months', '<%= months_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    update_content('#days', '<%= days_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    update_content('#popular_categories', '<%= popular_categories_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    update_content('#popular_projects', '<%= popular_projects_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+  });
+</script>

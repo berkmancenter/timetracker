@@ -1,0 +1,162 @@
+div,input,select,option,form,table, body{
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+th,td,p,li,h1,h2,h3,div{
+  font-family: Verdana, sans-serif;
+}
+
+h1, h2, h3, h4{
+  padding-top: 0;
+  margin-top: 0;
+}
+
+th,td,p,li,div,span{
+    font-size: 12px;
+}
+
+div.auto_complete {
+  width: 350px;
+  background: #fff;
+}
+div.auto_complete ul {
+  border:1px solid #888;
+  margin:0;
+  padding:0;
+  width:100%;
+  list-style-type:none;
+}
+div.auto_complete ul li {
+  margin:0;
+  padding:3px;
+}
+div.auto_complete ul li.selected {
+  background-color: #ffb;
+}
+div.auto_complete ul strong.highlight {
+  color: #800; 
+  margin:0;
+  padding:0;
+}
+
+#header, #left, #main, #footer{
+  border: 1px #cccccc;
+  padding: 5px;
+}
+
+#header{
+    float: left;
+    background-color: #efefef;
+    border-style: none none solid none;
+    width: 100%;
+}
+
+#header-left{
+  float: left;
+}
+
+#header-right{
+    width: 200px;
+    float: right;
+}
+
+#left{
+  float: left;
+  width: 200px;
+}
+
+#main{
+  float: left;
+  border-style: none none none solid;
+  width: 700px;
+}
+
+#popular{
+  border-top: 1px dotted black;
+  background-color: #e4e4e4;
+  padding: 3px;
+}
+
+#popular_categories, #popular_projects{
+  cursor: pointer;
+  max-height: 15em;
+  overflow: auto;
+}
+
+#new-entry-error{
+  color: red;
+  font-weight: bold;
+}
+
+tr.entry td{
+  border-top: 1px solid #cccccc;
+  background-color: #efefef;
+}
+
+#entry-list td, #entry-list th{
+  padding: 5px;
+}
+
+#entry-list td.project{
+  background-color: #d0d0d0;
+}
+
+#entry-list td.entry_date{
+  padding-top: 2em;
+  font-weight: bold;
+  font-size: larger;
+}
+
+#entry-list td.description{
+  padding-left: 50px;
+  font-size: smaller;
+  padding-bottom: 10px;
+}
+
+.accesskey{
+  color: #ccc;
+}
+
+.accesskey:hover{
+  color: #000;
+}
+
+#user-chooser-toggle{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#user_remove a{
+  color: black; 
+}
+
+#sudo{
+  width: 180px;
+  background-color: white;
+  border: 1px solid #bbbbbb;
+  padding: 5px;
+  position: absolute;
+  z-index: 1000;
+  float: left;
+}
+
+#footer{
+  background: darkred;
+  padding: 1em;
+  clear: both;
+  border-style: solid none none none;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+}
+
+#calendar-entry {
+  cursor: pointer;
+
+  img {
+    vertical-align: text-bottom;
+  }
+}

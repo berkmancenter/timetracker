@@ -4,12 +4,13 @@
   </tr>
   <% @date_shown << teline.entry_date %>
 <% end %>
+
 <tr class="entry" id="entry-<%= teline.id %>">
   <td>
-    <%= link_to_remote(icon(:time_delete), {:url => {:action => :delete, :id => teline},:update => {:success => 'entries', :failure => 'entry-error'}}, :title => 'Delete this entry' ) %>
-    <%= link_to_remote(icon(:time_add), {:url => {:action => :clone, :id => teline},:update => {:success => 'entry-form', :failure => 'entry-error'}}, :title => 'Clone this entry' ) %>
+    <%= link_to(image_tag('icons/time_delete.png'), delete_time_entry_url(id: teline.id), title: 'Delete this entry', class: 'entry-delete') %>
+    <%= link_to(image_tag('icons/time_add.png'), clone_time_entry_url(id: teline.id), title: 'Clone this entry', class: 'entry-delete') %>
     <% if teline.user.id == @session_user.id %>
-      <%= link_to_remote(icon(:time_go), {:url => {:action => :entry_form, :id => teline},:update => {:success => 'entry-form', :failure => 'entry-error'}}, :title => 'Edit this entry' ) %>
+      <%= link_to(image_tag('icons/time_go.png'), entry_form_time_entry_url(id: teline.id), title: 'Edit this entry', class: 'entry-edit') %>
     <% end %>
   </td>
   <td class="category"><%= h teline.category %></td>
@@ -23,4 +24,4 @@
 </tr>
 <tr>
   <td colspan="5" class="description"><%= h teline.description %></td>
-</td>
+</tr>
