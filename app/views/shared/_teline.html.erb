@@ -1,6 +1,6 @@
 <% unless @date_shown.include?(teline.entry_date) %>
-  <tr>
-    <td colspan="5" class="entry_date"><%= teline.entry_date %></td>
+  <tr class="entry-date">
+    <td colspan="5" class="entry_date is-size-4"><%= teline.entry_date %></td>
   </tr>
   <% @date_shown << teline.entry_date %>
 <% end %>
@@ -8,7 +8,7 @@
 <tr class="entry" id="entry-<%= teline.id %>">
   <td>
     <%= link_to(image_tag('icons/time_delete.png'), delete_time_entry_url(id: teline.id), title: 'Delete this entry', class: 'entry-delete') %>
-    <%= link_to(image_tag('icons/time_add.png'), clone_time_entry_url(id: teline.id), title: 'Clone this entry', class: 'entry-delete') %>
+    <%= link_to(image_tag('icons/time_add.png'), clone_time_entry_url(id: teline.id), title: 'Clone this entry', class: 'entry-clone') %>
     <% if teline.user.id == @session_user.id %>
       <%= link_to(image_tag('icons/time_go.png'), entry_form_time_entry_url(id: teline.id), title: 'Edit this entry', class: 'entry-edit') %>
     <% end %>
@@ -19,9 +19,12 @@
     <%= h teline.decimal_time %> hours
   <% end %></td>
 <% unless session["#{@session_user.id}_active_users"].blank? %>
-  <td><%= h teline.user.username %></td>
+  <td class="username"><%= h teline.user.username %></td>
 <% end %>
 </tr>
-<tr>
-  <td colspan="5" class="description"><%= h teline.description %></td>
-</tr>
+
+<% if teline.description.present? %>
+  <tr>
+    <td colspan="5" class="description"><%= h teline.description %></td>
+  </tr>
+<% end %>

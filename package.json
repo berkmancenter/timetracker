@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bulma": "^0.9.4",
     "jquery": "^3.6.1",
     "jquery-ui": "^1.13.2"
   }

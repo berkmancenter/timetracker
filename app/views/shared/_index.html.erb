@@ -1,24 +1,31 @@
-<h1>Time!</h1>
+<div class="content">
+  <div id="entry-form">
+    <%= render 'shared/teedit' %>
+  </div>
+  <div id="entry-error" class="error" style="display: none;"></div>
 
-<div id="entry-form">
-  <%= render 'shared/teedit' %>
-</div><!-- /#entry-form -->
-<div id="entry-error" class="error" style="display: none;"></div>
-<% unless entries.blank? %>
-  <table id="entry-list" cellpadding="0" cellspacing="0">
-    <tr>
-      <th>&nbsp;</th>
-      <th>Category</th>
-      <th>Project</th>
-      <th>Hours</th>
-      <% unless session["#{@session_user.id}_active_users"].blank? %>
-        <th>User</th>
-      <% end %>
-    </tr>
-    <% @date_shown = [] %>
-    <%= render partial: 'shared/teline', collection: entries, locals: { :new_entry => new_time_entry } %>
-  </table>
-<% end %>
+  <h4 class="is-size-4 mt-2">Existing entries</h4>
+
+  <% unless entries.blank? %>
+    <table id="entry-list" class="table">
+      <tr>
+        <th>Actions</th>
+        <th>Category</th>
+        <th>Project</th>
+        <th>Hours</th>
+        <% unless session["#{@session_user.id}_active_users"].blank? %>
+          <th>User</th>
+        <% end %>
+      </tr>
+      <% @date_shown = [] %>
+      <%= render partial: 'shared/teline', collection: entries, locals: { :new_entry => new_time_entry } %>
+    </table>
+
+    <div id="dialog-confirm-delete" title="Are you sure to remove it?">
+      <p><span class="ui-icon ui-icon-alert"></span>This item will be deleted. Are you sure?</p>
+    </div>
+  <% end %>
+</div>
 
 <% unless new_time_entry.blank? %>
   <script type="text/javascript">
@@ -31,8 +38,8 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    update_content('#months', '<%= months_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
-    update_content('#days', '<%= days_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    update_content('#months', '<%= months_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
+    update_content('#days', '<%= days_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
     update_content('#popular_categories', '<%= popular_categories_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
     update_content('#popular_projects', '<%= popular_projects_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
   });

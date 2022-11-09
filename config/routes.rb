@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       get :months
       get :auto_complete
       get :choose_user
+      get :view_other_timesheets
       post :edit
       post :sudo
       post :clear_user

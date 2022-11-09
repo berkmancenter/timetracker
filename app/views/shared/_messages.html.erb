@@ -1,5 +1,9 @@
-<div id="flash">
-  <% flash.each do |key, value| -%>
-    <div id="flash_<%= key %>"><%= value %></div>
-  <% end -%>
-</div>
+<% unless flash.empty? %>
+  <div class="flash notification is-info">
+    <button class="delete"></button>
+
+    <% flash.each do |key, value| -%>
+      <div id="flash_<%= key %>"><%= value %></div>
+    <% end -%>
+  </div>
+<% end %>

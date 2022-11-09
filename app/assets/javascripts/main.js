@@ -43,22 +43,49 @@ function entry_form () {
 }
 
 function entry_actions () {
-  let actions = ['clone', 'delete'];
+  $(document).off('click', '.entry-clone');
+  $(document).on('click', '.entry-clone', (e) => {
+    e.preventDefault();
 
-  actions.forEach((action) => {
-    $(document).off('click', `.entry-${action}`);
+    $.get(e.currentTarget.href)
+      .done(
+        (response) => {
+          $('#entries').html(response);
+          init();
+        }
+      )
+  });
 
-    $(document).on('click', `.entry-${action}`, (e) => {
-      e.preventDefault();
+  $('#dialog-confirm-delete').dialog({
+    autoOpen: false,
+    resizable: false,
+    height: 'auto',
+    width: 400,
+    modal: true,
+    buttons: {
+      'Delete': function() {
+        console.log($('#dialog-confirm-delete').data('current-url'));
+        $.get($('#dialog-confirm-delete').data('current-url'))
+          .done(
+            (response) => {
+              $(this).dialog('close');
+              $('#entries').html(response);
+              init();
+            }
+          )
+      },
+      Cancel: function() {
+        $(this).dialog('close');
+      }
+    }
+  });
 
-      $.get(e.currentTarget.href)
-        .done(
-          (response) => {
-            $('#entries').html(response);
-            init();
-          }
-        )
-    });
+  $(document).off('click', '.entry-delete');
+  $(document).on('click', '.entry-delete', (e) => {
+    e.preventDefault();
+
+    $('#dialog-confirm-delete').data('current-url', e.currentTarget.href);
+    $('#dialog-confirm-delete').dialog('open');
   });
 
   $(document).off('click', '.entry-edit');
@@ -75,7 +102,7 @@ function entry_actions () {
   });
 }
 
-function init_datepicker () {
+function datepicker () {
   let datepicker = $('#time_entry_entry_date').datepicker({
     dateFormat: 'MM dd, yy'
   });
@@ -97,7 +124,6 @@ function update_content (element_selector, url, params) {
 }
 
 function auto_complete () {
-  console.log(`${timetracker_autocomplete}?field=category`);
   $('#time_entry_category').autocomplete({
     source: `${timetracker_autocomplete}?field=category`,
     minLength: 2
@@ -109,12 +135,42 @@ function auto_complete () {
   });
 }
 
+function mobile_menu () {
+  $('.navbar-burger').off('click');
+  $('.navbar-burger').on('click', () => {
+    $('.navbar-burger').toggleClass('is-active');
+    $('.navbar-menu').toggleClass('is-active');
+  });
+}
+
+function flash () {
+  $('.notification .delete').off('click');
+  $('.notification .delete').on('click', (e) => {
+    $(e.currentTarget).parent().remove();
+  });
+}
+
+function month_change () {
+  $(document).off('click', '#month-change');
+  $(document).on('click', '#month-change', (e) => {
+    window.location = `${timetracker_root_path}?month=${$('#selected-month').val()}`;
+  });
+
+  $(document).off('click', '#month-csv');
+  $(document).on('click', '#month-csv', (e) => {
+    window.location = `${timetracker_root_path}?month=${$('#selected-month').val()}&csv=1`;
+  });
+}
+
 function init () {
   user_toggle();
   entry_form();
   entry_actions();
-  init_datepicker();
+  datepicker();
   auto_complete();
+  mobile_menu();
+  flash();
+  month_change();
 }
 
 $(document).ready(function() {

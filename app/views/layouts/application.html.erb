@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title><%= @html_title || controller.controller_path.to_s.gsub('/',' ').titleize %></title>
@@ -10,69 +10,78 @@
     <link rel="shortcut icon" href="/favicon.ico">
   </head>
   <body>
-    <div id="page">
-      <div id="header">
-        <div id="header-left">
-          <h1>Time tracking</h1>
-        </div>
-        <div id="header-right">
-          You are logged in as: <span class="username"><%= @session_user.username %></span><br/>
-          <% unless session["#{@session_user.id}_active_users"].blank? %>
-            You are viewing the timesheets of: <span class="active_users"><%= h session["#{@session_user.id}_active_users"].collect{|u|  User.find(u).username}.join(', ') %></span>
-        <% end %>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+          <h3 class="logo is-size-3">T <%= image_tag('time.svg') %> TRACK</h3>
+        </a>
+
         <% if @session_user.superadmin %>
-          <div id="user_chooser">
-            <div id="user-chooser-toggle">View other timesheets</div>
-            <div id="user_remove"><%= link_to('Remove a user', choose_user_time_entries_url) %></div>
-            <%= form_with url: sudo_time_entries_url, id: 'sudo', html: { style: 'display:none;' } do |f| %>
-              <div id="user-list">
-                <%= f.collection_check_boxes :active_users, User.with_time_entries, :id, :username %>
-              </div>
-              <%= submit_tag 'go' %><br/>
-              <span>Uncheck all users to view only your own timesheets.</span>
-            <% end %>
-          </div>
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="top-navbar-menu">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
         <% end %>
-        </div>
-      </div> <!-- /#header -->
-      <div style="clear:both;"></div>
-      <div id="left">
-        <h2>Months</h2>
-        <ul id="months">
-        </ul>
-        <ul>
-          <li>
-            <%= link_to 'all time', root_url(all: true) %> |
-            <%= link_to 'csv', root_url(all: true, csv: 1) %>
-          </li>
-      </ul>
-        <h2>Daily Totals</h2>
-        <ul id="days">
-        </ul>
-        <div id="popular">
-          <h2>Most popular. . .</h2>
-          <h3>Categories</h3>
-          <ul id="popular_categories">
-          </ul>
-          <h3>Projects</h3>
-          <ul id="popular_projects">
-          </ul>
-        </div>
-
-      </div><!-- /#left -->
-
-      <div id="main">
-        <%= render '/shared/messages' %>
-        <div id="entries">
-          <%= yield %>
-        </div><!-- /#entries -->
-      </div><!-- /#main -->
-
-      <div id="footer">
-        © 2022 Timetracker
       </div>
 
-    </div><!-- /#page -->
+      <div class="navbar-menu" id="top-navbar-menu">
+        <div class="navbar-start">
+          <% if @session_user.superadmin %>
+            <%= link_to('Remove a user', choose_user_time_entries_url, class: 'navbar-item') %>
+            <%= link_to('View other timesheets', view_other_timesheets_time_entries_url, class: 'navbar-item') %>
+          <% end %>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div>
+              You are logged in as
+              <div class="username"><%= @session_user.username %></div>
+              <% unless session["#{@session_user.id}_active_users"].blank? %>
+                You are viewing the timesheets of <span class="active_users"><%= h session["#{@session_user.id}_active_users"].collect{|u|  User.find(u).username}.join(', ') %></span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="container is-fluid">
+      <div class="columns is-desktop">
+        <div class="column sidebar is-full-mobile is-full-tablet is-one-third-desktop is-one-quarter-widescreen">
+          <div class="box">
+            <h5 class="has-text-weight-bold is-size-5 has-text-centered">Select month</h5>
+            <ul id="months"></ul>
+            <h5 class="has-text-weight-bold is-size-5 has-text-centered mt-2">Daily Totals</h5>
+            <ul id="days">
+            </ul>
+            <div id="popular" class="p-4">
+              <h5 class="has-text-weight-bold is-size-5 has-text-centered">Most popular</h5>
+              <h3 class="has-text-weight-bold">Categories</h3>
+              <ul id="popular_categories">
+              </ul>
+              <h3 class="has-text-weight-bold">Projects</h3>
+              <ul id="popular_projects">
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="column is-full-mobile is-full-tablet is-two-thirds-desktop is-three-quarters-widescreen">
+          <div class="box">
+            <%= render '/shared/messages' %>
+            <div id="entries">
+              <%= yield %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      © 2022 Timetracker
+    </div>
 
     <%= javascript_include_tag :application %>
   </body>

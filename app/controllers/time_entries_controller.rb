@@ -8,7 +8,7 @@ class TimeEntriesController < ApplicationController
       objects = []
       @entries = []
 
-      if ! params[:all].blank?
+      if month == 'all'
         @entries = TimeEntry.my_entries_by_month(get_active_users, month, true)
       else 
         @entries = TimeEntry.my_entries_by_month(get_active_users, month)
@@ -23,7 +23,7 @@ class TimeEntriesController < ApplicationController
     else
       @year_month = params[:month]
       @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
-      render 'shared/_index', layout: true, locals: {entries: TimeEntry.my_entries_by_month(get_active_users,month, ((params[:all].blank?) ? false : true )), new_time_entry: nil} and return
+      render 'shared/_index', layout: true, locals: {entries: TimeEntry.my_entries_by_month(get_active_users,month, ((month == 'all') ? true : false )), new_time_entry: nil} and return
     end
   end
 
@@ -71,23 +71,23 @@ class TimeEntriesController < ApplicationController
       @year_month = te.year_month
       te.destroy
       @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
-      render 'shared/_index', layout: ((request.xhr?) ? false : true), locals: {entries: TimeEntry.my_entries_by_month(get_active_users,@year_month), new_time_entry: nil} and return
+      render 'shared/_index', layout: ((request.xhr?) ? false : true), locals: {entries: TimeEntry.my_entries_by_month(get_active_users, @year_month), new_time_entry: nil} and return
     rescue Exception => exc
       render status: 500, text: "We couldn't delete that entry because: #{exc.message}" and return
     end
   end
 
   def popular_categories
-    render partial: 'shared/popular', collection: TimeEntry.my_popular_categories(@session_user), layout: ((request.xhr?) ? false : true), locals: {type: 'category'} and return
+    render partial: 'shared/popular', collection: TimeEntry.my_popular_categories(@session_user), layout: ((request.xhr?) ? false : true), locals: { type: 'category' } and return
   end
 
   def popular_projects
-    render partial: 'shared/popular', collection: TimeEntry.my_popular_projects(@session_user), layout: ((request.xhr?) ? false : true), locals: {type: 'project'} and return
+    render partial: 'shared/popular', collection: TimeEntry.my_popular_projects(@session_user), layout: ((request.xhr?) ? false : true), locals: { type: 'project' } and return
   end
 
   def days
     year_month = (@year_month.blank?) ? params[:month] : @year_month
-    render partial: 'shared/daily_summary', collection: TimeEntry.total_hours_by_month_day(get_active_users,year_month), layout: ((request.xhr?) ? false : true) and return
+    render partial: 'shared/daily_summary', layout: ((request.xhr?) ? false : true), locals: { daily_summaries: TimeEntry.total_hours_by_month_day(get_active_users,year_month) } and return
   end
 
   def choose_user
@@ -109,7 +109,8 @@ class TimeEntriesController < ApplicationController
   end
 
   def months
-    render partial: 'shared/month', collection: TimeEntry.entry_list_by_month(get_active_users), layout: ((request.xhr?) ? false : true) and return
+    current_month = (params[:month].blank?) ? "#{Time.now.to_date.year}-#{Time.now.strftime("%m")}" : params[:month]
+    render partial: 'shared/months', layout: ((request.xhr?) ? false : true), locals: { months: TimeEntry.entry_list_by_month(get_active_users), current_month: current_month } and return
   end
 
   def sudo
