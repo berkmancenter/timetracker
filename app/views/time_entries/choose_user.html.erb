@@ -1,0 +1,15 @@
+<div class="content">
+  <h1 class="is-size-1">Remove user</h1>
+
+  <p>Select a user to remove</p>
+  <p>Please be sure! Removing a user removes all their time entries and administrative rights.</p>
+
+  <%= form_with url: clear_user_time_entries_url, method: :post do |f| %>
+    <ul>
+      <% @users.each do |u|%>
+        <li><%= f.radio_button('user_id', u.id) %> <%= f.label("user_id_#{u.id}", u.username) %></li>
+      <% end %>
+    </ul>
+    <p><%= f.submit 'Remove a user and all their time entries', class: 'button is-success' %></p>
+  <% end %>
+</div>

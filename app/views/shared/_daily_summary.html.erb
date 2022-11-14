@@ -1,5 +1,15 @@
-<li><%= daily_summary[:entry_date] %> :  <%= daily_summary[:total_hours] %> 
-<% unless session["#{@session_user.id}_active_users"].blank? %>
--<%= daily_summary[:username] %>
-<% end %>
-</li>
+<table class="table">
+  <% daily_summaries.each do |daily_summary| %>
+    <tr>
+      <td><%= daily_summary[:entry_date] %></td>
+      <td><%= daily_summary[:total_hours] %> </td>
+    </tr>
+    <% unless session["#{@session_user.id}_active_users"].blank? %>
+      <tr>
+        <td colspan="2">
+          <%= daily_summary[:username] %>
+        </td>
+      </tr>
+    <% end %>
+  <% end %>
+</table>

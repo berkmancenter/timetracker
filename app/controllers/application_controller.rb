@@ -1,19 +1,13 @@
-# Filters added to this controller apply to all controllers in the application.
-# Likewise, all the methods added will be available for all controllers.
-require 'nokogiri'
-
 class ApplicationController < ActionController::Base
-  helper :all # include all helpers, all the time
+  protect_from_forgery with: :exception
 
-  protect_from_forgery # :secret => '8884fd422a761676cb1a65b799ad4d2f'
-
-  before_filter :authenticate
+  before_action :authenticate
 
   def get_active_users
     unless session["#{@session_user.id}_active_users"].blank?
-      return session["#{@session_user.id}_active_users"]
+      session["#{@session_user.id}_active_users"].map { |uid| User.find(uid) }
     else
-      return [@session_user]
+      [@session_user]
     end
   end
 
@@ -22,19 +16,23 @@ class ApplicationController < ActionController::Base
   def render_csv(param)
     param[:filebase] = param[:filebase].blank? ? param[:model].to_s.tableize : param[:filebase]
 
-    if param[:columns].blank? 
-      param[:columns] = param[:model].columns.collect{|c| c.name}
+    if param[:columns].blank?
+      param[:columns] = param[:model].columns.collect{ |c| c.name }
     end
-    csv_string = FasterCSV.generate do |csv|
+
+    csv_string = CSV.generate do |csv|
       csv << param[:columns]
       param[:objects].each do |record|
         line = param[:columns].collect{|col| record[col].to_s.chomp}
         csv << line
       end
     end
-    send_data(csv_string,
-              :type => 'application/octet-stream',
-              :filename => "#{param[:filebase]}-#{Time.now.to_s(:number)}.csv")
+
+    send_data(
+      csv_string,
+      type: 'application/octet-stream',
+      filename: "#{param[:filebase]}-#{Time.now.to_s(:number)}.csv"
+    )
   end
 
   def authenticate
@@ -60,11 +58,11 @@ class ApplicationController < ActionController::Base
 
       raise("Email or name missing for #{cas_data_file}") if (user_data['email'].present? == false) || (user_data['name'].present? == false)
 
-      user = User.find(:all, :conditions => ['email = ?', user_data['email']]).first
+      user = User.where(email: user_data['email']).first
       unless user
         user = User.new(
-          :username => user_data['email'].sub('@', '.'),
-          :email => user_data['email']
+          username: user_data['email'].sub('@', '.'),
+          email: user_data['email']
         )
         user.save!
       end

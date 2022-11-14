@@ -1,47 +1,92 @@
-  <div id="new-entry-error"></div>
+<div id="new-entry-error"></div>
 
-  <% remote_form_for @time_entry, :url => url_for(:action => :edit, :id => params[:id]), :html => {:method => :post}, :loading => "$('loader').show();", :complete => "$('loader').hide();", :update => {:failure => 'new-entry-error', :success => 'entries', } do |f| %>
-    <fieldset>
-      <legend>New Entry</legend>
-      <table>
-        <tr>
-          <td valign="top"><label for="time_entry_category">Category:</label></td>
-          <td><%= f.text_field :category, :accesskey => 'c' %> <span class="accesskey">alt-c</span>
-            <div class="auto_complete" id="time_entry_category_auto_complete"></div>
-            <%= javascript_tag "var time_entry_category_auto_completer = new Ajax.Autocompleter('time_entry_category', 'time_entry_category_auto_complete', '#{url_for :action => 'auto_complete_for_time_entry_category'}', {});" %>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><label for="time_entry_project">Project:</label></td>
-          <td><%= f.text_field :project, :accesskey => 'p' %> <span class="accesskey">alt-p</span>
-            <div class="auto_complete" id="time_entry_project_auto_complete"></div>
-            <%= javascript_tag "var time_entry_project_auto_completer = new Ajax.Autocompleter('time_entry_project', 'time_entry_project_auto_complete', '#{ url_for :action => 'auto_complete_for_time_entry_project'}', {});" %>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><label for="time_entry_description">Description:</label></td>
-          <td><%= f.text_area :description, :size => '40x3', :accesskey => 'r' %> <span class="accesskey">alt-r</span></td>
-        </tr>
-        <tr>
-          <td valign="top"><label for="time_entry_decimal_hours">Time spent:</label></td>
-          <td><%= f.text_field :decimal_time, :size => 5, :accesskey => 't' %> <span class="accesskey">alt-t</span></td>
-        </tr>
-        <tr>
-          <td valign="top"><label for="time_entry_entry_date">Date:</label></td>
-          <td>
-            <%= calendar_date_select_tag "time_entry[entry_date]", @time_entry.entry_date, :accesskey => 'a' %> <span class="accesskey">alt-a</span>
-          </tr>
-          <tr>
-            <td colspan="2" valign="top">
-              <%= submit_tag((@time_entry.new_record?) ? 'Add Entry' : 'Edit Entry', :accesskey => 's') %> <span class="accesskey">alt-s</span>
-              <%= image_tag('ajax-loader.gif', :id => :loader, :style => "display: none;") %>
-            </td>
-          </tr>
-        </table>
-      </fieldset>
-    <% end %>
-  <%= javascript_tag("
-if($('time_entry_category')){
-$('time_entry_category').focus();
-}
-") %>
+<%= form_for @time_entry, url: edit_time_entries_url do |f| %>
+  <%= f.hidden_field :id, value: params[:id] %>
+
+  <h4 class="is-size-4">Time entry data</h4>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Category</label>
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <%= f.text_field :category, :accesskey => 'c', class: 'input' %> <span class="accesskey">alt-c</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Project</label>
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <%= f.text_field :project, :accesskey => 'p', class: 'input' %> <span class="accesskey">alt-p</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Description</label>
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <%= f.text_area :description, :accesskey => 'r', class: 'textarea' %> <span class="accesskey">alt-r</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Time spent</label>
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <%= f.text_field :decimal_time, :accesskey => 't', class: 'input' %> <span class="accesskey">alt-t</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Date</label>
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <%= f.text_field :entry_date, value: @time_entry[:entry_date].strftime('%B %d, %Y') || Time.now.strftime('%B %d, %Y'), :accesskey => 'a', class: 'input' %>
+          <span id="calendar-entry"><%= image_tag('cal.svg', class: 'timetracker-icon') %></span>
+          <span class="accesskey">alt-a</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal"></div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <%= submit_tag (@time_entry.new_record?) ? 'Add Entry' : 'Edit Entry', :accesskey => 's', class: 'button is-success' %> <span class="accesskey">alt-s</span>
+          <%= image_tag('ajax-loader.gif', :id => :loader, :style => "display: none;") %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<script type="text/javascript">
+  if ($('#time_entry_category').length) {
+    $('#time_entry_category').focus();
+  }
+</script>

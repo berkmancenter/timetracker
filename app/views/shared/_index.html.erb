@@ -1,20 +1,15 @@
-<%= javascript_tag("
-new Ajax.Updater('months', '#{url_for(:action => :months)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-new Ajax.Updater('days', '#{url_for(:action => :days, :month => @year_month)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-new Ajax.Updater('popular_categories', '#{url_for(:action => :popular_categories)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-new Ajax.Updater('popular_projects', '#{url_for(:action => :popular_projects)}', {asynchronous:true, evalScripts:true, parameters:'authenticity_token=#{form_authenticity_token}'});
-"
-                  ) %>
-  <h1>Time!</h1>
-
+<div class="content">
   <div id="entry-form">
-    <%= render :partial => 'shared/teedit' %>
-  </div><!-- /#entry-form -->
+    <%= render 'shared/teedit' %>
+  </div>
   <div id="entry-error" class="error" style="display: none;"></div>
+
+  <h4 class="is-size-4 mt-2">Existing entries</h4>
+
   <% unless entries.blank? %>
-    <table id="entry-list" cellpadding="0" cellspacing="0">
+    <table id="entry-list" class="table">
       <tr>
-        <th>&nbsp;</th>
+        <th>Actions</th>
         <th>Category</th>
         <th>Project</th>
         <th>Hours</th>
@@ -23,9 +18,29 @@ new Ajax.Updater('popular_projects', '#{url_for(:action => :popular_projects)}',
         <% end %>
       </tr>
       <% @date_shown = [] %>
-      <%= render :partial => 'shared/teline', :collection => entries, :locals => {:new_entry => new_time_entry} %>
+      <%= render partial: 'shared/teline', collection: entries, locals: { :new_entry => new_time_entry } %>
     </table>
+
+    <div id="dialog-confirm-delete" title="Are you sure to remove it?">
+      <p><span class="ui-icon ui-icon-alert"></span>This item will be deleted. Are you sure?</p>
+    </div>
   <% end %>
-  <% unless new_time_entry.blank? %>
-    <%= javascript_tag("Effect.Pulsate('entry-#{new_time_entry}');") %>
-  <% end %>
+</div>
+
+<% unless new_time_entry.blank? %>
+  <script type="text/javascript">
+    $('#entry-<%= new_time_entry %>').addClass('pulsing');
+    setTimeout(() => {
+      $('#entry-<%= new_time_entry %>').removeClass('pulsing');
+    }, 3000);
+  </script>
+<% end %>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    update_content('#months', '<%= months_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
+    update_content('#days', '<%= days_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
+    update_content('#popular_categories', '<%= popular_categories_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    update_content('#popular_projects', '<%= popular_projects_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+  });
+</script>

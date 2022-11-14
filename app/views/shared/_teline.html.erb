@@ -1,15 +1,16 @@
 <% unless @date_shown.include?(teline.entry_date) %>
-  <tr>
-    <td colspan="5" class="entry_date"><%= teline.entry_date %></td>
+  <tr class="entry-date">
+    <td colspan="5" class="entry_date is-size-4"><%= teline.entry_date %></td>
   </tr>
   <% @date_shown << teline.entry_date %>
 <% end %>
+
 <tr class="entry" id="entry-<%= teline.id %>">
   <td>
-    <%= link_to_remote(icon(:time_delete), {:url => {:action => :delete, :id => teline},:update => {:success => 'entries', :failure => 'entry-error'}}, :title => 'Delete this entry' ) %>
-    <%= link_to_remote(icon(:time_add), {:url => {:action => :clone, :id => teline},:update => {:success => 'entry-form', :failure => 'entry-error'}}, :title => 'Clone this entry' ) %>
+    <%= link_to(image_tag('time_delete.svg', class: 'timetracker-icon'), delete_time_entry_url(id: teline.id), title: 'Delete this entry', class: 'entry-delete ') %>
+    <%= link_to(image_tag('time_clone.svg', class: 'timetracker-icon'), clone_time_entry_url(id: teline.id), title: 'Clone this entry', class: 'entry-clone') %>
     <% if teline.user.id == @session_user.id %>
-      <%= link_to_remote(icon(:time_go), {:url => {:action => :entry_form, :id => teline},:update => {:success => 'entry-form', :failure => 'entry-error'}}, :title => 'Edit this entry' ) %>
+      <%= link_to(image_tag('time_edit.svg', class: 'timetracker-icon'), entry_form_time_entry_url(id: teline.id), title: 'Edit this entry', class: 'entry-edit') %>
     <% end %>
   </td>
   <td class="category"><%= h teline.category %></td>
@@ -17,10 +18,13 @@
   <td class="decimal_time"><% unless teline.decimal_time.blank? %>
     <%= h teline.decimal_time %> hours
   <% end %></td>
-<% unless session["#{@session_user.id}_active_users"].blank? %>
-  <td><%= h teline.user.username %></td>
-<% end %>
+  <% unless session["#{@session_user.id}_active_users"].blank? %>
+    <td class="username"><%= h teline.user.username %></td>
+  <% end %>
 </tr>
-<tr>
-  <td colspan="5" class="description"><%= h teline.description %></td>
-</td>
+
+<% if teline.description.present? %>
+  <tr>
+    <td colspan="5" class="description"><%= h teline.description %></td>
+  </tr>
+<% end %>

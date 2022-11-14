@@ -1,7 +1,15 @@
-<% if flash[messages.to_sym] -%>
-  <div id="<%= messages %>">
-    <%= flash[messages.to_sym] %>
-    <%= javascript_tag(visual_effect(:pulsate, messages)) %>
+<% unless flash.empty? %>
+  <div class="flash notification is-info">
+    <button class="delete"></button>
+
+    <% flash.each do |key, value| -%>
+      <div id="flash_<%= key %>"><%= value %></div>
+    <% end -%>
   </div>
-  <% flash[messages.to_sym] = nil -%>
+<% end %>
+
+<% unless session["#{@session_user.id}_active_users"].blank? %>
+  <div class="flash notification is-info">
+    You are viewing the timesheets of <span class="active_users"><%= h session["#{@session_user.id}_active_users"].collect{|u|  User.find(u).username}.join(', ') %></span>
+  </div>
 <% end %>
