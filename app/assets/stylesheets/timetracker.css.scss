@@ -146,6 +146,10 @@ div.auto_complete ul strong.highlight {
       border-top: 2px solid #000;
       border-bottom: none;
     }
+
+    td:first-child {
+      text-align: center;
+    }
   }
 
   .entry-date + .entry {
@@ -175,11 +179,38 @@ div.auto_complete ul strong.highlight {
 
   td.category,
   td.project {
-    width: 38%;
+    width: 32%;
+  }
+
+  @media screen and (min-width: 1400px) {
+    td.category,
+    td.project {
+      width: 35%;
+    }
+  }
+
+  @media screen and (min-width: 2100px) {
+    td.category,
+    td.project {
+      width: 38%;
+    }
   }
 
   td.decimal_time,
   td.username {
     width: 15%;
   }
+}
+
+form {
+  .is-horizontal {
+    .field-label {
+      text-align: left;
+    }
+  }
+}
+
+.timetracker-icon {
+  max-width: 32px;
+  max-height: 100%;
 }

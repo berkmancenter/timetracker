@@ -38,9 +38,6 @@
             <div>
               You are logged in as
               <div class="username"><%= @session_user.username %></div>
-              <% unless session["#{@session_user.id}_active_users"].blank? %>
-                You are viewing the timesheets of <span class="active_users"><%= h session["#{@session_user.id}_active_users"].collect{|u|  User.find(u).username}.join(', ') %></span>
-              <% end %>
             </div>
           </div>
         </div>

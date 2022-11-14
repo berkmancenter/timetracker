@@ -65,7 +65,7 @@
       <div class="field">
         <div class="control">
           <%= f.text_field :entry_date, value: @time_entry[:entry_date].strftime('%B %d, %Y') || Time.now.strftime('%B %d, %Y'), :accesskey => 'a', class: 'input' %>
-          <span id="calendar-entry"><%= image_tag('icons/calendar.png') %></span>
+          <span id="calendar-entry"><%= image_tag('cal.svg', class: 'timetracker-icon') %></span>
           <span class="accesskey">alt-a</span>
         </div>
       </div>

@@ -114,12 +114,8 @@ class TimeEntriesController < ApplicationController
   end
 
   def sudo
-    session["#{@session_user.id}_active_users"] = params[:active_users].reject(&:empty?)
-    if session["#{@session_user.id}_active_users"].blank?
-      flash[:notice] = "You are now viewing only your own timesheets."
-    else
-      flash[:notice] = "You are now viewing the timesheet(s) of the user(s) you selected."
-    end
+    session["#{@session_user.id}_active_users"] = params[:active_users]&.reject(&:empty?)
+    flash[:notice] = "You are now viewing only your own timesheets." if session["#{@session_user.id}_active_users"].blank?
 
     redirect_to root_url
   end
