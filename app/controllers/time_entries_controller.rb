@@ -1,17 +1,16 @@
 class TimeEntriesController < ApplicationController
-  before_action :is_admin, only: [:sudo, :unsudo, :choose_user, :clear_user]
+  before_action :is_admin, only: [:sudo, :unsudo, :choose_user, :clear_user, :view_other_timesheets]
 
   def index
-    month = (params[:month].blank?) ? nil : params[:month]
     if params[:csv]
       columns = ['username', 'category', 'project', 'entry_date', 'decimal_time', 'description']
       objects = []
       @entries = []
 
       if month == 'all'
-        @entries = TimeEntry.my_entries_by_month(get_active_users, month, true)
+        @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true)
       else 
-        @entries = TimeEntry.my_entries_by_month(get_active_users, month)
+        @entries = TimeEntry.my_entries_by_month(get_active_users, current_month)
       end
 
       @entries.each do |te|
@@ -19,11 +18,11 @@ class TimeEntriesController < ApplicationController
         objects << te
       end
 
-      render_csv(filebase: "time-entries-#{month}", model: TimeEntry, objects: objects, columns: columns) and return
+      render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
     else
-      @year_month = params[:month]
+      @year_month = current_month
       @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
-      render 'shared/_index', layout: true, locals: {entries: TimeEntry.my_entries_by_month(get_active_users,month, ((month == 'all') ? true : false )), new_time_entry: nil} and return
+      render 'shared/_index', layout: true, locals: {entries: TimeEntry.my_entries_by_month(get_active_users, current_month, ((current_month == 'all') ? true : false )), new_time_entry: nil} and return
     end
   end
 
@@ -109,7 +108,6 @@ class TimeEntriesController < ApplicationController
   end
 
   def months
-    current_month = (params[:month].blank?) ? "#{Time.now.to_date.year}-#{Time.now.strftime("%m")}" : params[:month]
     render partial: 'shared/months', layout: ((request.xhr?) ? false : true), locals: { months: TimeEntry.entry_list_by_month(get_active_users), current_month: current_month } and return
   end
 
@@ -142,5 +140,11 @@ class TimeEntriesController < ApplicationController
     end
 
     render json: TimeEntry.where("#{params[:field]} ilike ?", "%#{params[:term]}%").group(params[:field]).pluck(params[:field])
+  end
+
+  private
+
+  def current_month
+    @current_month ||= (params[:month].blank?) ? "#{Time.now.to_date.year}-#{Time.now.strftime("%m")}" : params[:month]
   end
 end
