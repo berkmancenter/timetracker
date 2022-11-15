@@ -75,7 +75,6 @@ class ApplicationController < ActionController::Base
   end
 
   def is_admin
-    @session_user.superadmin
+    redirect_to root_url unless @session_user.superadmin
   end
-
 end
