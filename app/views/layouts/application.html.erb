@@ -2,6 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title><%= @html_title || controller.controller_path.to_s.gsub('/',' ').titleize %></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <%= stylesheet_link_tag :application, :media => 'all' %>
     <%= javascript_include_tag :head %>
     <%= render '/shared/js_vars' %>
@@ -28,7 +31,7 @@
       <div class="navbar-menu" id="top-navbar-menu">
         <div class="navbar-start">
           <% if @session_user.superadmin %>
-            <%= link_to('Remove a user', choose_user_time_entries_url, class: 'navbar-item') %>
+            <%= link_to('Users', users_url, class: 'navbar-item') %>
             <%= link_to('View other timesheets', view_other_timesheets_time_entries_url, class: 'navbar-item') %>
           <% end %>
         </div>

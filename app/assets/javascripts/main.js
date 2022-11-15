@@ -59,6 +59,7 @@ function entry_actions () {
   $('#dialog-confirm-delete').dialog({
     autoOpen: false,
     resizable: false,
+    draggable: false,
     height: 'auto',
     width: 400,
     modal: true,
