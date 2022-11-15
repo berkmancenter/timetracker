@@ -1,7 +1,7 @@
 <div class="content">
   <h1 class="is-size-1">View other users timesheets</h1>
 
-  <%= form_with url: sudo_time_entries_url, id: 'sudo', class: 'form' do |f| %>
+  <%= form_with url: sudo_users_url, id: 'sudo', class: 'form' do |f| %>
     <% User.with_time_entries.each do |user| %>
       <div class="field">
         <label class="checkbox">
