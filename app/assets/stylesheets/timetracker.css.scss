@@ -146,11 +146,6 @@ body {
     background-color: #fff;
   }
 
-  td {
-    word-break: break-word;
-    vertical-align: middle;
-  }
-
   td,
   th {
     border-width: 1px;
@@ -191,6 +186,13 @@ body {
   }
 }
 
+table.table {
+  td {
+    word-break: break-word;
+    vertical-align: middle;
+  }
+}
+
 form {
   .is-horizontal {
     .field-label {
@@ -202,4 +204,12 @@ form {
 .timetracker-icon {
   max-width: 32px;
   max-height: 100%;
+}
+
+.period-balance {
+  color: #078907;
+
+  &.period-negative-balance {
+    color: #db0404;
+  }
 }

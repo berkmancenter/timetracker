@@ -9,16 +9,28 @@ Rails.application.routes.draw do
       get :months
       get :auto_complete
       get :choose_user
-      get :view_other_timesheets
       post :edit
-      post :sudo
-      post :clear_user
       patch :edit
     end
     member do
       get :entry_form
       get :clone
       get :delete
+    end
+  end
+
+  resources :users do
+    collection do
+      get :view_other_timesheets
+      post :sudo
+    end
+  end
+
+  resources :periods do
+    member do
+      get :credits
+      get :stats
+      patch :set_credits
     end
   end
 end

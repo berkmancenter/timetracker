@@ -3,6 +3,8 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate
 
+  layout 'regular'
+
   def get_active_users
     unless session["#{@session_user.id}_active_users"].blank?
       session["#{@session_user.id}_active_users"].map { |uid| User.find(uid) }

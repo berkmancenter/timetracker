@@ -31,6 +31,7 @@ class TimeEntriesController < ApplicationController
     @time_entry = TimeEntry.find_by_id(params[:time_entry][:id]) || TimeEntry.new(entry_date: Time.now, decimal_time: 0)
 
     return unless request.post? || request.patch?
+    return if @time_entry.id && @time_entry.user != @session_user
 
     @time_entry.attributes = time_entry_params
     @time_entry.category = @time_entry.category.downcase
@@ -67,6 +68,9 @@ class TimeEntriesController < ApplicationController
   def delete
     begin
       te = TimeEntry.find(params[:id])
+
+      return if te.user != @session_user
+
       @year_month = te.year_month
       te.destroy
       @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
@@ -93,36 +97,8 @@ class TimeEntriesController < ApplicationController
     @users = User.where('id <> ?', @session_user.id).order(:username)
   end
 
-  def clear_user
-    u = User.find(params[:user_id])
-    if u != @session_user
-      u.destroy
-      flash[:notice] = 'User removed.'
-    else
-      flash[:notice] = 'You can\'t remove yourself, you cheeky monkey!'
-    end
-    redirect_to action: :index
-  rescue
-    flash[:notice] = 'There was a problem removing that user. Que malo!'
-    redirect_to action: :index
-  end
-
   def months
     render partial: 'shared/months', layout: ((request.xhr?) ? false : true), locals: { months: TimeEntry.entry_list_by_month(get_active_users), current_month: current_month } and return
-  end
-
-  def sudo
-    session["#{@session_user.id}_active_users"] = params[:active_users]&.reject(&:empty?)
-    flash[:notice] = "You are now viewing only your own timesheets." if session["#{@session_user.id}_active_users"].blank?
-
-    redirect_to root_url
-  end
-
-  def unsudo
-    session["#{@session_user.id}_active_users"] = nil
-    flash[:notice] = 'You are browsing as yourself again.'
-
-    redirect_to root_url
   end
 
   def entry_form

@@ -32,7 +32,8 @@
         <div class="navbar-start">
           <% if @session_user.superadmin %>
             <%= link_to('Users', users_url, class: 'navbar-item') %>
-            <%= link_to('View other timesheets', view_other_timesheets_time_entries_url, class: 'navbar-item') %>
+            <%= link_to('Periods', periods_url, class: 'navbar-item') %>
+            <%= link_to('View other timesheets', view_other_timesheets_users_url, class: 'navbar-item') %>
           <% end %>
         </div>
 
@@ -46,38 +47,8 @@
         </div>
       </div>
     </nav>
-    
-    <div class="container is-fluid">
-      <div class="columns is-desktop">
-        <div class="column sidebar is-full-mobile is-full-tablet is-one-third-desktop is-one-quarter-widescreen">
-          <div class="box">
-            <h5 class="has-text-weight-bold is-size-5 has-text-centered">Select month</h5>
-            <ul id="months"></ul>
-            <h5 class="has-text-weight-bold is-size-5 has-text-centered mt-2">Daily Totals</h5>
-            <ul id="days">
-            </ul>
-            <div id="popular" class="p-4">
-              <h5 class="has-text-weight-bold is-size-5 has-text-centered">Most popular</h5>
-              <h3 class="has-text-weight-bold">Categories</h3>
-              <ul id="popular_categories">
-              </ul>
-              <h3 class="has-text-weight-bold">Projects</h3>
-              <ul id="popular_projects">
-              </ul>
-            </div>
-          </div>
-        </div>
 
-        <div class="column is-full-mobile is-full-tablet is-two-thirds-desktop is-three-quarters-widescreen">
-          <div class="box">
-            <%= render '/shared/messages' %>
-            <div id="entries">
-              <%= yield %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <%= render "layouts/#{layout_type}_content" %>
 
     <div id="footer">
       © 2022 Timetracker

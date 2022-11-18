@@ -38,9 +38,9 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    update_content('#months', '<%= months_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
-    update_content('#days', '<%= days_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
-    update_content('#popular_categories', '<%= popular_categories_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
-    update_content('#popular_projects', '<%= popular_projects_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    TimeEntries.update_content('#months', '<%= months_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
+    TimeEntries.update_content('#days', '<%= days_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>&month=<%= @year_month %>');
+    TimeEntries.update_content('#popular_categories', '<%= popular_categories_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
+    TimeEntries.update_content('#popular_projects', '<%= popular_projects_time_entries_url %>', 'authenticity_token=<%= form_authenticity_token %>');
   });
 </script>
