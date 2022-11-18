@@ -1,6 +1,11 @@
 <div class="content">
   <h1 class="is-size-1">View other users timesheets</h1>
 
+  <label class="checkbox mb-4">
+    <input type="checkbox" id="select-all-timesheets">
+    Select all
+  </label>
+
   <%= form_with url: sudo_users_url, id: 'sudo', class: 'form' do |f| %>
     <% User.with_time_entries.each do |user| %>
       <div class="field">
