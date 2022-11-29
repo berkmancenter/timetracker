@@ -70,7 +70,8 @@ class ApplicationController < ActionController::Base
       end
     rescue => e
       logger.error(e)
-      raise ActiveRecord::RecordNotFound, 'Something went wrong'
+
+      render 'users/no_auth', layout: 'login'
     end
 
     @session_user = user

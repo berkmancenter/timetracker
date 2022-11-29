@@ -8,7 +8,7 @@
   </div>
 <% end %>
 
-<% unless session["#{@session_user.id}_active_users"].blank? %>
+<% unless session["#{@session_user&.id}_active_users"].blank? %>
   <div class="flash notification is-info">
     You are viewing the timesheets of <span class="active_users"><%= h session["#{@session_user.id}_active_users"].collect{|u|  User.find(u).username}.join(', ') %></span>
   </div>
