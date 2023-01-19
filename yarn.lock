@@ -14,7 +14,19 @@ jquery-ui@^1.13.2:
   dependencies:
     jquery ">=1.8.0 <4.0.0"
 
+jquery@>=1.2.6:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.3.tgz#23ed2ffed8a19e048814f13391a19afcdba160e6"
+  integrity sha512-bZ5Sy3YzKo9Fyc8wH2iIQK4JImJ6R0GWI9kL1/k7Z91ZBNgkRXE6U0JfHIizZbort8ZunhSI3jw9I6253ahKfg==
+
 "jquery@>=1.8.0 <4.0.0", jquery@^3.6.1:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.1.tgz#fab0408f8b45fc19f956205773b62b292c147a16"
   integrity sha512-opJeO4nCucVnsjiXOE+/PcCgYw9Gwpvs/a6B1LL/lQhwWwpbVEVYDZ1FokFr8PRc7ghYlrFPuyHuiiDNTQxmcw==
+
+tablesorter@^2.31.3:
+  version "2.31.3"
+  resolved "https://registry.yarnpkg.com/tablesorter/-/tablesorter-2.31.3.tgz#94c33234ba0e5d9efc5ba4e48651010a396c8b64"
+  integrity sha512-ueEzeKiMajDcCWnUoT1dOeNEaS1OmPh9+8J0O2Sjp3TTijMygH74EA9QNJiNkLJqULyNU0RhbKY26UMUq9iurA==
+  dependencies:
+    jquery ">=1.2.6"

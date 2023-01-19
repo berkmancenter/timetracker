@@ -11,8 +11,19 @@ class Periods {
     });
   }
 
+  tablesSorting () {
+    $('.periods-index-table, .periods-stats-table').tablesorter({
+      headers: {
+        '.table-actions-column' : {
+          sorter: false
+        }
+      }
+    });
+  }
+
   init () {
     this.datepicker();
+    this.tablesSorting();
   }
 }
 

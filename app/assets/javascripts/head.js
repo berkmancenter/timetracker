@@ -24,3 +24,5 @@
 //= require jquery-ui/ui/widgets/menu
 //= require jquery-ui/ui/widgets/datepicker
 //= require jquery-ui/ui/widgets/autocomplete
+
+//= require tablesorter

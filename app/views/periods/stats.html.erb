@@ -6,26 +6,30 @@
     from <span class="tag is-info is-large"><%= @period.from %></span> to <span class="tag is-info is-large"><%= @period.to %></span>
   </h3>
 
-  <table class="table">
-    <tr>
-      <th>Username</th>
-      <th>Email</th>
-      <th>Credits</th>
-      <th>Total hours</th>
-      <th>Should have now</th>
-      <th>Balance</th>
-      <th>Balance percentage</th>
-    </tr>
-    <% @stats.each do |stat| %>
+  <table class="table periods-stats-table">
+    <thead>
       <tr>
-        <td><%= stat['username'] %></td>
-        <td><%= stat['email'] %></td>
-        <td><%= stat['credits'] %></td>
-        <td><%= stat['total_hours'] %></td>
-        <td><%= stat['should_hours'].round(2) %></td>
-        <td class="period-balance<% if stat['balance'] < 0 %> period-negative-balance<% end %>"><%= stat['balance'].round(2) %></td>
-        <td><%= stat['balance_percent'].round(2) %>%</td>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Credits</th>
+        <th>Total hours</th>
+        <th>Should have now</th>
+        <th>Balance</th>
+        <th>Balance percentage</th>
       </tr>
-    <% end %>
+    </thead>
+    <tbody>
+      <% @stats.each do |stat| %>
+        <tr>
+          <td><%= stat['username'] %></td>
+          <td><%= stat['email'] %></td>
+          <td><%= stat['credits'] %></td>
+          <td><%= stat['total_hours'] %></td>
+          <td><%= stat['should_hours'].round(2) %></td>
+          <td class="period-balance<% if stat['balance'] < 0 %> period-negative-balance<% end %>"><%= stat['balance'].round(2) %></td>
+          <td><%= stat['balance_percent'].round(2) %>%</td>
+        </tr>
+      <% end %>
+    </tbody>
   </table>
 </div>

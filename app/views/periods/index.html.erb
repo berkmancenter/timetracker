@@ -9,54 +9,58 @@
     )
   %>
 
-  <table class="table">
-    <tr>
-      <th>Name</th>
-      <th>From</th>
-      <th>To</th>
-      <th>Actions</th>
-    </tr>
-    <% @periods.each do |period| %>
+  <table class="table periods-index-table">
+    <thead>
       <tr>
-        <td><%= period.name %></td>
-        <td><%= period.from %></td>
-        <td><%= period.to %></td>
-        <td>
-          <%=
-            link_to(
-              image_tag('time_delete.svg', class: 'timetracker-icon'),
-              period_url(id: period.id),
-              title: 'Delete this period',
-              method: :delete,
-              data: { confirm: 'Are you sure?' }
-            )
-          %>
-
-          <%=
-            link_to(
-              image_tag('time_edit.svg', class: 'timetracker-icon'),
-              edit_period_url(id: period.id),
-              title: 'Edit this period'
-            )
-          %>
-
-          <%=
-            link_to(
-              image_tag('credits.svg', class: 'timetracker-icon'),
-              credits_period_url(id: period.id),
-              title: 'Set credits for this period'
-            )
-          %>
-
-          <%=
-            link_to(
-              image_tag('stats.svg', class: 'timetracker-icon'),
-              stats_period_url(id: period.id),
-              title: 'See statistics for this period'
-            )
-          %>
-        </td>
+        <th>Name</th>
+        <th>From</th>
+        <th>To</th>
+        <th class="table-actions-column">Actions</th>
       </tr>
-    <% end %>
+    </thead>
+    <tbody>
+      <% @periods.each do |period| %>
+        <tr>
+          <td><%= period.name %></td>
+          <td><%= period.from %></td>
+          <td><%= period.to %></td>
+          <td>
+            <%=
+              link_to(
+                image_tag('time_delete.svg', class: 'timetracker-icon'),
+                period_url(id: period.id),
+                title: 'Delete this period',
+                method: :delete,
+                data: { confirm: 'Are you sure?' }
+              )
+            %>
+
+            <%=
+              link_to(
+                image_tag('time_edit.svg', class: 'timetracker-icon'),
+                edit_period_url(id: period.id),
+                title: 'Edit this period'
+              )
+            %>
+
+            <%=
+              link_to(
+                image_tag('credits.svg', class: 'timetracker-icon'),
+                credits_period_url(id: period.id),
+                title: 'Set credits for this period'
+              )
+            %>
+
+            <%=
+              link_to(
+                image_tag('stats.svg', class: 'timetracker-icon'),
+                stats_period_url(id: period.id),
+                title: 'See statistics for this period'
+              )
+            %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
   </table>
 </div>

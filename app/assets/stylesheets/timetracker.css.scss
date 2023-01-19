@@ -191,6 +191,11 @@ table.table {
     word-break: break-word;
     vertical-align: middle;
   }
+
+  th, td {
+    font-size: 16px;
+    font-family: 'Lato', sans-serif;
+  }
 }
 
 form {
@@ -212,4 +217,8 @@ form {
   &.period-negative-balance {
     color: #db0404;
   }
+}
+
+.tablesorter-header {
+  cursor: pointer;
 }
