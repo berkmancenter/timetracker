@@ -7,7 +7,7 @@
     <% unless session["#{@session_user.id}_active_users"].blank? %>
       <tr>
         <td colspan="2">
-          <%= daily_summary[:username] %>
+          <%= clean_username(daily_summary[:username]) %>
         </td>
       </tr>
     <% end %>

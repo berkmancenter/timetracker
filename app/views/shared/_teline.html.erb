@@ -23,7 +23,7 @@
     <%= h teline.decimal_time %> hours
   <% end %></td>
   <% unless session["#{@session_user.id}_active_users"].blank? %>
-    <td class="username"><%= h teline.user.username %></td>
+    <td class="username"><%= h clean_username(teline.user.username) %></td>
   <% end %>
 </tr>
 

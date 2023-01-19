@@ -42,7 +42,7 @@
             <div class="navbar-item">
               <div>
                 You are logged in as
-                <div class="username"><%= @session_user.username %></div>
+                <div class="username"><%= clean_username(@session_user.username) %></div>
               </div>
             </div>
           <% end %>
