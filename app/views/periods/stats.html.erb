@@ -21,7 +21,7 @@
     <tbody>
       <% @stats.each do |stat| %>
         <tr>
-          <td><%= stat['username'] %></td>
+          <td><%= clean_username(stat['username']) %></td>
           <td><%= stat['email'] %></td>
           <td><%= stat['credits'] %></td>
           <td><%= stat['total_hours'] %></td>

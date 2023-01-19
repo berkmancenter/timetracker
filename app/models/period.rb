@@ -9,12 +9,13 @@ class Period < ActiveRecord::Base
     total_num_of_days = (self.to - self.from).to_f
     current_num_of_days = (Date.today - self.from).to_f
     current_passed = current_num_of_days / total_num_of_days
+    current_passed = 1 if current_passed > 1
 
     query = "
       SELECT
         u.username,
         u.email,
-        sum(t.decimal_time) as total_hours,
+        COALESCE(SUM(t.decimal_time), 0) as total_hours,
         c.amount as credits
       FROM
         users u
@@ -27,15 +28,17 @@ class Period < ActiveRecord::Base
         ON
         u.id=t.user_id
       WHERE
-        t.created_at >= '#{self.from.to_time}'
+        (t.created_at >= '#{self.from.to_time}'
         AND
-        t.created_at <= '#{self.to.to_time.end_of_day}'
+        t.created_at <= '#{self.to.to_time.end_of_day}')
+        OR
+        t.created_at IS NULL
       GROUP BY
-        username,
-        email,
-        amount
+        u.username,
+        u.email,
+        c.amount
       ORDER BY
-        username
+        u.username
     "
 
     records_array = ActiveRecord::Base.connection.execute(query)
