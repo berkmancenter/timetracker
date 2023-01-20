@@ -26,3 +26,4 @@
 //= require jquery-ui/ui/widgets/autocomplete
 
 //= require tablesorter
+//= require sweetalert2

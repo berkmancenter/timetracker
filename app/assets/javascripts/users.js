@@ -22,9 +22,28 @@ class Users {
       e.preventDefault();
       let elem = $(e.currentTarget);
       let action = elem.attr('data-action-url');
+      let should_confirm = elem.attr('data-should-confirm');
+      let confirm_message = elem.attr('data-confirm-message');
       let form = $('form').first();
 
       form.attr('action', action);
+
+      if (should_confirm) {
+        Swal.fire({
+          text: confirm_message,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          confirmButtonColor: '#48c78e',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        })
+
+        return;
+      }
+
       form.submit();
     });
   }

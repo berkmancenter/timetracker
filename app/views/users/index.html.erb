@@ -2,7 +2,13 @@
   <h1 class="is-size-1">Users</h1>
 
   <%= form_with class: 'form' do |f| %>
-    <a class="button is-danger users-multi-action" data-action-url="<%= destroy_multi_users_url %>">Remove selected</a>
+    <a class="button is-danger users-multi-action"
+       data-action-url="<%= destroy_multi_users_url %>"
+       data-should-confirm="true"
+       data-confirm-message="Are you sure to remove selected users?"
+    >
+       Remove selected
+    </a>
     <a class="button is-info users-multi-action" data-action-url="<%= toggle_admin_multi_users_url %>">Toggle admin selected</a>
 
     <table class="table users-index-table">

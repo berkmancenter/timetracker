@@ -3,6 +3,7 @@
     "bulma": "^0.9.4",
     "jquery": "^3.6.1",
     "jquery-ui": "^1.13.2",
+    "sweetalert2": "^11.7.0",
     "tablesorter": "^2.31.3"
   }
 }
