@@ -31,7 +31,7 @@ class UsersController < ApplicationController
   end
 
   def destroy_multi
-    user_ids = params[:users].reject { |uid| uid.to_i == @session_user.id }
+    user_ids = params[:users]&.reject { |uid| uid.to_i == @session_user.id }
 
     if user_ids&.any?
       User.where(id: user_ids).destroy_all
@@ -44,7 +44,7 @@ class UsersController < ApplicationController
   end
 
   def toggle_admin_multi
-    user_ids = params[:users].reject { |uid| uid.to_i == @session_user.id }
+    user_ids = params[:users]&.reject { |uid| uid.to_i == @session_user.id }
 
     if user_ids&.any?
       User.where(id: user_ids).each do |user|
