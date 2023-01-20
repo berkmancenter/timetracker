@@ -1,21 +1,28 @@
 <div class="content">
   <h1 class="is-size-1">View other users timesheets</h1>
 
-  <label class="checkbox mb-4">
-    <input type="checkbox" id="select-all-timesheets">
-    Select all
-  </label>
-
   <%= form_with url: sudo_users_url, id: 'sudo', class: 'form' do |f| %>
-    <% User.with_time_entries.each do |user| %>
-      <div class="field">
-        <label class="checkbox">
-          <input type="checkbox" name="active_users[]" value="<%= user.id %>">
-          <%= user.username %>
-        </label>
-      </div>
-    <% end %>
-    <p>Uncheck all users to view only your own timesheets.</p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" id="select-all-timesheets">
+          </th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% User.with_time_entries.each do |user| %>
+          <tr>
+            <td>
+              <input type="checkbox" name="active_users[]" value="<%= user.id %>">
+            </td>
+            <td><%= user.username %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
     <%= submit_tag 'go', class: 'button is-success' %><br/>
   <% end %>
 </div>

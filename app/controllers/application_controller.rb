@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
 
   def get_active_users
     unless session["#{@session_user.id}_active_users"].blank?
-      session["#{@session_user.id}_active_users"].map { |uid| User.find(uid) }
+      session["#{@session_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
     else
       [@session_user]
     end

@@ -9,7 +9,8 @@
 <% end %>
 
 <% unless session["#{@session_user&.id}_active_users"].blank? %>
-  <div class="flash notification is-info">
-    You are viewing the timesheets of <span class="active_users"><%= h session["#{@session_user.id}_active_users"].collect{|u|  User.find(u).username}.join(', ') %></span>
+  <div class="flash notification is-warning">
+    <div class="has-text-weight-bold">You are viewing the timesheets of</div>
+    <span class="active_users"><%= h session["#{@session_user.id}_active_users"].map { |u| User.where(id: u).first&.username }.compact.join(', ') %></span>
   </div>
 <% end %>

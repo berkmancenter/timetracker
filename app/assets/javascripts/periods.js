@@ -11,7 +11,7 @@ class Periods {
     });
   }
 
-  tablesSorting () {
+  tables_sorting () {
     $('.periods-index-table, .periods-stats-table').tablesorter({
       headers: {
         '.table-actions-column' : {
@@ -23,7 +23,7 @@ class Periods {
 
   init () {
     this.datepicker();
-    this.tablesSorting();
+    this.tables_sorting();
   }
 }
 

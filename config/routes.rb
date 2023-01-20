@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     collection do
       get :view_other_timesheets
       post :sudo
+      post :destroy_multi
+      post :toggle_admin_multi
     end
   end
 
