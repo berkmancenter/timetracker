@@ -7,22 +7,27 @@
   </h3>
 
   <%= form_for @period, url: set_credits_period_url do |f| %>
-    <table class="table">
-      <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Credits</th>
-      </tr>
-
-      <% @credits.each do |credit| %>
+    <table class="table periods-credits-table">
+      <thead>
         <tr>
-          <td><%= credit[:user].username %></td>
-          <td><%= credit[:user].email %></td>
-          <td>
-            <%= f.text_field :credits, name: "period[amount][#{credit[:user].id}]", id: "period[amount][#{credit[:user].id}]", value: credit[:amount], class: 'input' %>
-          </td>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Credits</th>
         </tr>
-      <% end %>
+      </thead>
+
+      <tbody>
+        <% @credits.each do |credit| %>
+          <tr>
+            <td><%= credit[:user].username %></td>
+            <td><%= credit[:user].email %></td>
+            <td>
+              <span class="is-hidden"><%= credit[:amount] %></span>
+              <%= f.text_field :credits, name: "period[amount][#{credit[:user].id}]", id: "period[amount][#{credit[:user].id}]", value: credit[:amount], class: 'input' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
     </table>
 
     <div class="field">

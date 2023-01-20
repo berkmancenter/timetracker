@@ -11,7 +11,7 @@ class Periods {
   }
 
   tables_sorting () {
-    $('.periods-index-table, .periods-stats-table').tablesorter({
+    $('.periods-index-table, .periods-stats-table, .periods-credits-table').tablesorter({
       headers: {
         '.table-actions-column' : {
           sorter: false
