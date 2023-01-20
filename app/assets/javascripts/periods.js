@@ -4,10 +4,9 @@ class Periods {
       dateFormat: 'MM dd, yy'
     });
 
-    $('#calendar-entry').off('click');
-
-    $('#calendar-entry').on('click', () => {
-      datepicker.focus();
+    $('.calendar-entry').off('click');
+    $('.calendar-entry').on('click', (ev) => {
+      $(ev.currentTarget).prev().focus();
     });
   }
 

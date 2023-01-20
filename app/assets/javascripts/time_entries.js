@@ -7,7 +7,6 @@ class TimeEntries {
     }
 
     $(document).off('submit', form_selector);
-
     $(document).on('submit', form_selector, e => {
       e.preventDefault();
 
@@ -102,9 +101,8 @@ class TimeEntries {
       dateFormat: 'MM dd, yy'
     });
 
-    $('#calendar-entry').off('click');
-
-    $('#calendar-entry').on('click', () => {
+    $('.calendar-entry').off('click');
+    $('#entry-form').on('click', '.calendar-entry', () => {
       datepicker.focus();
     });
   }
