@@ -3,6 +3,21 @@ class User < ActiveRecord::Base
   has_many :credits, dependent: :destroy
 
   def self.with_time_entries
-    self.find_by_sql('select users.id,users.username from users,time_entries where users.id = time_entries.user_id group by users.id,users.username order by users.username')
+    self.find_by_sql('
+      SELECT
+        users.id,
+        users.username,
+        users.email
+      FROM
+        users,
+        time_entries
+      WHERE
+        users.id = time_entries.user_id
+      GROUP BY
+        users.id,
+        users.username
+      ORDER BY
+        users.username
+    ')
   end
 end

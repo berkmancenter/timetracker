@@ -2,12 +2,13 @@
   <h1 class="is-size-1">View other users timesheets</h1>
 
   <%= form_with url: sudo_users_url, id: 'sudo', class: 'form' do |f| %>
-    <table class="table">
+    <table class="table table-hovered">
       <thead>
         <tr>
           <th>
             <input type="checkbox" class="table-select-all">
           </th>
+          <th>Username</th>
           <th>Email</th>
         </tr>
       </thead>
@@ -17,7 +18,8 @@
             <td>
               <input type="checkbox" name="active_users[]" value="<%= user.id %>">
             </td>
-            <td><%= user.username %></td>
+            <td><%= clean_username(user.username) %></td>
+            <td><%= user.email %></td>
           </tr>
         <% end %>
       </tbody>

@@ -203,6 +203,18 @@ table.table {
     transform: scale(2);
     cursor: pointer;
   }
+
+  &.table-hovered {
+    tbody {
+      tr:hover {
+        background-color: #e4e4e4;
+  
+        td {
+          background-color: #e4e4e4;
+        }
+      }
+    }
+  }
 }
 
 form {
@@ -219,7 +231,7 @@ form {
   padding: 6px;
 
   &-interact:hover {
-    background-color: #e4e4e4;
+    background-color: #ffffff;
   }
 }
 
