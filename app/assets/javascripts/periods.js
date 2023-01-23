@@ -13,7 +13,7 @@ class Periods {
   tables_sorting () {
     $('.periods-index-table, .periods-stats-table, .periods-credits-table').tablesorter({
       headers: {
-        '.table-actions-column' : {
+        '.table-actions-column, .table-select-column' : {
           sorter: false
         }
       }

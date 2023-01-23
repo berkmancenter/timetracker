@@ -27,7 +27,7 @@
           <td>
             <%=
               link_to(
-                image_tag('minus.svg', class: 'timetracker-icon'),
+                image_tag('minus.svg', class: 'timetracker-icon timetracker-icon-interact'),
                 period_url(id: period.id),
                 title: 'Delete this period',
                 method: :delete,
@@ -37,7 +37,7 @@
 
             <%=
               link_to(
-                image_tag('time_edit.svg', class: 'timetracker-icon'),
+                image_tag('time_edit.svg', class: 'timetracker-icon timetracker-icon-interact'),
                 edit_period_url(id: period.id),
                 title: 'Edit this period'
               )
@@ -45,7 +45,7 @@
 
             <%=
               link_to(
-                image_tag('credits.svg', class: 'timetracker-icon'),
+                image_tag('credits.svg', class: 'timetracker-icon timetracker-icon-interact'),
                 credits_period_url(id: period.id),
                 title: 'Set credits for this period'
               )
@@ -53,7 +53,7 @@
 
             <%=
               link_to(
-                image_tag('stats.svg', class: 'timetracker-icon'),
+                image_tag('stats.svg', class: 'timetracker-icon timetracker-icon-interact'),
                 stats_period_url(id: period.id),
                 title: 'See statistics for this period'
               )

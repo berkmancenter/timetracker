@@ -1,5 +1,5 @@
 class PeriodsController < ApplicationController
-  before_action :set_period, only: [:show, :edit, :update, :destroy, :credits, :set_credits, :stats]
+  before_action :set_period, only: [:show, :edit, :update, :destroy, :credits, :set_credits, :set_credits_multi , :stats]
   before_action :is_admin
 
   layout 'admin'
@@ -57,7 +57,6 @@ class PeriodsController < ApplicationController
     end
 
     existing_credits = @period.credits.where(user: new_credits_values.keys)
-
     new_credits = []
     new_credits_values.each do |user_id, value|
       existing_credit = existing_credits.select { |credit| credit.user_id == user_id.to_i }.first
@@ -79,6 +78,21 @@ class PeriodsController < ApplicationController
     @period.save
 
     redirect_to credits_period_url(@period), notice: 'Credits have been set.'
+  end
+
+  def set_credits_multi
+    multi_credit_amount = params[:period][:multi_credit]
+    selected_users = params[:period][:users]
+
+    if multi_credit_amount&.present? && selected_users&.any?
+      selected_users.each do |user|
+        params[:period][:amount][user] = multi_credit_amount
+      end
+
+      set_credits
+    else
+      redirect_to credits_period_url(@period), notice: 'No users or credits selected.'
+    end
   end
 
   def stats

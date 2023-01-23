@@ -2,20 +2,20 @@
   <h1 class="is-size-1">Users</h1>
 
   <%= form_with class: 'form' do |f| %>
-    <a class="button is-danger users-multi-action"
+    <a class="button is-danger super-action"
        data-action-url="<%= destroy_multi_users_url %>"
        data-should-confirm="true"
        data-confirm-message="Are you sure to remove selected users?"
     >
        Remove selected
     </a>
-    <a class="button is-info users-multi-action" data-action-url="<%= toggle_admin_multi_users_url %>">Toggle admin selected</a>
+    <a class="button is-info super-action" data-action-url="<%= toggle_admin_multi_users_url %>">Toggle admin selected</a>
 
     <table class="table users-index-table">
       <thead>
         <tr>
           <th class="table-select-column">
-            <input type="checkbox" class="users-select-all">
+            <input type="checkbox" class="table-select-all">
           </th>
           <th>Username</th>
           <th>Email</th>
@@ -37,7 +37,7 @@
             <td>
               <%=
                 link_to(
-                  image_tag('minus.svg', class: 'timetracker-icon'),
+                  image_tag('minus.svg', class: 'timetracker-icon timetracker-icon-interact'),
                   user_url(id: user.id),
                   title: 'Delete this user',
                   method: :delete,

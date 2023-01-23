@@ -195,6 +195,13 @@ table.table {
   th, td {
     font-size: 16px;
     font-family: 'Lato', sans-serif;
+    padding: 0.5em 0.75em !important;
+    vertical-align: middle;
+  }
+
+  input[type=checkbox] {
+    transform: scale(2);
+    cursor: pointer;
   }
 }
 
@@ -207,8 +214,13 @@ form {
 }
 
 .timetracker-icon {
-  max-width: 32px;
+  max-width: 36px;
   max-height: 100%;
+  padding: 6px;
+
+  &-interact:hover {
+    background-color: #e4e4e4;
+  }
 }
 
 .period-balance {

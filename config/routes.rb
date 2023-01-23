@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       get :credits
       get :stats
       patch :set_credits
+      patch :set_credits_multi
     end
   end
 end

@@ -58,7 +58,6 @@ class TimeEntries {
       modal: true,
       buttons: {
         'Delete': function() {
-          console.log($('#dialog-confirm-delete').data('current-url'));
           $.get($('#dialog-confirm-delete').data('current-url'))
             .done(
               (response) => {
@@ -146,14 +145,6 @@ class TimeEntries {
     });
   }
 
-  select_all_timesheets () {
-    $('#select-all-timesheets').on('change', (e) => {
-      let current_val = $(e.currentTarget).is(":checked");
-
-      $('#sudo input[type=checkbox]').prop('checked', current_val);
-    });
-  }
-
   init () {
     this.entry_form();
     this.entry_actions();
@@ -162,7 +153,6 @@ class TimeEntries {
     this.mobile_menu();
     this.flash();
     this.month_change();
-    this.select_all_timesheets();
   }
 
   static update_content (element_selector, url, params) {
