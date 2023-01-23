@@ -35,7 +35,7 @@
             <td>
               <input type="checkbox" name="period[users][]" value="<%= credit[:user].id %>">
             </td>
-            <td><%= credit[:user].username %></td>
+            <td><%= clean_username(credit[:user].username) %></td>
             <td><%= credit[:user].email %></td>
             <td>
               <span class="is-hidden"><%= credit[:amount] %></span>
