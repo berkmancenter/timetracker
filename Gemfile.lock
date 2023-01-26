@@ -239,6 +239,7 @@ DEPENDENCIES
   ruby-net-ldap
   rubyzip
   sassc-rails
+  sprockets-rails
   sqlite3
   terser
   unf
