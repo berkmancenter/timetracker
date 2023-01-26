@@ -18,6 +18,7 @@
 
 # Ignore yarn stuff
 node_modules/
+yarn.lock
 
 # Ignore all logfiles and tempfiles.
 log/*
@@ -35,6 +36,7 @@ rerun.txt
 tags
 vendor/bundler_gems
 config/database.yml
+config/secrets.yml
 .idea/*
 .byebug_history
 .rubocop.yml
