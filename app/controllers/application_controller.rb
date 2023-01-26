@@ -38,6 +38,8 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate
+    use_fake_auth and return if Rails.application.config.use_fakeauth
+
     cas_data_file = "#{ENV['CAS_DATA_DIRECTORY']}/#{cookies[:MOD_AUTH_CAS]}"
     user_data = {}
 
@@ -79,5 +81,19 @@ class ApplicationController < ActionController::Base
 
   def is_admin
     redirect_to root_url unless @session_user.superadmin
+  end
+
+  def use_fake_auth
+    fake_user = User.where(email: 'timetracker_fake_user@example.com').first
+
+    if fake_user.nil?
+      fake_user = User.create!(
+        username: 'timetracker_fake_user',
+        email: 'timetracker_fake_user@example.com',
+        superadmin: true
+      )
+    end
+
+    @session_user = fake_user
   end
 end

@@ -89,5 +89,11 @@ module Timetracker
     # TODO: To make the CMS work, can be removed when the CMS is ready to work
     # with the latest Rails version.
     config.active_record.yaml_column_permitted_classes = [Symbol]
+
+    # Set host allowed by the application
+    config.hosts << ENV['ALLOWED_HOST'] if ENV['ALLOWED_HOST'].present?
+
+    # Set the default value for bypassing the authentication
+    config.use_fakeauth = false
   end
 end

@@ -88,4 +88,7 @@ Rails.application.configure do
 
   # Allow any hostname
   config.hosts.clear
+
+  # In the development mode, you may want to avoid using the CAS server.
+  config.use_fakeauth = (ENV['USE_FAKEAUTH'] == 'true') || false
 end
