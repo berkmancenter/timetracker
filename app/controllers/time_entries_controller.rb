@@ -7,9 +7,9 @@ class TimeEntriesController < ApplicationController
       objects = []
       @entries = []
 
-      if month == 'all'
+      if current_month == 'all'
         @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true)
-      else 
+      else
         @entries = TimeEntry.my_entries_by_month(get_active_users, current_month)
       end
 
