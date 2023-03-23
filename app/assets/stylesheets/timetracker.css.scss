@@ -23,14 +23,23 @@ body {
 #popular {
   li {
     word-break: break-word;
+    padding: 2px 5px;
+    margin: 5px;
+    border: 1px solid black;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f2eeed;
+    }
   }
 }
 
 #popular_categories, #popular_projects {
-  cursor: pointer;
   overflow: auto;
-  list-style: circle;
-  padding-left: 25px;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #new-entry-error {
