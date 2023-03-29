@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :is_admin
+  before_action :is_admin, except: %i[current_user]
 
   layout 'admin'
 
@@ -57,5 +57,9 @@ class UsersController < ApplicationController
     end
 
     redirect_to users_url
+  end
+
+  def current_user
+    render json: { username: helpers.clean_username(@session_user.username) }, status: :ok
   end
 end

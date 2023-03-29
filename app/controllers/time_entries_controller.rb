@@ -1,7 +1,7 @@
 class TimeEntriesController < ApplicationController
   before_action :is_admin, only: [:sudo, :unsudo, :choose_user, :clear_user, :view_other_timesheets]
 
-  def index
+  def entries
     if params[:csv]
       columns = ['username', 'category', 'project', 'entry_date', 'decimal_time', 'description']
       objects = []
@@ -20,9 +20,10 @@ class TimeEntriesController < ApplicationController
 
       render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
     else
-      @year_month = current_month
-      @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
-      render 'shared/_index', layout: true, locals: {entries: TimeEntry.my_entries_by_month(get_active_users, current_month, ((current_month == 'all') ? true : false )), new_time_entry: nil} and return
+      month = params[:month]
+      render json: {
+        entries: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all')
+      }, status: :ok
     end
   end
 
@@ -37,31 +38,11 @@ class TimeEntriesController < ApplicationController
     @time_entry.category = @time_entry.category.downcase
     @time_entry.project = @time_entry.project.downcase
     @time_entry.user = @session_user
-    if @time_entry.save
-      @year_month = @time_entry.year_month
-      new_time_entry = @time_entry.id
-      @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
-      params[:id] = nil
-      render 'shared/_index', layout: ((request.xhr?) ? false : true), locals: {entries: TimeEntry.my_entries_by_month([@session_user],@year_month), new_time_entry: new_time_entry} and return
-    else
-      if request.xhr?
-        message = @time_entry.errors.collect{|attribute,msg| "#{attribute} #{msg}"}.join('<br/>')
-        render status: 500, layout: false, text: "We couldn't save that entry because: #{message}" and return
-      end
-    end
-  end
 
-  def clone
-    begin
-      te = TimeEntry.find(params[:id])
-      teclone = te.attributes
-      teclone.delete('id')
-      teclone['entry_date'] = Time.now
-      @time_entry = TimeEntry.new(teclone)
-      params[:id] = nil
-      render 'shared/_index', layout: ((request.xhr?) ? false : true), locals: {entries: TimeEntry.my_entries_by_month([@session_user],@time_entry.year_month), new_time_entry: nil} and return
-    rescue Exception => exc
-      render status: 500, text: "We couldn't clone that entry because: #{exc.message}" and return
+    if @time_entry.save
+      render json: { entry: @time_entry }, status: :ok
+    else
+      render json: { message: 'We couldn\'t save that entry' }, status: :bad_request
     end
   end
 
@@ -69,28 +50,28 @@ class TimeEntriesController < ApplicationController
     begin
       te = TimeEntry.find(params[:id])
 
-      return if te.user != @session_user
+      if te.user != @session_user
+        render json: { message: 'Unauthorized' }, status: :unauthorized
+        return
+      end
 
-      @year_month = te.year_month
       te.destroy
-      @time_entry = TimeEntry.new(entry_date: Time.now, decimal_time: 0)
-      render 'shared/_index', layout: ((request.xhr?) ? false : true), locals: {entries: TimeEntry.my_entries_by_month(get_active_users, @year_month), new_time_entry: nil} and return
+
+      render json: { message: 'ok' }, status: :ok
     rescue Exception => exc
-      render status: 500, text: "We couldn't delete that entry because: #{exc.message}" and return
+      render json: { message: 'We couldn\'t delete that entry' }, status: :bad_request
     end
   end
 
-  def popular_categories
-    render partial: 'shared/popular', collection: TimeEntry.my_popular_categories(@session_user), layout: ((request.xhr?) ? false : true), locals: { type: 'category' } and return
-  end
-
-  def popular_projects
-    render partial: 'shared/popular', collection: TimeEntry.my_popular_projects(@session_user), layout: ((request.xhr?) ? false : true), locals: { type: 'project' } and return
+  def popular
+    render json: {
+      categories: TimeEntry.my_popular_categories(@session_user),
+      projects: TimeEntry.my_popular_projects(@session_user)
+    }, status: :ok
   end
 
   def days
-    year_month = (@year_month.blank?) ? params[:month] : @year_month
-    render partial: 'shared/daily_summary', layout: ((request.xhr?) ? false : true), locals: { daily_summaries: TimeEntry.total_hours_by_month_day(get_active_users,year_month) } and return
+    render json: { daily_totals: TimeEntry.total_hours_by_month_day(get_active_users, params[:month]) }, status: :ok
   end
 
   def choose_user
@@ -98,7 +79,7 @@ class TimeEntriesController < ApplicationController
   end
 
   def months
-    render partial: 'shared/months', layout: ((request.xhr?) ? false : true), locals: { months: TimeEntry.entry_list_by_month(get_active_users), current_month: current_month } and return
+    render json: TimeEntry.entry_list_by_month(get_active_users)
   end
 
   def entry_form

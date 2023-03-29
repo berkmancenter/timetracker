@@ -1,0 +1,28 @@
+{
+  "name": "slack-liveblog",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vuepic/vue-datepicker": "^4.2.3",
+    "autocompleter": "^8.0.3",
+    "bulma": "^0.9.4",
+    "dayjs": "^1.11.7",
+    "sweetalert2": "^11.7.3",
+    "vue": "^3.2.45",
+    "vue-datepicker-next": "^1.0.3",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "@rollup/plugin-inject": "^5.0.3",
+    "@vitejs/plugin-vue": "^4.1.0",
+    "sass": "^1.58.3",
+    "vite": "^4.1.0",
+    "vuex": "^4.1.0"
+  }
+}

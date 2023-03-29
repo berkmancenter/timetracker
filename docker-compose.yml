@@ -9,12 +9,13 @@ services:
     environment:
       - POSTGRES_PASSWORD=so_wow
 
-  website:
+  app:
     depends_on:
       - 'postgres'
     build: .
     ports:
       - '3000:3000'
+      - '6767:5173'
     volumes:
       - '.:/app'
 
