@@ -47,3 +47,5 @@ public/usercron/
 .ssh/*
 storage/
 docker_website_bash_history
+public/index_f.html
+public/front_assets
