@@ -16,7 +16,7 @@
         <button class="button mt-2" @click="changeMonth">Change</button>
       </div>
       <div class="column">
-        <button class="button mt-2" @click="onCsvClicked">CSV</button>
+        <button class="button mt-2" @click="getCsv">CSV</button>
       </div>
     </div>
   </div>
@@ -25,6 +25,11 @@
 <script>
   export default {
     name: 'MonthSelect',
+    data() {
+      return {
+        apiUrl: import.meta.env.VITE_API_URL,
+      }
+    },
     methods: {
       changeMonth() {
         this.$router.push(
@@ -40,7 +45,7 @@
         this.$store.dispatch('tracker/fetchDailyTotals')
       },
       getCsv() {
-        // Handle the "CSV" button click
+        window.location.href = `${this.apiUrl}/time_entries/entries?csv=true&month=${this.$store.state.tracker.selectedMonth}`
       },
     },
   };
