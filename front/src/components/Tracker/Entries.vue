@@ -21,13 +21,13 @@
             <tr class="entry">
               <td>
                 <a title="Delete this entry" class="entry-delete" @click="deleteEntry(entry)">
-                  <Icon src="minus.svg" />
+                  <Icon :src="minusIcon" />
                 </a>
                 <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
-                  <Icon src="time_clone.svg" />
+                  <Icon :src="cloneIcon" />
                 </a>
                 <a title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
-                  <Icon src="time_edit.svg" />
+                  <Icon :src="editIcon" />
                 </a>
               </td>
               <td class="category">{{ entry.category }}</td>
@@ -53,11 +53,21 @@
   import Icon from './Icon.vue'
   import Swal from 'sweetalert2'
   import dayjs from 'dayjs'
+  import minusIcon from '@/images/minus.svg'
+  import cloneIcon from '@/images/time_clone.svg'
+  import editIcon from '@/images/time_edit.svg'
 
   export default {
     name: 'Entries',
     components: {
       Icon,
+    },
+    data() {
+      return {
+        minusIcon,
+        cloneIcon,
+        editIcon,
+      }
     },
     computed: {
       entriesByDate() {

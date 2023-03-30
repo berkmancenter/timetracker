@@ -1,5 +1,5 @@
 <template>
-  <img class="tracker-icon" :class="{ 'tracker-icon-interactive': interactive }" :src="iconSrc">
+  <img class="tracker-icon" :class="{ 'tracker-icon-interactive': interactive }" :src="src">
 </template>
 
 <script>
@@ -15,12 +15,6 @@
         default: true,
       },
     },
-    computed: {
-      iconSrc() {
-        const path = new URL('@/images/', import.meta.url)
-        return `${path}/${this.src}`
-      }
-    }
   }
 </script>
 
