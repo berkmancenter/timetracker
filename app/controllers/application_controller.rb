@@ -6,6 +6,8 @@ class ApplicationController < ActionController::Base
 
   layout 'regular'
 
+  protected
+
   def get_active_users
     unless session["#{@session_user.id}_active_users"].blank?
       session["#{@session_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
@@ -14,7 +16,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  protected
+  def get_active_users_usernames
+    get_active_users.map { |u| User.where(id: u).first&.username }.compact
+  end
 
   def render_csv(param)
     param[:filebase] = param[:filebase].blank? ? param[:model].to_s.tableize : param[:filebase]

@@ -66,17 +66,17 @@
       async submitForm(ev) {
         const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
 
-        const months = await this.$store.dispatch('tracker/fetchMonths')
-        this.$store.dispatch('tracker/setMonths', months)
-
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
-
         if (this.$store.state.tracker.formMode === 'create') {
           this.$store.dispatch('tracker/addEntry', submitResponse.entry)
         } else {
           this.$store.dispatch('tracker/replaceEntry', submitResponse.entry)
           this.$store.dispatch('tracker/setFormMode', 'create')
         }
+
+        const months = await this.$store.dispatch('tracker/fetchMonths')
+        this.$store.dispatch('tracker/setMonths', months)
+
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
 
         this.$store.dispatch('tracker/clearEntryForm')
       },

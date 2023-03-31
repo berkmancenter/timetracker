@@ -9,12 +9,13 @@
           <th>Category</th>
           <th>Project</th>
           <th>Hours</th>
+          <th v-if="$store.state.tracker.user.sudoMode">Username</th>
         </tr>
       </thead>
       <template v-for="(entries, date) in entriesByDate">
         <tbody>
           <tr class="entry-date">
-            <td colspan="4" class="entry_date is-size-4" v-if="isNewDay(date)">{{ date }}</td>
+            <td colspan="5" class="entry_date is-size-4" v-if="isNewDay(date)">{{ date }}</td>
           </tr>
 
           <template v-for="entry in entries" :key="entry.id">
@@ -33,6 +34,7 @@
               <td class="category">{{ entry.category }}</td>
               <td class="project">{{ entry.project }}</td>
               <td class="decimal_time">{{ entry.decimal_time }} hours</td>
+              <td class="username" v-if="$store.state.tracker.user.sudoMode">{{ entry.username }}</td>
             </tr>
 
             <tr v-if="entry.description">
@@ -41,7 +43,7 @@
           </template>
 
           <tr class="separator">
-            <td colspan="4"></td>
+            <td colspan="5"></td>
           </tr>
         </tbody>
       </template>

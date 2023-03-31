@@ -8,7 +8,7 @@
       </div>
 
       <div class="navbar-menu" id="top-navbar-menu">
-        <div class="navbar-start">
+        <div class="navbar-start" v-if="$store.state.tracker.user.is_admin">
           <a class="navbar-item" v-for="topMenuItem in topMenuItems" :href="`${apiUrl}/${topMenuItem.path}`">{{ topMenuItem.label }}</a>
         </div>
 
@@ -29,7 +29,7 @@
           <div class="box">
             <month-select></month-select>
             <daily-totals v-if="$store.state.tracker.selectedMonth !== 'all'"></daily-totals>
-            <popular></popular>
+            <popular v-if="$store.state.tracker.user.sudoMode === false"></popular>
           </div>
         </div>
 
@@ -93,7 +93,8 @@
         const months = await this.$store.dispatch('tracker/fetchMonths')
 
         this.$store.dispatch('tracker/setMonths', months)
-        this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'user', 'dailyTotals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'user', 'dailyTotals'])
+        this.$store.dispatch('tracker/setSudoMode', this.$store.state.tracker.user.active_users.length > 1)
       }
     },
   }

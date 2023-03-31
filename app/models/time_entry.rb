@@ -17,9 +17,9 @@ class TimeEntry < ActiveRecord::Base
     users_sql = users.collect{|u| self.connection.quote(u.id)}.join(', ')
     month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
     if alltime
-      self.find_by_sql(["select * from time_entries where user_id in (#{users_sql}) order by entry_date desc, id"])
+      self.find_by_sql(["select time_entries.*, users.username from time_entries join users on time_entries.user_id = users.id where user_id in (#{users_sql}) order by entry_date desc, id"])
     else
-      self.find_by_sql(["select * from time_entries where extract(year from entry_date) || '-' || lpad(extract(month from entry_date)::text, 2, '0') = ? and user_id in (#{users_sql}) order by entry_date desc, id", month])
+      self.find_by_sql(["select time_entries.*, users.username from time_entries join users on time_entries.user_id = users.id where extract(year from entry_date) || '-' || lpad(extract(month from entry_date)::text, 2, '0') = ? and user_id in (#{users_sql}) order by entry_date desc, id", month])
     end
   end
 

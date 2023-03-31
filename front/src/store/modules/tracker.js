@@ -20,6 +20,8 @@ const state = {
   formMode: 'create',
   user: {
     username: '',
+    active_users: [],
+    sudoMode: false,
   },
   popular: {
     categories: [],
@@ -76,6 +78,9 @@ const mutations = {
   },
   setSelectedMonth(state, month) {
     state.selectedMonth = month
+  },
+  setSudoMode(state, isSudoMode) {
+    state.user.sudoMode = isSudoMode
   },
 }
 
@@ -179,11 +184,21 @@ const actions = {
   },
   async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'user', 'dailyTotals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
+    const promises = []
 
-    itemsToReload.forEach(async (item) => {
-      const data = await context.dispatch(`fetch${capitalize(item)}`)
-      context.commit(`set${capitalize(item)}`, data)
-    })
+    for (const item of itemsToReload) {
+      const promise = (async () => {
+        const data = await context.dispatch(`fetch${capitalize(item)}`)
+        context.commit(`set${capitalize(item)}`, data)
+      })()
+
+      promises.push(promise)
+    }
+  
+    return await Promise.all(promises)
+  },
+  setSudoMode(context, isSudoMode) {
+    context.commit('setSudoMode', isSudoMode)
   },
 }
 
