@@ -14,7 +14,7 @@ services:
       - 'postgres'
     build: .
     ports:
-      - '3000:3000'
+      - '6868:3000'
       - '6767:5173'
     volumes:
       - '.:/app'
