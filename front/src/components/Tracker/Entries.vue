@@ -121,14 +121,14 @@
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: this.colors.main,
-        }).then((result) => {
+        }).then(async (result) => {
           if (result.isConfirmed) {
-            this.$store.dispatch('tracker/deleteEntry', entry)
-              .then(() => {
-                this.$store.dispatch('tracker/fetchMonths')
-                this.$store.dispatch('tracker/fetchPopular')
-                this.$store.dispatch('tracker/fetchDailyTotals')
-              })
+            await this.$store.dispatch('tracker/deleteEntry', entry)
+            const months = await this.$store.dispatch('tracker/fetchMonths')
+
+            this.$store.dispatch('tracker/setMonths', months)
+            this.$store.dispatch('tracker/fetchPopular')
+            this.$store.dispatch('tracker/fetchDailyTotals')
           }
         })
       },

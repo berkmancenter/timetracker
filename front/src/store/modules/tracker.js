@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import router from '@/router/index'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -76,9 +77,6 @@ const mutations = {
   setSelectedMonth(state, month) {
     state.selectedMonth = month
   },
-  setMonths(state, months) {
-    state.months = months
-  },
 }
 
 const actions = {
@@ -91,28 +89,24 @@ const actions = {
   async fetchEntries(context) {
     const response = await fetch(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}`)
     const data = await response.json()
-    context.commit('setEntries', data.entries)
 
     return data
   },
   async fetchUser(context) {
     const response = await fetch(`${apiUrl}/users/current_user`)
     const data = await response.json()
-    context.commit('setUser', data)
 
     return data
   },
   async fetchPopular(context) {
     const response = await fetch(`${apiUrl}/time_entries/popular`)
     const data = await response.json()
-    context.commit('setPopular', data)
 
     return data
   },
   async fetchDailyTotals(context) {
     const response = await fetch(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}`)
     const data = await response.json()
-    context.commit('setDailyTotals', data)
 
     return data
   },
@@ -163,9 +157,33 @@ const actions = {
   },
   setMonths(context, months) {
     context.commit('setMonths', months)
+
+    const currentMonthParam = router.currentRoute._value.params?.month
+    const previousMonth = context.state.selectedMonth
+    if ((currentMonthParam && months.includes(currentMonthParam)) || currentMonthParam === 'all') {
+      context.dispatch('setSelectedMonth', currentMonthParam)
+    } else {
+      if (months.length > 0) {
+        context.dispatch('setSelectedMonth', months[0])
+      } else {
+        context.dispatch('setSelectedMonth', 'all')
+      }
+
+      if (previousMonth !== context.state.selectedMonth) {
+        context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
+      }
+    }
   },
   setSelectedMonth(context, month) {
     context.commit('setSelectedMonth', month)
+  },
+  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'user', 'dailyTotals']) {
+    const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
+
+    itemsToReload.forEach(async (item) => {
+      const data = await context.dispatch(`fetch${capitalize(item)}`)
+      context.commit(`set${capitalize(item)}`, data)
+    })
   },
 }
 

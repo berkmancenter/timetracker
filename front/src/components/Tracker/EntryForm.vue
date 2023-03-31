@@ -63,22 +63,22 @@
       },
     },
     methods: {
-      submitForm(ev) {
-        this.$store.dispatch('tracker/submitEntryForm')
-          .then((response) => {
-            this.$store.dispatch('tracker/fetchMonths')
-            this.$store.dispatch('tracker/fetchPopular')
-            this.$store.dispatch('tracker/fetchDailyTotals')
+      async submitForm(ev) {
+        const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
 
-            if (this.$store.state.tracker.formMode === 'create') {
-              this.$store.dispatch('tracker/addEntry', response.entry)
-            } else {
-              this.$store.dispatch('tracker/replaceEntry', response.entry)
-            }
+        const months = await this.$store.dispatch('tracker/fetchMonths')
+        this.$store.dispatch('tracker/setMonths', months)
 
-            this.$store.dispatch('tracker/setFormMode', 'create')
-            this.$store.dispatch('tracker/clearEntryForm')
-          })
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
+
+        if (this.$store.state.tracker.formMode === 'create') {
+          this.$store.dispatch('tracker/addEntry', submitResponse.entry)
+        } else {
+          this.$store.dispatch('tracker/replaceEntry', submitResponse.entry)
+          this.$store.dispatch('tracker/setFormMode', 'create')
+        }
+
+        this.$store.dispatch('tracker/clearEntryForm')
       },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {
@@ -97,18 +97,17 @@
         autocomplete({
           input: this.$refs[fieldRefName],
           preventSubmit: true,
-          fetch: function(text, update) {
-            that.$store.dispatch('tracker/fetchAutoComplete', {
+          fetch: async (text, update) => {
+            let items = await that.$store.dispatch('tracker/fetchAutoComplete', {
               term: text.toLowerCase(),
               field: type,
-            }).then((items) => {
-              items = items.map((item) => {
-                return { label: item }
-              })
-
-              update(items)
             })
 
+            items = items.map((item) => {
+              return { label: item }
+            })
+
+            update(items)
           },
           onSelect: function(item) {
             that.$refs[fieldRefName].value = item.label

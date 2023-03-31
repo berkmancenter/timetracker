@@ -28,7 +28,7 @@
         <div class="column sidebar is-full-mobile is-full-tablet is-one-third-desktop is-one-quarter-widescreen">
           <div class="box">
             <month-select></month-select>
-            <daily-totals></daily-totals>
+            <daily-totals v-if="$store.state.tracker.selectedMonth !== 'all'"></daily-totals>
             <popular></popular>
           </div>
         </div>
@@ -86,26 +86,15 @@
       }
     },
     created() {
-      this.$store.dispatch('tracker/fetchMonths')
-        .then((response) => {
-          this.$store.dispatch('tracker/setMonths', response)
+      this.initialDataLoad()
+    },
+    methods: {
+      async initialDataLoad() {
+        const months = await this.$store.dispatch('tracker/fetchMonths')
 
-          const currentMonthParam = this.$route.params?.month
-          if ((currentMonthParam && response.includes(currentMonthParam)) || currentMonthParam === 'all') {
-            this.$store.dispatch('tracker/setSelectedMonth', currentMonthParam)
-          } else {
-            if (response.length > 0) {
-              this.$store.dispatch('tracker/setSelectedMonth', response[0])
-            } else {
-              this.$store.dispatch('tracker/setSelectedMonth', 'all')
-            }
-          }
-
-          this.$store.dispatch('tracker/fetchEntries')
-          this.$store.dispatch('tracker/fetchUser')
-          this.$store.dispatch('tracker/fetchPopular')
-          this.$store.dispatch('tracker/fetchDailyTotals')
-        })
+        this.$store.dispatch('tracker/setMonths', months)
+        this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'user', 'dailyTotals'])
+      }
     },
   }
 </script>

@@ -21,9 +21,7 @@ class TimeEntriesController < ApplicationController
       render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
     else
       month = params[:month]
-      render json: {
-        entries: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all')
-      }, status: :ok
+      render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all'), status: :ok
     end
   end
 
@@ -71,7 +69,7 @@ class TimeEntriesController < ApplicationController
   end
 
   def days
-    render json: { daily_totals: TimeEntry.total_hours_by_month_day(get_active_users, params[:month]) }, status: :ok
+    render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month]), status: :ok
   end
 
   def choose_user

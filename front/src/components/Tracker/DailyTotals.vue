@@ -1,9 +1,9 @@
 <template>
-  <div v-if="$store.state.tracker.selectedMonth !== 'all'">
+  <div>
     <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-header">Daily Totals</h5>
     <table class="table">
       <tbody>
-        <tr v-for="(item, index) in $store.state.tracker.dailyTotals.daily_totals" :key="index">
+        <tr v-for="(item, index) in $store.state.tracker.dailyTotals" :key="index">
           <td>{{ item.entry_date }}</td>
           <td>{{ item.total_hours }}</td>
         </tr>
@@ -17,7 +17,3 @@
     name: 'DailyTotals',
   }
 </script>
-
-<style scoped lang="scss">
-
-</style>
