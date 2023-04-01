@@ -2,11 +2,13 @@
   <div>
     <h3 class="has-text-weight-bold">{{ title }}</h3>
 
-    <ul class="tracker-popular-items">
+    <ul class="tracker-popular-items" v-if="items.length > 0">
       <li v-for="item in items" :key="item" @click="selectItem(item)">
         {{ item }}
       </li>
     </ul>
+
+    <p v-if="items.length === 0">Your top {{ title.toLowerCase() }} will show up here.</p>
   </div>
 </template>
 
