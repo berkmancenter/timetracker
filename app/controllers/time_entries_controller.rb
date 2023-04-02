@@ -33,8 +33,8 @@ class TimeEntriesController < ApplicationController
     return if @time_entry.id && @time_entry.user != @session_user
 
     @time_entry.attributes = time_entry_params
-    @time_entry.category = @time_entry.category.downcase
-    @time_entry.project = @time_entry.project.downcase
+    @time_entry.category = @time_entry.category.downcase.strip
+    @time_entry.project = @time_entry.project.downcase.strip
     @time_entry.user = @session_user
 
     if @time_entry.save
