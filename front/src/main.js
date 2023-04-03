@@ -1,8 +1,7 @@
 // Additional libs
-import 'bulma'
-import DatePicker from 'vue-datepicker-next'
-import 'vue-datepicker-next/index.css'
-import 'autocompleter/autocomplete.css'
+import './plugins/bulma'
+import './plugins/datepicker'
+import './plugins/autocomplete'
 
 import { createApp } from 'vue'
 import router from './router/index'
