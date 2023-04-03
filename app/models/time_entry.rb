@@ -3,36 +3,80 @@ class TimeEntry < ActiveRecord::Base
 
   attribute :username
 
+  validates :user, :entry_date, presence: true
+
   def self.my_popular_categories(user)
-    self.find_by_sql(['select category as item, count(category) as ccount from time_entries where user_id = ? and length(category) > 0 group by category order by ccount desc limit 20', user.id])
+    self.get_popular('category', user)
   end
 
   def self.my_popular_projects(user)
-    self.find_by_sql(['select project as item, count(project) as pcount from time_entries where user_id = ? and length(project) > 0 group by project order by pcount desc limit 20', user.id])
+    self.get_popular('project', user)
   end
 
   def self.my_entries_by_month(users, month = Time.now.year.to_s + '-' + Time.now.month.to_s, alltime = false)
-    users_sql = users.collect{|u| self.connection.quote(u.id)}.join(', ')
+    user_ids = users.map(&:id)
     month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
+
+    entries = TimeEntry
+              .select('time_entries.*, users.username, users.id AS user_id')
+              .joins(:user)
+              .where(users: { id: user_ids })
+              .order(entry_date: :desc, id: :desc)
+
     if alltime
-      self.find_by_sql(["select * from time_entries where user_id in (#{users_sql}) order by entry_date desc, id"])
+      entries
     else
-      self.find_by_sql(["select * from time_entries where extract(year from entry_date) || '-' || lpad(extract(month from entry_date)::text, 2, '0') = ? and user_id in (#{users_sql}) order by entry_date desc, id", month])
+      entries
+        .where("#{year_month_entry_sql} = ?", month)
     end
   end
 
-  def self.total_hours_by_month_day(users, month = Time.now.year.to_s + '-' + Time.now.month.to_s)
-    users_sql = users.collect{|u| self.connection.quote(u.id)}.join(', ')
-    month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
-    self.find_by_sql(["select users.username as username,entry_date,sum(decimal_time) as total_hours from time_entries,users where extract(year from entry_date) || '-' || lpad(extract(month from entry_date)::text, 2, '0') = ? and user_id in(#{users_sql}) and time_entries.user_id = users.id group by username,entry_date order by entry_date",month])
+  def self.total_hours_by_month_day(users, month)
+    return [] if month.nil?
+
+    user_ids = users.map(&:id)
+    TimeEntry
+      .select("users.username, entry_date, SUM(decimal_time) AS total_hours")
+      .joins(:user)
+      .where("#{year_month_entry_sql} = ?", month)
+      .where(user_id: user_ids)
+      .group(:username, :entry_date)
+      .order(entry_date: :desc)
   end
 
   def self.entry_list_by_month(users)
-    users_sql = users.collect{|u| self.connection.quote(u.id)}.join(', ')
-    self.find_by_sql("select extract(year from entry_date) || '-' || lpad(extract(month from entry_date)::text, 2, '0') as month from time_entries where user_id in(#{users_sql}) group by month order by month desc")
+    user_ids = users.map(&:id)
+    TimeEntry
+      .select(year_month_entry_sql_as)
+      .where(user_id: user_ids)
+      .group('year_month_entry')
+      .order('year_month_entry desc')
+      .map(&:year_month_entry)
   end
 
   def year_month
     "#{self.entry_date.to_date.year}-#{self.entry_date.strftime("%m")}"
+  end
+
+  private
+
+  def self.get_popular(type, user)
+    where_clause = "#{type} IS NOT NULL AND LENGTH(#{type}) > 0"
+    TimeEntry
+      .select(type)
+      .where(user: user)
+      .where(where_clause)
+      .group(type)
+      .order(Arel.sql('COUNT(*) DESC'))
+      .limit(20)
+      .pluck(type)
+  end
+
+  def self.year_month_entry_sql
+    "EXTRACT(year FROM entry_date) || '-' || LPAD(EXTRACT(month FROM entry_date)::text, 2, '0')"
+  end
+
+  def self.year_month_entry_sql_as
+    "#{self.year_month_entry_sql} AS year_month_entry"
   end
 end

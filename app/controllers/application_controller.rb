@@ -2,8 +2,11 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   before_action :authenticate
+  skip_before_action :verify_authenticity_token
 
   layout 'regular'
+
+  protected
 
   def get_active_users
     unless session["#{@session_user.id}_active_users"].blank?
@@ -13,7 +16,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  protected
+  def get_active_users_usernames
+    get_active_users.map { |u| User.where(id: u).first&.username }.compact
+  end
 
   def render_csv(param)
     param[:filebase] = param[:filebase].blank? ? param[:model].to_s.tableize : param[:filebase]

@@ -1,10 +1,10 @@
 Rails.application.routes.draw do
-  root to: 'time_entries#index'
+  root to: 'front#index'
 
-  resources :time_entries, only: %i[index] do
+  resources :time_entries do
     collection do
-      get :popular_categories
-      get :popular_projects
+      get :entries
+      get :popular
       get :days
       get :months
       get :auto_complete
@@ -13,8 +13,6 @@ Rails.application.routes.draw do
       patch :edit
     end
     member do
-      get :entry_form
-      get :clone
       get :delete
     end
   end
@@ -22,6 +20,7 @@ Rails.application.routes.draw do
   resources :users do
     collection do
       get :view_other_timesheets
+      get :current_user
       post :sudo
       post :destroy_multi
       post :toggle_admin_multi
