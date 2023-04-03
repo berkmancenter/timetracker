@@ -2,6 +2,13 @@
   <div>
     <h4 class="is-size-4 mt-2">Existing entries</h4>
 
+    <article v-if="$store.state.tracker.user.active_users.length > 1" class="message is-warning">
+      <div class="message-body">
+        <div><strong>You are viewing the timesheets of</strong></div>
+        {{ activeUsersString }}
+      </div>
+    </article>
+
     <table class="tracker-entries table">
       <thead>
         <tr>
@@ -95,6 +102,9 @@
 
         return entriesByDate
       },
+      activeUsersString() {
+        return this.$store.state.tracker.user.active_users.join(', ')
+      }
     },
     methods: {
       isNewDay(date) {
