@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     colors: {
       main: '#890309',
     },
+    environment: import.meta.env.VITE_ENVIRONMENT || 'development',
   }
   app.use(router)
   app.use(store)
