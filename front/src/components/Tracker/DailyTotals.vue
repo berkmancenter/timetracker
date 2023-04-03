@@ -3,11 +3,15 @@
     <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-header">Daily Totals</h5>
     <table class="table">
       <tbody>
-        <tr v-for="(item, index) in $store.state.tracker.dailyTotals" :key="index">
-          <td>{{ item.entry_date }}</td>
-          <td>{{ item.total_hours }}</td>
-          <td v-if="$store.state.tracker.user.sudoMode">{{ item.username }}</td>
-        </tr>
+        <template v-for="(item, index) in $store.state.tracker.dailyTotals" :key="index">
+          <tr>
+            <td>{{ item.entry_date }}</td>
+            <td>{{ item.total_hours }}</td>
+          </tr>
+          <tr v-if="$store.state.tracker.user.sudoMode">
+            <td colspan="2">{{ item.username }}</td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
