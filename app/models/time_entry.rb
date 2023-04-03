@@ -18,7 +18,7 @@ class TimeEntry < ActiveRecord::Base
     month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
 
     entries = TimeEntry
-              .select('time_entries.*, users.username')
+              .select('time_entries.*, users.username, users.id AS user_id')
               .joins(:user)
               .where(users: { id: user_ids })
               .order(entry_date: :desc, id: :desc)

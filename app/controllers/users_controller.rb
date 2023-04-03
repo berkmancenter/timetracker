@@ -62,6 +62,7 @@ class UsersController < ApplicationController
   def current_user
     render json: {
       username: helpers.clean_username(@session_user.username),
+      user_id: @session_user.id,
       is_admin: @session_user.superadmin,
       active_users: get_active_users_usernames
     }, status: :ok

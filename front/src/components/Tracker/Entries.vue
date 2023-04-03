@@ -27,7 +27,7 @@
                 <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
                   <Icon :src="cloneIcon" />
                 </a>
-                <a title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
+                <a v-if="entry.user_id === $store.state.tracker.user.user_id" title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
                   <Icon :src="editIcon" />
                 </a>
               </td>
