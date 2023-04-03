@@ -144,6 +144,12 @@ const actions = {
     return data
   },
   addEntry(context, entry) {
+    const month = router.currentRoute._value.params?.month
+
+    if (month !== 'all' && entry.entry_date.includes('month') === false) {
+      return
+    }
+
     context.commit('addEntry', entry)
   },
   replaceEntry(context, entry) {
@@ -176,6 +182,15 @@ const actions = {
       }
 
       if (previousMonth !== context.state.selectedMonth) {
+        router.push(
+          {
+            name: 'tracker.index',
+            params: {
+              month: context.state.selectedMonth
+            }
+          }
+        )
+
         context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
       }
     }
