@@ -1,7 +1,8 @@
 // Additional libs
 import './plugins/bulma'
-import './plugins/datepicker'
+import datepicker from './plugins/datepicker'
 import './plugins/autocomplete'
+import './plugins/pace'
 
 import { createApp } from 'vue'
 import router from './router/index'
@@ -17,6 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   app.use(router)
   app.use(store)
-  app.component('date-picker', DatePicker)
+  app.use(datepicker)
   app.mount('#app')
 });

@@ -15,5 +15,6 @@
   @import '@/assets/scss/variables.scss';
   @import '@/assets/scss/bulma-custom.scss';
   @import '@/assets/scss/datepicker-custom.scss';
+  @import '@/assets/scss/pace-theme.scss';
   @import '@/assets/scss/global.scss';
 </style>
