@@ -146,7 +146,7 @@ const actions = {
   addEntry(context, entry) {
     const month = router.currentRoute._value.params?.month
 
-    if (month !== 'all' && entry.entry_date.includes('month') === false) {
+    if (month !== 'all' && entry.entry_date.includes(month) === false) {
       return
     }
 
