@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import router from '@/router/index'
+import fetchIt from '@/lib/fetch_it'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -86,43 +87,43 @@ const mutations = {
 
 const actions = {
   async fetchMonths(context) {
-    const response = await fetch(`${apiUrl}/time_entries/months`)
+    const response = await fetchIt(`${apiUrl}/time_entries/months`)
     const data = await response.json()
 
     return data
   },
   async fetchEntries(context) {
-    const response = await fetch(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}`)
     const data = await response.json()
 
     return data
   },
   async fetchUser(context) {
-    const response = await fetch(`${apiUrl}/users/current_user`)
+    const response = await fetchIt(`${apiUrl}/users/current_user`)
     const data = await response.json()
 
     return data
   },
   async fetchPopular(context) {
-    const response = await fetch(`${apiUrl}/time_entries/popular`)
+    const response = await fetchIt(`${apiUrl}/time_entries/popular`)
     const data = await response.json()
 
     return data
   },
   async fetchDailyTotals(context) {
-    const response = await fetch(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}`)
     const data = await response.json()
 
     return data
   },
   async fetchAutoComplete(context, options) {
-    const response = await fetch(`${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}`)
     const data = await response.json()
 
     return data
   },
   async submitEntryForm(context) {
-    const response = await fetch(`${apiUrl}/time_entries/edit`, {
+    const response = await fetchIt(`${apiUrl}/time_entries/edit`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -135,7 +136,7 @@ const actions = {
     return data
   },
   async deleteEntry(context, entry) {
-    const response = await fetch(`${apiUrl}/time_entries/${entry.id}/delete`)
+    const response = await fetchIt(`${apiUrl}/time_entries/${entry.id}/delete`)
     const data = response.json()
 
     context.commit('deleteEntry', entry)
