@@ -137,4 +137,18 @@
       width: 100%;
     }
   }
+
+  @media screen and (max-width: 768px) {
+    .container.is-fluid {
+      padding: 0;
+
+      > .columns {
+        margin: 0;
+
+        > .column {
+          padding: 0;
+        }
+      }
+    }
+  }
 </style>

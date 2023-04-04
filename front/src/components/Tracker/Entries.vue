@@ -9,52 +9,54 @@
       </div>
     </article>
 
-    <table class="tracker-entries table">
-      <thead>
-        <tr>
-          <th>Actions</th>
-          <th>Category</th>
-          <th>Project</th>
-          <th>Hours</th>
-          <th v-if="$store.state.tracker.user.sudoMode">Username</th>
-        </tr>
-      </thead>
-      <template v-for="(entries, date) in entriesByDate">
-        <tbody>
-          <tr class="entry-date">
-            <td colspan="5" class="entry_date is-size-4" v-if="isNewDay(date)">{{ date }}</td>
+    <div class="tracker-entries-wrapper">
+      <table class="tracker-entries table">
+        <thead>
+          <tr>
+            <th>Actions</th>
+            <th>Category</th>
+            <th>Project</th>
+            <th>Hours</th>
+            <th v-if="$store.state.tracker.user.sudoMode">Username</th>
           </tr>
-
-          <template v-for="entry in entries" :key="entry.id">
-            <tr class="entry">
-              <td>
-                <a title="Delete this entry" class="entry-delete" @click="deleteEntry(entry)">
-                  <Icon :src="minusIcon" />
-                </a>
-                <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
-                  <Icon :src="cloneIcon" />
-                </a>
-                <a v-if="entry.user_id === $store.state.tracker.user.user_id" title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
-                  <Icon :src="editIcon" />
-                </a>
-              </td>
-              <td class="category">{{ entry.category }}</td>
-              <td class="project">{{ entry.project }}</td>
-              <td class="decimal_time">{{ entry.decimal_time }} hours</td>
-              <td class="username" v-if="$store.state.tracker.user.sudoMode">{{ entry.username }}</td>
+        </thead>
+        <template v-for="(entries, date) in entriesByDate">
+          <tbody>
+            <tr class="entry-date">
+              <td colspan="5" class="entry_date is-size-4" v-if="isNewDay(date)">{{ date }}</td>
             </tr>
 
-            <tr v-if="entry.description">
-              <td colspan="5" class="description">{{ entry.description }}</td>
-            </tr>
-          </template>
+            <template v-for="entry in entries" :key="entry.id">
+              <tr class="entry">
+                <td>
+                  <a title="Delete this entry" class="entry-delete" @click="deleteEntry(entry)">
+                    <Icon :src="minusIcon" />
+                  </a>
+                  <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
+                    <Icon :src="cloneIcon" />
+                  </a>
+                  <a v-if="entry.user_id === $store.state.tracker.user.user_id" title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
+                    <Icon :src="editIcon" />
+                  </a>
+                </td>
+                <td class="category">{{ entry.category }}</td>
+                <td class="project">{{ entry.project }}</td>
+                <td class="decimal_time">{{ entry.decimal_time }} hours</td>
+                <td class="username" v-if="$store.state.tracker.user.sudoMode">{{ entry.username }}</td>
+              </tr>
 
-          <tr class="separator">
-            <td colspan="5"></td>
-          </tr>
-        </tbody>
-      </template>
-    </table>
+              <tr v-if="entry.description">
+                <td colspan="5" class="description">{{ entry.description }}</td>
+              </tr>
+            </template>
+
+            <tr class="separator">
+              <td colspan="5"></td>
+            </tr>
+          </tbody>
+        </template>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -229,5 +231,9 @@
         }
       }
     }
+  }
+
+  .tracker-entries-wrapper {
+    overflow-x: auto;
   }
 </style>
