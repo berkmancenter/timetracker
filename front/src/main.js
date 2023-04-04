@@ -3,6 +3,7 @@ import './plugins/bulma'
 import datepicker from './plugins/datepicker'
 import './plugins/autocomplete'
 import './plugins/pace'
+import mitt from './plugins/mitt'
 
 import { createApp } from 'vue'
 import router from './router/index'
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
       main: '#890309',
     },
     environment: import.meta.env.VITE_ENVIRONMENT || 'development',
+    mitt: mitt,
   }
   app.use(router)
   app.use(store)

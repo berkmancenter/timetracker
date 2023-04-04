@@ -119,12 +119,14 @@
         cloneEntry.entry_date = dayjs().format('MMMM D, YYYY')
         this.$store.dispatch('tracker/setFormMode', 'create')
         this.$store.dispatch('tracker/setFormEntry', cloneEntry)
+        this.mitt.emit('cloneEntry')
       },
       editEntry(entry) {
         const cloneEntry = JSON.parse(JSON.stringify(entry))
         cloneEntry.entry_date = dayjs(cloneEntry.entry_date).format('MMMM D, YYYY')
         this.$store.dispatch('tracker/setFormMode', 'edit')
         this.$store.dispatch('tracker/setFormEntry', cloneEntry)
+        this.mitt.emit('editEntry')
       },
       deleteEntry(entry) {
         Swal.fire({

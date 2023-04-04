@@ -35,6 +35,8 @@
           field: this.type,
           value: item,
         })
+
+        this.mitt.emit('popularSelected')
       },
     },
   };

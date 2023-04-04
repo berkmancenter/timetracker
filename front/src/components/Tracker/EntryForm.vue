@@ -1,6 +1,6 @@
 <template>
   <div id="tracker-entry-form">
-    <form @submit.prevent="submitForm">
+    <form @submit.prevent="submitForm" ref="entryForm">
       <h4 class="is-size-4">Time entry data</h4>
 
       <FormField label="Category" accessKey="c">
@@ -49,6 +49,7 @@
     },
     mounted() {
       this.initAutoComplete()
+      this.initEvents()
     },
     computed: {
       formValue() {
@@ -114,6 +115,15 @@
             that.changeFormValue(type, item.label)
           }
         })
+      },
+      initEvents() {
+        const that = this
+        this.mitt.on('editEntry', () => that.focusOnForm())
+        this.mitt.on('cloneEntry', () => that.focusOnForm())
+        this.mitt.on('popularSelected', () => that.focusOnForm())
+      },
+      focusOnForm() {
+        this.$refs.entryForm.scrollIntoView({behavior: 'smooth'})
       },
     },
   }
