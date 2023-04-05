@@ -41,7 +41,7 @@
                 </td>
                 <td class="category">{{ entry.category }}</td>
                 <td class="project">{{ entry.project }}</td>
-                <td class="decimal_time">{{ entry.decimal_time }} hours</td>
+                <td class="decimal_time">{{ entry.decimal_time }}</td>
                 <td class="username" v-if="$store.state.tracker.user.sudoMode">{{ entry.username }}</td>
               </tr>
 
