@@ -1,7 +1,9 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+
+const basePath = import.meta.env.VITE_BASE_PATH
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(basePath || '/'),
   routes: [
     {
       path: '/:month?',

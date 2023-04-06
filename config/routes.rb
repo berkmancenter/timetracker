@@ -35,4 +35,6 @@ Rails.application.routes.draw do
       patch :set_credits_multi
     end
   end
+
+  match '*unmatched', to: 'front#index', via: %i[get]
 end
