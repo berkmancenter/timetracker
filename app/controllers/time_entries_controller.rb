@@ -94,7 +94,7 @@ class TimeEntriesController < ApplicationController
       head 500 and return
     end
 
-    render json: TimeEntry.where("#{params[:field]} ilike ?", "%#{params[:term]}%").group(params[:field]).pluck(params[:field])
+    render json: TimeEntry.where(user: @session_user).where("#{params[:field]} ilike ?", "%#{params[:term]}%").group(params[:field]).pluck(params[:field])
   end
 
   private
