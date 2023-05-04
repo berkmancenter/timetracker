@@ -24,7 +24,10 @@
       </FormField>
 
       <FormField label="" accessKey="s">
-        <input type="submit" name="commit" :value="submitButtonName" class="button is-success entry-form-submit" accesskey="s" />
+        <button type="submit" name="commit" class="button is-success entry-form-submit ld-ext-right" :class="{ running: working }" accesskey="s">
+          {{ submitButtonName }}
+          <div class="ld ld-ring ld-spin"></div>
+        </button>
       </FormField>
     </form>
   </div>
@@ -45,6 +48,7 @@
     data() {
       return {
         calImg: calImg,
+        working: false
       }
     },
     mounted() {
@@ -65,6 +69,8 @@
     },
     methods: {
       async submitForm(ev) {
+        this.working = true
+
         const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
 
         if (this.$store.state.tracker.formMode === 'create') {
@@ -80,6 +86,8 @@
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
 
         this.$store.dispatch('tracker/clearEntryForm')
+
+        this.working = false
       },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {
@@ -131,7 +139,7 @@
 
 <style lang="scss">
   #tracker-entry-form {
-    input.entry-form-submit {
+    button.entry-form-submit {
       vertical-align: middle;
       margin-right: 0.5rem;
     }

@@ -1,10 +1,11 @@
 // Additional libs
 import './plugins/bulma'
-import datepicker from './plugins/datepicker'
 import './plugins/autocomplete'
 import './plugins/pace'
+import './plugins/loading-css'
 import mitt from './plugins/mitt'
 import awn from './plugins/awesome-notifications'
+import datepicker from './plugins/datepicker'
 
 import { createApp } from 'vue'
 import router from './router/index'
