@@ -1,5 +1,5 @@
 <template>
-  <div id="tracker-entry-form">
+  <div id="tracker-entry-form" class="mb-6">
     <form @submit.prevent="submitForm" ref="entryForm">
       <h4 class="is-size-4">Time entry data</h4>
 

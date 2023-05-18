@@ -1,6 +1,6 @@
 <template>
-  <div class="field is-horizontal">
-    <div class="field-label is-normal">
+  <div class="tracker-entry-form-field field">
+    <div class="field-label is-normal mb-2">
       <label class="label">{{ label }}</label>
     </div>
     <div class="field-body">
@@ -30,8 +30,14 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-  .accesskey {
-    color: #cccccc;
+<style lang="scss">
+  .tracker-entry-form-field {
+    .accesskey {
+      color: #cccccc;
+    }
+
+    .field-label {
+      text-align: left;
+    }
   }
 </style>
