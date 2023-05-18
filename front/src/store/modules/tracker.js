@@ -157,6 +157,7 @@ const actions = {
   },
   clearEntryForm(context) {
     context.commit('clearEntryForm')
+    context.commit('setFormMode', 'create')
   },
   setFormField(context, data) {
     context.commit('setFormField', data)

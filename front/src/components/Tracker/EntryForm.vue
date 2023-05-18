@@ -77,7 +77,6 @@
           this.$store.dispatch('tracker/addEntry', submitResponse.entry)
         } else {
           this.$store.dispatch('tracker/replaceEntry', submitResponse.entry)
-          this.$store.dispatch('tracker/setFormMode', 'create')
         }
 
         const months = await this.$store.dispatch('tracker/fetchMonths')
@@ -86,7 +85,6 @@
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
 
         this.$store.dispatch('tracker/clearEntryForm')
-
         this.working = false
       },
       changeFormValue(field, value) {
