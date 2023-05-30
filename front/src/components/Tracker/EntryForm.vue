@@ -16,7 +16,7 @@
       </FormField>
 
       <FormField label="Time spent" accessKey="t">
-        <input class="input" type="number" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" accesskey="t" required />
+        <input class="input" type="number" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
       </FormField>
 
       <FormField label="Date" accessKey="a">
