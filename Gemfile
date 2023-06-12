@@ -32,3 +32,5 @@ group :development, :test, :assets do
   gem 'sassc-rails'
   gem 'terser'
 end
+
+gem "bundle-audit", "~> 0.1.0", :group => :development
