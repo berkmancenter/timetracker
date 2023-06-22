@@ -36,7 +36,7 @@
 <script>
   import calImg from '@/images/cal.svg'
   import FormField from './FormField.vue'
-  import Icon from './Icon.vue'
+  import Icon from '@/components/Shared/Icon.vue'
   import autocomplete from 'autocompleter'
 
   export default {

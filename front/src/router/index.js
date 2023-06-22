@@ -6,9 +6,25 @@ const router = createRouter({
   history: createWebHistory(basePath || '/'),
   routes: [
     {
-      path: '/:month?',
-      component: () => import('@/components/Tracker/Tracker.vue'),
-      name: 'tracker.index',
+      path: '/',
+      component: () => import('@/layouts/Default.vue'),
+      children: [
+        {
+          path: '',
+          component: () => import('@/components/Tracker/Tracker.vue'),
+          name: 'app.index',
+        },
+        {
+          path: ':month?',
+          component: () => import('@/components/Tracker/Tracker.vue'),
+          name: 'tracker.index',
+        },
+        {
+          path: 'admin/users',
+          component: () => import('@/components/Admin/Users.vue'),
+          name: 'users.index',
+        },
+      ],
     }
   ]
 })

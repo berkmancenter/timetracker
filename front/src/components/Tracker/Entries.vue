@@ -2,7 +2,7 @@
   <div>
     <h4 class="is-size-4 mt-2">Existing entries</h4>
 
-    <article v-if="$store.state.tracker.user.active_users.length > 1" class="message is-warning">
+    <article v-if="$store.state.shared.user.active_users.length > 1" class="message is-warning">
       <div class="message-body">
         <div><strong>You are viewing the timesheets of</strong></div>
         {{ activeUsersString }}
@@ -17,7 +17,7 @@
             <th>Category</th>
             <th>Project</th>
             <th>Hours</th>
-            <th v-if="$store.state.tracker.user.sudoMode">Username</th>
+            <th v-if="$store.state.shared.user.sudoMode">Username</th>
           </tr>
         </thead>
         <template v-for="(entries, date) in entriesByDate">
@@ -35,14 +35,14 @@
                   <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
                     <Icon :src="cloneIcon" />
                   </a>
-                  <a v-if="entry.user_id === $store.state.tracker.user.user_id" title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
+                  <a v-if="entry.user_id === $store.state.shared.user.user_id" title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
                     <Icon :src="editIcon" />
                   </a>
                 </td>
                 <td class="category">{{ entry.category }}</td>
                 <td class="project">{{ entry.project }}</td>
                 <td class="decimal_time">{{ entry.decimal_time }}</td>
-                <td class="username" v-if="$store.state.tracker.user.sudoMode">{{ entry.username }}</td>
+                <td class="username" v-if="$store.state.shared.user.sudoMode">{{ entry.username }}</td>
               </tr>
 
               <tr v-if="entry.description">
@@ -61,7 +61,7 @@
 </template>
 
 <script>
-  import Icon from './Icon.vue'
+  import Icon from '@/components/Shared/Icon.vue'
   import Swal from 'sweetalert2'
   import dayjs from 'dayjs'
   import minusIcon from '@/images/minus.svg'
@@ -105,7 +105,7 @@
         return entriesByDate
       },
       activeUsersString() {
-        return this.$store.state.tracker.user.active_users.join(', ')
+        return this.$store.state.shared.user.active_users.join(', ')
       }
     },
     methods: {

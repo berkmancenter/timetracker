@@ -19,11 +19,6 @@ const state = {
   selectedMonth: 'all',
   formEntry: JSON.parse(JSON.stringify(defaultEntry)),
   formMode: 'create',
-  user: {
-    username: '',
-    active_users: [],
-    sudoMode: false,
-  },
   popular: {
     categories: [],
     projects: [],
@@ -37,9 +32,6 @@ const mutations = {
   },
   setEntries(state, entries) {
     state.entries = entries
-  },
-  setUser(state, user) {
-    state.user = user
   },
   setPopular(state, popular) {
     state.popular = popular
@@ -80,9 +72,6 @@ const mutations = {
   setSelectedMonth(state, month) {
     state.selectedMonth = month
   },
-  setSudoMode(state, isSudoMode) {
-    state.user.sudoMode = isSudoMode
-  },
 }
 
 const actions = {
@@ -94,12 +83,6 @@ const actions = {
   },
   async fetchEntries(context) {
     const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}`)
-    const data = await response.json()
-
-    return data
-  },
-  async fetchUser(context) {
-    const response = await fetchIt(`${apiUrl}/users/current_user`)
     const data = await response.json()
 
     return data
@@ -213,9 +196,6 @@ const actions = {
     }
   
     return await Promise.all(promises)
-  },
-  setSudoMode(context, isSudoMode) {
-    context.commit('setSudoMode', isSudoMode)
   },
 }
 

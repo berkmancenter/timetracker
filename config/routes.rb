@@ -22,8 +22,8 @@ Rails.application.routes.draw do
       get :view_other_timesheets
       get :current_user
       post :sudo
-      post :destroy_multi
-      post :toggle_admin_multi
+      post :delete
+      post :toggle_admin
     end
   end
 
