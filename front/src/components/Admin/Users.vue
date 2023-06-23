@@ -5,14 +5,15 @@
     <form class="form">
       <div class="mb-4">
         <a class="button is-danger mr-2" @click="deleteUsers()">Remove selected</a>
-        <a class="button is-info" @click="toggleAdminUsers()">Toggle admin selected</a>
+        <a class="button is-info mr-2" @click="toggleAdminUsers()">Toggle admin selected</a>
+        <a class="button is-info" @click="sudo()">View other users timesheets</a>
       </div>
 
       <table class="table table-hovered users-index-table">
         <thead>
           <tr>
             <th>
-              <input type="checkbox">
+              <input type="checkbox" ref="toggleAllCheckbox" @click="toggleAll()">
             </th>
             <th>Username</th>
             <th>Email</th>
@@ -30,7 +31,7 @@
             <td>{{ user.email }}</td>
             <td>
               <span class="is-hidden">{{ user.superadmin }}</span>
-              <Icon :src="iconBool(user.superadmin)" />
+              <Icon :src="iconBool(user.superadmin)" :interactive="false" />
             </td>
             <td>{{ user.created_at }}</td>
             <td>
@@ -158,6 +159,38 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+      },
+      async sudo() {
+        const usersIds = this.$store.state.admin.users
+              .filter(user => user.selected)
+              .map(user => user.id)
+
+        if (usersIds.length === 0) {
+          this.awn.warning('No users selected.')
+
+          return
+        }
+
+        const response = await this.$store.dispatch('admin/sudo', usersIds)
+
+        if (response.ok) {
+          const user = await this.$store.dispatch('shared/fetchUser')
+
+          this.$store.dispatch('shared/setUser', user)
+          this.awn.success('You can now see timesheets of selected users.')
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+      },
+      toggleAll() {
+        const newStatus = this.$refs.toggleAllCheckbox.checked
+
+        this.$store.state.admin.users
+          .map((user) => {
+            user.selected = newStatus
+
+            return user
+          })
       },
     },
   }

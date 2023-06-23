@@ -6,6 +6,9 @@
       <div class="message-body">
         <div><strong>You are viewing the timesheets of</strong></div>
         {{ activeUsersString }}
+        <div>
+          <a class="button is-info mt-2" @click="unSudo()">Show only my timesheets</a>
+        </div>
       </div>
     </article>
 
@@ -146,6 +149,18 @@
             this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
           }
         })
+      },
+      async unSudo() {
+        const response = await this.$store.dispatch('admin/unSudo')
+
+        if (response.ok) {
+          const user = await this.$store.dispatch('shared/fetchUser')
+
+          this.$store.dispatch('shared/setUser', user)
+          this.awn.success('Showing only your timesheets.')
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
       },
     }
   }

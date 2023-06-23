@@ -36,10 +36,9 @@ class UsersController < ApplicationController
   end
 
   def sudo
-    session["#{@session_user.id}_active_users"] = params[:active_users]&.reject(&:empty?)
-    flash[:notice] = "You are now viewing only your own timesheets." if session["#{@session_user.id}_active_users"].blank?
+    session["#{@session_user.id}_active_users"] = params[:users]
 
-    redirect_to root_url
+    render json: { message: 'ok' }, status: :ok
   end
 
   def current_user

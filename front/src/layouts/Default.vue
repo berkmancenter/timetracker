@@ -75,7 +75,6 @@
         const user = await this.$store.dispatch('shared/fetchUser')
 
         this.$store.dispatch('shared/setUser', user)
-        this.$store.dispatch('shared/setSudoMode', this.$store.state.shared.user.active_users.length > 1)
       }
     },
   }

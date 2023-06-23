@@ -50,6 +50,34 @@ const actions = {
   setUsers(context, users) {
     context.commit('setUsers', users)
   },
+  async sudo(context, users) {
+    const response = await fetchIt(`${apiUrl}/users/sudo`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        users: users,
+      }),
+    })
+
+    return response
+  },
+  async unSudo(context, users) {
+    const response = await fetchIt(`${apiUrl}/users/sudo`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        users: [],
+      }),
+    })
+
+    return response
+  },
 }
 
 const getters = {}
