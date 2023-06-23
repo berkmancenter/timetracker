@@ -28,6 +28,7 @@
       <div class="columns is-desktop">
         <div class="column sidebar is-full-mobile is-full-tablet is-one-third-desktop is-one-quarter-widescreen">
           <div class="box">
+            <router-view name="Sidebar"></router-view>
           </div>
         </div>
 

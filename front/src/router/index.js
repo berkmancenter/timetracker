@@ -16,7 +16,10 @@ const router = createRouter({
         },
         {
           path: ':month?',
-          component: () => import('@/components/Tracker/Tracker.vue'),
+          components: {
+            default: () => import('@/components/Tracker/Tracker.vue'),
+            Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
+          },
           name: 'tracker.index',
         },
         {

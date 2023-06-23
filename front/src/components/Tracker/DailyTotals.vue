@@ -8,7 +8,7 @@
             <td>{{ item.entry_date }}</td>
             <td>{{ item.total_hours }}</td>
           </tr>
-          <tr v-if="$store.state.tracker.user.sudoMode">
+          <tr v-if="$store.state.shared.user.sudoMode">
             <td colspan="2">{{ item.username }}</td>
           </tr>
         </template>
