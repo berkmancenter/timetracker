@@ -155,6 +155,7 @@
 
         if (response.ok) {
           const user = await this.$store.dispatch('shared/fetchUser')
+          await this.$store.dispatch('tracker/reloadViewData')
 
           this.$store.dispatch('shared/setUser', user)
           this.awn.success('Showing only your timesheets.')

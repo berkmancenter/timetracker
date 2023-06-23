@@ -9,17 +9,17 @@
         <a class="button is-info" @click="sudo()">View other users timesheets</a>
       </div>
 
-      <table class="table table-hovered users-index-table">
+      <table class="table table-hovered admin-users-table" ref="usersTable">
         <thead>
-          <tr>
-            <th>
+          <tr class="no-select">
+            <th data-sort-method="none" class="no-sort">
               <input type="checkbox" ref="toggleAllCheckbox" @click="toggleAll()">
             </th>
             <th>Username</th>
             <th>Email</th>
             <th>Admin</th>
             <th>Created</th>
-            <th>Actions</th>
+            <th data-sort-method="none" class="no-sort">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +52,8 @@
   import yesIcon from '@/images/yes.svg'
   import noIcon from '@/images/no.svg'
   import Swal from 'sweetalert2'
+  import 'tablesort/tablesort.css'
+  import Tablesort from 'tablesort'
 
   export default {
     name: 'AdminUsers',
@@ -68,6 +70,9 @@
     created() {
       this.initialDataLoad()
     },
+    mounted() {
+      this.initTableSorting()
+    },
     methods: {
       initialDataLoad() {
         this.loadUsers()
@@ -76,6 +81,11 @@
         const users = await this.$store.dispatch('admin/fetchUsers')
 
         this.$store.dispatch('admin/setUsers', users)
+      },
+      initTableSorting() {
+        new Tablesort(this.$refs.usersTable, {
+          descending: true,
+        })
       },
       iconBool(isAdmin) {
         if (isAdmin) {

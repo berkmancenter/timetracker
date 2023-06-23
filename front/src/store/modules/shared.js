@@ -30,9 +30,6 @@ const actions = {
     context.commit('setUser', user)
     context.commit('setSudoMode', user.active_users.length > 1)
   },
-  setSudoMode(context, isSudoMode) {
-    context.commit('setSudoMode', isSudoMode)
-  },
 }
 
 const getters = {}

@@ -2779,6 +2779,11 @@ syntax-error@^1.1.1:
   dependencies:
     acorn-node "^1.2.0"
 
+tablesort@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/tablesort/-/tablesort-5.3.0.tgz#899534f40f5395c1ec4d00f7b9d026c6e21ccc3f"
+  integrity sha512-WkfcZBHsp47gVH9CBHG0ZXopriG01IA87arGrchvIe868d4RiXVvoYPS1zMq9IdW05kBs5iGsqxTABqLyWonbg==
+
 through2@^0.6.3:
   version "0.6.5"
   resolved "https://registry.yarnpkg.com/through2/-/through2-0.6.5.tgz#41ab9c67b29d57209071410e1d7a7a968cd3ad48"

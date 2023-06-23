@@ -182,7 +182,7 @@ const actions = {
   setSelectedMonth(context, month) {
     context.commit('setSelectedMonth', month)
   },
-  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'user', 'dailyTotals']) {
+  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
     const promises = []
 
