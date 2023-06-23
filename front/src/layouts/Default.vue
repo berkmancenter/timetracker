@@ -60,10 +60,6 @@
             label: 'Periods',
             path: 'periods',
           },
-          {
-            label: 'View other timesheets',
-            path: 'users/view_other_timesheets',
-          },
         ],
         apiUrl: import.meta.env.VITE_API_URL,
       }

@@ -155,7 +155,7 @@ const actions = {
     context.commit('setMonths', months)
 
     const currentMonthParam = router.currentRoute._value.params?.month
-    const previousMonth = context.state.selectedMonth
+
     if ((currentMonthParam && months.includes(currentMonthParam)) || currentMonthParam === 'all') {
       context.dispatch('setSelectedMonth', currentMonthParam)
     } else {
@@ -165,18 +165,16 @@ const actions = {
         context.dispatch('setSelectedMonth', 'all')
       }
 
-      if (previousMonth !== context.state.selectedMonth) {
-        router.push(
-          {
-            name: 'tracker.index',
-            params: {
-              month: context.state.selectedMonth
-            }
+      router.push(
+        {
+          name: 'tracker.index',
+          params: {
+            month: context.state.selectedMonth
           }
-        )
+        }
+      )
 
-        context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
-      }
+      context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
     }
   },
   setSelectedMonth(context, month) {
