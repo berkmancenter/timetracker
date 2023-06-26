@@ -1,4 +1,4 @@
-import fetchIt from '@/lib/fetch_it'
+import fetchIt from '@/lib/fetch-it'
 
 const apiUrl = import.meta.env.VITE_API_URL
 

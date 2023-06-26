@@ -1,0 +1,100 @@
+<template>
+  <div class="content admin-periods-form">
+    <h1 class="is-size-1">{{ title }}</h1>
+
+    <form class="form" @submit.prevent="save">
+      <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+          <input class="input" type="text" v-model="$store.state.admin.period.name" required="true">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">From</label>
+        <div class="control">
+          <date-picker v-model:value="$store.state.admin.period.from" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="from"></date-picker>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">To</label>
+        <div class="control">
+          <date-picker v-model:value="$store.state.admin.period.to" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="to"></date-picker>
+        </div>
+      </div>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+  import Icon from '@/components/Shared/Icon.vue'
+
+  export default {
+    name: 'AdminPeriodsForm',
+    components: {
+      Icon,
+    },
+    data() {
+      return {}
+    },
+    computed: {
+      title() {
+        if (this.$route.params.id) {
+          return 'Edit period'
+        } else {
+          return 'New period'
+        }
+      }
+    },
+    created() {
+      this.$store.dispatch('admin/clearPeriod')
+      this.initialDataLoad()
+    },
+    methods: {
+      initialDataLoad() {
+        this.loadPeriod()
+      },
+      async loadPeriod() {
+        if (this.$route.params.id) {
+          const response = await this.$store.dispatch('admin/fetchPeriod', this.$route.params.id)
+
+          response.from = new Date(response.from).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+
+          response.to = new Date(response.to).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+
+          this.$store.dispatch('admin/setPeriod', response)
+        }
+      },
+      async save() {
+        const response = await this.$store.dispatch('admin/savePeriod', this.$store.state.admin.period)
+
+        if (response?.ok) {
+          this.awn.success('Period has been saved.')
+          this.$router.push({
+            path: '/admin/periods'
+          })
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+      },
+    },
+  }
+</script>
+
+<style lang="scss">
+</style>

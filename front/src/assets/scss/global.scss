@@ -5,3 +5,7 @@ body, button, input, optgroup, select, textarea {
 .no-select {
   user-select: none;
 }
+
+.swal2-shown {
+  padding-right: 0 !important;
+}
