@@ -7,6 +7,12 @@ const options = {
     global: 6000,
   },
   maxNotifications: 2,
+  labels: {
+    tip: '',
+    info: '',
+    warning: '',
+    success: '',
+  },
 }
 
 export default new AWN(options)
