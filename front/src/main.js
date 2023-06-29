@@ -6,6 +6,7 @@ import './plugins/loading-css'
 import mitt from './plugins/mitt'
 import awn from './plugins/awesome-notifications'
 import datepicker from './plugins/datepicker'
+import floating from './plugins/floating-vue'
 
 import { createApp } from 'vue'
 import router from './router/index'
@@ -24,6 +25,7 @@ app.config.globalProperties = {
 app.use(router)
 app.use(store)
 app.use(datepicker)
+app.use(floating)
 app.mount('#app')
 
 const globals = app.config.globalProperties

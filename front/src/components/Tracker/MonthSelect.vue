@@ -1,22 +1,24 @@
 <template>
   <div class="tracker-months">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-header">Select Month</h5>
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Select Month</h5>
 
-    <div class="select">
-      <select v-model="$store.state.tracker.selectedMonth">
-        <option value="all">All</option>
-        <option v-for="month in $store.state.tracker.months" :key="month" :value="month">
-          {{ month }}
-        </option>
-      </select>
-    </div>
-
-    <div class="columns">
-      <div class="column">
-        <button class="button mt-2" @click="changeMonth">Change</button>
+    <div class="switmenu-section-content">
+      <div class="select">
+        <select v-model="$store.state.tracker.selectedMonth">
+          <option value="all">All</option>
+          <option v-for="month in $store.state.tracker.months" :key="month" :value="month">
+            {{ month }}
+          </option>
+        </select>
       </div>
-      <div class="column">
-        <button class="button mt-2" @click="getCsv">CSV</button>
+
+      <div class="columns">
+        <div class="column">
+          <button class="button mt-2" @click="changeMonth">Change</button>
+        </div>
+        <div class="column">
+          <button class="button mt-2" @click="getCsv">CSV</button>
+        </div>
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 <template>
   <div id="tracker-entry-form" class="mb-6">
     <form @submit.prevent="submitForm" ref="entryForm">
-      <h4 class="is-size-4">Time entry data</h4>
+      <h4 class="is-size-4 no-select">Time entry data</h4>
 
       <FormField label="Category" accessKey="c">
         <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" @input="changeFormValue('category', $event.target.value)" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
