@@ -1,75 +1,101 @@
 class PeriodsController < ApplicationController
-  before_action :set_period, only: [:show, :edit, :update, :destroy, :credits, :set_credits, :set_credits_multi , :stats]
+  before_action :set_period, except: [:index, :upsert, :delete]
   before_action :is_admin
 
   layout 'admin'
 
   def index
-    @periods = Period.all
+    periods = Period.all
+
+    render json: periods, status: :ok
   end
 
-  def new
-    @period = Period.new
+  def show
+    render json: @period, status: :ok
   end
 
-  def create
-    @period = Period.new(period_params)
-
-    if @period.save
-      redirect_to periods_url, notice: 'Period was successfully created.'
+  def upsert
+    if period_params[:id]
+      period = Period.find(period_params['id'])
+      period.assign_attributes(period_params)
     else
-      flash.now[:error] = @period.errors.full_messages.join(', ')
-      render :new
+      period = Period.new(period_params)
+    end
+
+    if period.save
+      render json: { entry: period }, status: :ok
+    else
+      render json: { message: period.errors.full_messages.join(', ') }, status: :bad_request
     end
   end
 
-  def update
-    if @period.update(period_params)
-      redirect_to periods_url, notice: 'Period was successfully updated.'
-    else
-      flash.now[:error] = @period.errors.full_messages.join(', ')
-      render :edit
-    end
-  end
+  def delete
+    periods_ids = params[:periods]
 
-  def destroy
-    @period.destroy
-    redirect_to periods_url, notice: 'Period was successfully destroyed.'
+    if periods_ids&.any?
+      Period.where(id: periods_ids).destroy_all
+
+      render json: { message: 'ok' }, status: :ok
+    else
+      render json: { message: 'No periods selected.' }, status: :bad_request
+    end
   end
 
   def credits
-    @users = User.order(:username)
-    @credits = @users.map do |user|
+    users = User.order(:username)
+    credits = users.map do |user|
       {
         user: user,
         amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
       }
     end
+
+    render json: {
+      period: @period,
+      credits: credits
+    }, status: :ok
   end
 
   def set_credits
-    new_credits_values = {}
-
-    params[:period][:amount].each do |user_id, value|
-      next if !value.present? || value.to_d == 0.0.to_d
-
-      new_credits_values[user_id.to_i] = value
+    unless params[:credits].any?
+      render json: { message: 'No users or credits selected.' }, status: :bad_request
+      return
     end
 
-    existing_credits = @period.credits.where(user: new_credits_values.keys)
+    new_credits_values = {}
+
+    params[:credits].each do |credit_data|
+      next if !credit_data['amount'].present? || credit_data['amount'].to_d == 0.0.to_d
+
+      new_credits_values[credit_data['user']['id'].to_i] = credit_data['amount']
+    end
+
     new_credits = []
-    new_credits_values.each do |user_id, value|
-      existing_credit = existing_credits.select { |credit| credit.user_id == user_id.to_i }.first
-      unless existing_credit.nil?
+
+    @period.credits.each do |existing_credit|
+      user_id = existing_credit.user_id
+
+      if new_credits_values.key?(user_id)
+        value = new_credits_values[user_id]
+
+        next if existing_credit.amount.to_d == value.to_d
+
         existing_credit.amount = value
         new_credit = existing_credit
+        new_credits_values.delete(user_id)
       else
-        new_credit = Credit.new(
-          user_id: user_id,
-          period: @period,
-          amount: value.to_d
-        )
+        new_credit = existing_credit
       end
+
+      new_credits << new_credit
+    end
+
+    new_credits_values.each do |user_id, value|
+      new_credit = Credit.new(
+        user_id: user_id,
+        period: @period,
+        amount: value.to_d
+      )
 
       new_credits << new_credit
     end
@@ -77,26 +103,16 @@ class PeriodsController < ApplicationController
     @period.credits = new_credits
     @period.save
 
-    redirect_to credits_period_url(@period), notice: 'Credits have been set.'
-  end
-
-  def set_credits_multi
-    multi_credit_amount = params[:period][:multi_credit]
-    selected_users = params[:period][:users]
-
-    if multi_credit_amount&.present? && selected_users&.any?
-      selected_users.each do |user|
-        params[:period][:amount][user] = multi_credit_amount
-      end
-
-      set_credits
-    else
-      redirect_to credits_period_url(@period), notice: 'No users or credits selected.'
-    end
+    render json: @period.credits, status: :ok
   end
 
   def stats
-    @stats = @period.get_stats
+    stats = @period.get_stats
+
+    render json: {
+      period: @period,
+      stats: stats
+    }, status: :ok
   end
 
   private
@@ -106,6 +122,6 @@ class PeriodsController < ApplicationController
   end
 
   def period_params
-    params.require(:period).permit(:name, :from, :to)
+    params.require(:period).permit(:id, :name, :from, :to)
   end
 end

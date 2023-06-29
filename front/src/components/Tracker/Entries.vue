@@ -68,8 +68,8 @@
   import Swal from 'sweetalert2'
   import dayjs from 'dayjs'
   import minusIcon from '@/images/minus.svg'
-  import cloneIcon from '@/images/time_clone.svg'
-  import editIcon from '@/images/time_edit.svg'
+  import cloneIcon from '@/images/clone.svg'
+  import editIcon from '@/images/edit.svg'
 
   export default {
     name: 'Entries',

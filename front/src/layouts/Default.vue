@@ -9,8 +9,7 @@
 
       <div class="navbar-menu" id="top-navbar-menu">
         <div class="navbar-start" v-if="$store.state.shared.user.is_admin">
-          <router-link to="/admin/users" class="navbar-item">Users</router-link>
-          <a class="navbar-item" v-for="topMenuItem in topMenuItems" :href="`${apiUrl}/${topMenuItem.path}`">{{ topMenuItem.label }}</a>
+          <a class="navbar-item" v-for="topMenuItem in topMenuItems" :href="`/${topMenuItem.path}`">{{ topMenuItem.label }}</a>
         </div>
 
         <div class="navbar-end">
@@ -35,7 +34,7 @@
         <div class="column is-full-mobile is-full-tablet is-two-thirds-desktop is-three-quarters-widescreen">
           <div class="box">
               <div class="content">
-                <router-view :key="$route.fullPath" />
+                <router-view />
               </div>
           </div>
         </div>
@@ -57,8 +56,12 @@
         logoImg: logoImg,
         topMenuItems: [
           {
+            label: 'Users',
+            path: 'admin/users',
+          },
+          {
             label: 'Periods',
-            path: 'periods',
+            path: 'admin/periods',
           },
         ],
         apiUrl: import.meta.env.VITE_API_URL,

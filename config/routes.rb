@@ -19,7 +19,6 @@ Rails.application.routes.draw do
 
   resources :users do
     collection do
-      get :view_other_timesheets
       get :current_user
       post :sudo
       post :delete
@@ -31,8 +30,11 @@ Rails.application.routes.draw do
     member do
       get :credits
       get :stats
-      patch :set_credits
-      patch :set_credits_multi
+      post :set_credits
+    end
+    collection do
+      post :upsert
+      post :delete
     end
   end
 

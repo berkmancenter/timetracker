@@ -9,7 +9,7 @@
         <a class="button is-info" @click="sudo()">View other users timesheets</a>
       </div>
 
-      <table class="table table-hovered admin-users-table" ref="usersTable">
+      <admin-table :tableClasses="['admin-users-table']">
         <thead>
           <tr class="no-select">
             <th data-sort-method="none" class="no-sort">
@@ -41,7 +41,7 @@
             </td>
           </tr>
         </tbody>
-      </table>
+      </admin-table>
     </form>
   </div>
 </template>
@@ -52,26 +52,25 @@
   import yesIcon from '@/images/yes.svg'
   import noIcon from '@/images/no.svg'
   import Swal from 'sweetalert2'
-  import 'tablesort/tablesort.css'
-  import Tablesort from 'tablesort'
+  import cleanUsername from '@/lib/clean-username'
+  import AdminTable from '@/components/Admin/AdminTable.vue'
 
   export default {
     name: 'AdminUsers',
     components: {
       Icon,
+      AdminTable,
     },
     data() {
       return {
         minusIcon,
         yesIcon,
         noIcon,
-      };
+        cleanUsername,
+      }
     },
     created() {
       this.initialDataLoad()
-    },
-    mounted() {
-      this.initTableSorting()
     },
     methods: {
       initialDataLoad() {
@@ -82,11 +81,6 @@
 
         this.$store.dispatch('admin/setUsers', users)
       },
-      initTableSorting() {
-        new Tablesort(this.$refs.usersTable, {
-          descending: true,
-        })
-      },
       iconBool(isAdmin) {
         if (isAdmin) {
           return this.yesIcon
@@ -94,15 +88,12 @@
           return this.noIcon
         }
       },
-      cleanUsername(username) {
-        return username.replace(/\.law\.harvard\.edu|\.harvard\.edu/g, '')
-      },
       deleteUser(user) {
         const that = this
 
         Swal.fire({
-          title: 'Removing User',
-          text: `Are you sure want to remove ${user.email}?`,
+          title: 'Removing user',
+          text: `Are you sure to remove ${user.email}?`,
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: this.colors.main,
@@ -132,8 +123,8 @@
         }
 
         Swal.fire({
-          title: 'Removing Users',
-          text: `Are you sure want to remove selected users?`,
+          title: 'Removing users',
+          text: `Are you sure to remove selected users?`,
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: this.colors.main,
@@ -206,30 +197,4 @@
   }
 </script>
 
-<style lang="scss">
-  .admin-users {
-    table.table {
-      td {
-        word-break: break-word;
-        vertical-align: middle;
-      }
-
-      input[type=checkbox] {
-        transform: scale(2);
-        cursor: pointer;
-      }
-
-      &.table-hovered {
-        tbody {
-          tr:hover {
-            background-color: #e4e4e4;
-
-            td {
-              background-color: #e4e4e4;
-            }
-          }
-        }
-      }
-    }
-  }
-</style>
+<style lang="scss"></style>

@@ -1,0 +1,23 @@
+table.table {
+  td {
+    word-break: break-word;
+    vertical-align: middle;
+  }
+
+  input[type=checkbox] {
+    transform: scale(2);
+    cursor: pointer;
+  }
+
+  &.table-hovered {
+    tbody {
+      tr:hover {
+        background-color: #e4e4e4;
+
+        td {
+          background-color: #e4e4e4;
+        }
+      }
+    }
+  }
+}

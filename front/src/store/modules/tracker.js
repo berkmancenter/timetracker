@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import router from '@/router/index'
-import fetchIt from '@/lib/fetch_it'
+import fetchIt from '@/lib/fetch-it'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
