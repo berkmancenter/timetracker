@@ -80,15 +80,6 @@ class TimeEntriesController < ApplicationController
     render json: TimeEntry.entry_list_by_month(get_active_users)
   end
 
-  def entry_form
-    begin
-      @time_entry = TimeEntry.find(params[:id])
-      render 'shared/_teedit', layout: ((request.xhr?) ? false : true)
-    rescue Exception => exc
-      render status: 500, text: "We can't edit that entry because: #{exc.message}" and return
-    end
-  end
-
   def auto_complete
     if params[:field].nil? || params[:term].nil? || !['category', 'project'].include?(params[:field])
       head 500 and return

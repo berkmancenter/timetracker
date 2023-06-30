@@ -1,19 +1,28 @@
 <template>
   <div class="tracker-daily-totals">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-header">Daily Totals</h5>
-    <table class="table">
-      <tbody>
-        <template v-for="(item, index) in $store.state.tracker.dailyTotals" :key="index">
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Daily Totals</h5>
+
+    <div class="switmenu-section-content">
+      <table class="table">
+        <thead>
           <tr>
-            <td>{{ item.entry_date }}</td>
-            <td>{{ item.total_hours }}</td>
+            <th>Day</th>
+            <th>Hours</th>
           </tr>
-          <tr v-if="$store.state.shared.user.sudoMode">
-            <td colspan="2">{{ item.username }}</td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <template v-for="(item, index) in $store.state.tracker.dailyTotals" :key="index">
+            <tr>
+              <td>{{ item.entry_date }}</td>
+              <td>{{ item.total_hours }}</td>
+            </tr>
+            <tr v-if="$store.state.shared.user.sudoMode">
+              <td colspan="2">{{ item.username }}</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 

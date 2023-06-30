@@ -24,32 +24,50 @@ const router = createRouter({
         },
         {
           path: 'admin/users',
-          component: () => import('@/components/Admin/Users/Index.vue'),
+          components: {
+            default: () => import('@/components/Admin/Users/Index.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
           name: 'users.index',
         },
         {
           path: 'admin/periods',
-          component: () => import('@/components/Admin/Periods/Index.vue'),
+          components: {
+            default: () => import('@/components/Admin/Periods/Index.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
           name: 'periods.index',
         },
         {
           path: 'admin/periods/new',
-          component: () => import('@/components/Admin/Periods/Form.vue'),
+          components: {
+            default: () => import('@/components/Admin/Periods/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
           name: 'periods.new',
         },
         {
           path: 'admin/periods/:id/edit',
-          component: () => import('@/components/Admin/Periods/Form.vue'),
+          components: {
+            default: () => import('@/components/Admin/Periods/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
           name: 'periods.edit',
         },
         {
           path: 'admin/periods/:id/stats',
-          component: () => import('@/components/Admin/Periods/Stats.vue'),
+          components: {
+            default: () => import('@/components/Admin/Periods/Stats.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
           name: 'periods.stats',
         },
         {
           path: 'admin/periods/:id/credits',
-          component: () => import('@/components/Admin/Periods/Credits.vue'),
+          components: {
+            default: () => import('@/components/Admin/Periods/Credits.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
           name: 'periods.credits',
         },
       ],

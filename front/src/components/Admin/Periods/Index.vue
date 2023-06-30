@@ -22,14 +22,14 @@
             <td>{{ period.from }}</td>
             <td>{{ period.to }}</td>
             <td>
+              <router-link :to="`/admin/periods/${period.id}/edit`">
+                <Icon :src="editIcon" />
+              </router-link>
               <a title="Delete this period" @click.prevent="deletePeriod(period)">
                 <Icon :src="minusIcon" />
               </a>
               <router-link :to="`/admin/periods/${period.id}/credits`">
                 <Icon :src="creditsIcon" />
-              </router-link>
-              <router-link :to="`/admin/periods/${period.id}/edit`">
-                <Icon :src="editIcon" />
               </router-link>
               <router-link :to="`/admin/periods/${period.id}/stats`">
                 <Icon :src="statsIcon" />

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tracker-popular">
     <h3 class="has-text-weight-bold">{{ title }}</h3>
 
     <ul class="tracker-popular-items" v-if="items.length > 0">
@@ -42,24 +42,29 @@
   };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
+  .tracker-popular {
+    background-color: #ffffff;
+    padding: 0 0.25rem;
+
     li {
-    word-break: break-word;
-    padding: 0.2rem 0.3rem;
-    margin: 0.4rem;
-    border: 0.1rem solid black;
-    border-radius: 0.2rem;
-    cursor: pointer;
+      word-break: break-word;
+      padding: 0.2rem 0.3rem;
+      margin: 0.4rem;
+      border: 0.1rem solid black;
+      border-radius: 0.2rem;
+      cursor: pointer;
 
-    &:hover {
-      background-color: var(--greyish-color);
+      &:hover {
+        background-color: var(--greyish-color);
+      }
     }
-  }
 
-  ul {
-    overflow: auto;
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
+    ul {
+      overflow: auto;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 </style>

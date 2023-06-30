@@ -165,15 +165,6 @@ const actions = {
         context.dispatch('setSelectedMonth', 'all')
       }
 
-      router.push(
-        {
-          name: 'tracker.index',
-          params: {
-            month: context.state.selectedMonth
-          }
-        }
-      )
-
       context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
     }
   },
