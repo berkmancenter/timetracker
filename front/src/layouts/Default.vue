@@ -161,6 +161,7 @@
     z-index: 1;
     padding: 0;
     padding-top: 4.5rem;
+    padding-bottom: 1rem;
     border-right: 2px solid #F5F5F6;
     background-color: var(--super-light-color);
 

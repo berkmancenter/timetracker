@@ -78,6 +78,8 @@
   .switmenu-menu {
     position: fixed;
     padding: 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
     height: 100%;
     width: 25%;
     top: 0;
