@@ -93,4 +93,12 @@ class TimeEntriesController < ApplicationController
   def current_month
     @current_month ||= (params[:month].blank?) ? "#{Time.now.to_date.year}-#{Time.now.strftime("%m")}" : params[:month]
   end
+
+  def get_active_users
+    unless session["#{@session_user.id}_active_users"].blank?
+      session["#{@session_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
+    else
+      [@session_user]
+    end
+  end
 end

@@ -46,7 +46,21 @@ class UsersController < ApplicationController
       username: helpers.clean_username(@session_user.username),
       user_id: @session_user.id,
       is_admin: @session_user.superadmin,
-      active_users: get_active_users_usernames
+      sudo_users: get_sudo_users_usernames
     }, status: :ok
+  end
+
+  private
+
+  def get_sudo_users
+    unless session["#{@session_user.id}_active_users"].blank?
+      session["#{@session_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
+    else
+      []
+    end
+  end
+
+  def get_sudo_users_usernames
+    get_sudo_users.map { |u| User.where(id: u).first&.username }.compact
   end
 end

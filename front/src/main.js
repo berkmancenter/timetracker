@@ -9,7 +9,7 @@ import datepicker from './plugins/datepicker'
 import floating from './plugins/floating-vue'
 
 import { createApp } from 'vue'
-import router from './router/index'
+import { router } from './router/index'
 import store from './store/index'
 import App from './App.vue'
 

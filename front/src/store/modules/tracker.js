@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import router from '@/router/index'
+import { router } from '@/router/index'
 import fetchIt from '@/lib/fetch-it'
 
 const apiUrl = import.meta.env.VITE_API_URL
@@ -155,7 +155,6 @@ const actions = {
     context.commit('setMonths', months)
 
     const currentMonthParam = router.currentRoute._value.params?.month
-
     if ((currentMonthParam && months.includes(currentMonthParam)) || currentMonthParam === 'all') {
       context.dispatch('setSelectedMonth', currentMonthParam)
     } else {

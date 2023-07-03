@@ -6,7 +6,7 @@ const apiUrl = import.meta.env.VITE_API_URL
 const state = {
   user: {
     username: '',
-    active_users: [],
+    sudo_users: [],
     sudoMode: false,
     sideMenuStatus: false,
   },
@@ -33,7 +33,7 @@ const actions = {
   },
   setUser(context, user) {
     context.commit('setUser', user)
-    context.commit('setSudoMode', user.active_users.length > 1)
+    context.commit('setSudoMode', user.sudo_users.length > 0)
   },
   setSideMenuStatus(context, status) {
     context.commit('setSideMenuStatus', status)

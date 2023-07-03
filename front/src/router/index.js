@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { globals } from '@/main.js'
 
 const basePath = import.meta.env.VITE_BASE_PATH
 
@@ -75,4 +76,15 @@ const router = createRouter({
   ]
 })
 
-export default router
+const redirectToSelectedMonth = function(store) {
+  router.push(
+    {
+      name: 'tracker.index',
+      params: {
+        month: store.state.tracker.selectedMonth,
+      },
+    },
+  )
+}
+
+export { router, redirectToSelectedMonth }

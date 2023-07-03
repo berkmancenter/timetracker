@@ -2,7 +2,7 @@
   <div>
     <h4 class="is-size-4 mt-2">Existing entries</h4>
 
-    <article v-if="$store.state.shared.user.active_users.length > 1" class="message is-warning">
+    <article v-if="$store.state.shared.user.sudoMode" class="message is-warning">
       <div class="message-body">
         <div><strong>You are viewing the timesheets of</strong></div>
         {{ activeUsersString }}
@@ -45,7 +45,7 @@
                 <td class="category">{{ entry.category }}</td>
                 <td class="project">{{ entry.project }}</td>
                 <td class="decimal_time">{{ entry.decimal_time }}</td>
-                <td class="username" v-if="$store.state.shared.user.sudoMode">{{ entry.username }}</td>
+                <td class="username" v-if="$store.state.shared.user.sudoMode">{{ cleanUsername(entry.username) }}</td>
               </tr>
 
               <tr v-if="entry.description">
@@ -70,6 +70,8 @@
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
+  import cleanUsername from '@/lib/clean-username'
+  import { redirectToSelectedMonth } from '@/router/index'
 
   export default {
     name: 'Entries',
@@ -81,6 +83,8 @@
         minusIcon,
         cloneIcon,
         editIcon,
+        cleanUsername,
+        redirectToSelectedMonth,
       }
     },
     computed: {
@@ -108,7 +112,7 @@
         return entriesByDate
       },
       activeUsersString() {
-        return this.$store.state.shared.user.active_users.join(', ')
+        return this.$store.state.shared.user.sudo_users.join(', ')
       }
     },
     methods: {
@@ -154,10 +158,17 @@
         const response = await this.$store.dispatch('admin/unSudo')
 
         if (response.ok) {
+          const months = await this.$store.dispatch('tracker/fetchMonths')
+
+          this.$store.dispatch('tracker/setMonths', months)
+          this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'entries'])
+
           const user = await this.$store.dispatch('shared/fetchUser')
-          await this.$store.dispatch('tracker/reloadViewData')
 
           this.$store.dispatch('shared/setUser', user)
+
+          this.redirectToSelectedMonth(this.$store)
+
           this.awn.success('Showing only your timesheets.')
         } else {
           this.awn.warning('Something went wrong, try again.')

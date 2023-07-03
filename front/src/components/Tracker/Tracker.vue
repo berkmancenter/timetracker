@@ -8,6 +8,7 @@
 <script>
   import EntryForm from './EntryForm.vue'
   import Entries from './Entries.vue'
+  import { redirectToSelectedMonth } from '@/router/index'
 
   export default {
     name: 'TrackerLayout',
@@ -16,13 +17,15 @@
       Entries,
     },
     data() {
-      return {}
+      return {
+        redirectToSelectedMonth,
+      }
     },
     created() {
       this.initialDataLoad()
     },
     updated() {
-      this.redirectToSelectedMonth()
+      this.redirectToSelectedMonth(this.$store)
     },
     methods: {
       async initialDataLoad() {
@@ -30,17 +33,7 @@
 
         this.$store.dispatch('tracker/setMonths', months)
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals'])
-        this.redirectToSelectedMonth()
-      },
-      redirectToSelectedMonth() {
-        this.$router.push(
-          {
-            name: 'tracker.index',
-            params: {
-              month: this.$store.state.tracker.selectedMonth,
-            },
-          },
-        )
+        this.redirectToSelectedMonth(this.$store)
       },
     },
   }
