@@ -12,11 +12,11 @@ class Period < ActiveRecord::Base
     current_passed = 1 if current_passed > 1
 
     User
-      .select('users.username, users.email, COALESCE(SUM(time_entries.decimal_time), 0) AS total_hours, credits.amount AS credits')
+      .select('users.username, users.email, users.superadmin, COALESCE(SUM(time_entries.decimal_time), 0) AS total_hours, credits.amount AS credits')
       .joins("LEFT JOIN time_entries ON time_entries.user_id = users.id AND (time_entries.created_at >= '#{self.from.to_time}' AND time_entries.created_at <= '#{self.to.to_time.end_of_day}')")
       .joins(:credits)
       .where('credits.period_id = ?', self.id)
-      .group('users.username, users.email, credits.amount')
+      .group('users.username, users.email, users.superadmin, credits.amount')
       .order('users.username')
       .map do |record|
         record = record.attributes

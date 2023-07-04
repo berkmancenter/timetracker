@@ -45,8 +45,11 @@ class PeriodsController < ApplicationController
     users = User.order(:username)
     credits = users.map do |user|
       {
-        user: user,
-        amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
+        user_id: user.id,
+        username: user.username,
+        superadmin: user.superadmin,
+        email: user.email,
+        credit_amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
       }
     end
 
@@ -65,9 +68,9 @@ class PeriodsController < ApplicationController
     new_credits_values = {}
 
     params[:credits].each do |credit_data|
-      next if !credit_data['amount'].present? || credit_data['amount'].to_d == 0.0.to_d
+      next if !credit_data['credit_amount'].present? || credit_data['credit_amount'].to_d == 0.0.to_d
 
-      new_credits_values[credit_data['user']['id'].to_i] = credit_data['amount']
+      new_credits_values[credit_data['user_id'].to_i] = credit_data['credit_amount']
     end
 
     new_credits = []

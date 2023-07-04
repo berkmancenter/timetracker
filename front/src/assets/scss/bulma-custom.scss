@@ -1,9 +1,17 @@
-
-
 .button.is-success {
   background-color: var(--success-color);
 
   &:hover {
     background-color: var(--success-color);
+  }
+}
+
+.tabs.is-toggle li.is-active a {
+  background-color: var(--bulma-link);
+}
+
+.tabs {
+  ul {
+    margin: 0;
   }
 }

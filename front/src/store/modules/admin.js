@@ -12,8 +12,12 @@ const state = {
   users: [],
   periods: [],
   period: JSON.parse(JSON.stringify(defaultPeriod)),
-  periodStats: {},
-  periodCredits: {},
+  periodStats: {
+    stats: [],
+  },
+  periodCredits: {
+    credits: [],
+  },
 }
 
 const mutations = {

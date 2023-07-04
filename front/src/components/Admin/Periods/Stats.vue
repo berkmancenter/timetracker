@@ -11,6 +11,8 @@
       <span class="tag is-black is-large">{{ $store.state.admin.periodStats?.period?.to }}</span>
     </h3>
 
+    <super-admin-filter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
+
     <admin-table :tableClasses="['admin-periods-stats-table']">
       <thead>
         <tr class="no-select">
@@ -24,7 +26,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="periodStat in $store.state.admin.periodStats?.stats">
+        <tr v-for="periodStat in filteredItems">
           <td>{{ cleanUsername(periodStat.username) }}</td>
           <td>{{ periodStat.email }}</td>
           <td>{{ periodStat.credits }}</td>
@@ -33,7 +35,7 @@
           <td class="admin-periods-stats-period-balance" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance.toFixed(2) }}</td>
           <td>{{ periodStat.balance_percent.toFixed(2) }}</td>
         </tr>
-        <tr v-if="$store.state.admin.periodStats?.stats?.length === 0">
+        <tr v-if="filteredItems.length === 0">
           <td colspan="7">No records found.</td>
         </tr>
       </tbody>
@@ -44,15 +46,18 @@
 <script>
   import cleanUsername from '@/lib/clean-username'
   import AdminTable from '@/components/Admin/AdminTable.vue'
+  import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
 
   export default {
     name: 'AdminPeriodsStats',
     components: {
       AdminTable,
+      SuperAdminFilter,
     },
     data() {
       return {
         cleanUsername: cleanUsername,
+        filteredItems: [],
       }
     },
     created() {
@@ -66,6 +71,9 @@
         const periodStats = await this.$store.dispatch('admin/fetchPeriodStats', this.$route.params.id)
 
         this.$store.dispatch('admin/setPeriodStats', periodStats)
+      },
+      superAdminFilterChanged(users) {
+        this.filteredItems = users
       },
     },
   }

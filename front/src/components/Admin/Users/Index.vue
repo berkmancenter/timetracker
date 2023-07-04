@@ -9,6 +9,8 @@
         <a class="button is-info" @click="sudo()">View other users timesheets</a>
       </div>
 
+      <super-admin-filter :users="$store.state.admin.users" @change="superAdminFilterChanged" />
+
       <admin-table :tableClasses="['admin-users-table']">
         <thead>
           <tr class="no-select">
@@ -23,7 +25,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in $store.state.admin.users" :key="user.id">
+          <tr v-for="user in filteredItems" :key="user.id">
             <td>
               <input type="checkbox" v-model="user.selected">
             </td>
@@ -54,12 +56,14 @@
   import Swal from 'sweetalert2'
   import cleanUsername from '@/lib/clean-username'
   import AdminTable from '@/components/Admin/AdminTable.vue'
+  import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
 
   export default {
     name: 'AdminUsers',
     components: {
       Icon,
       AdminTable,
+      SuperAdminFilter,
     },
     data() {
       return {
@@ -67,6 +71,7 @@
         yesIcon,
         noIcon,
         cleanUsername,
+        filteredItems: [],
       }
     },
     created() {
@@ -112,7 +117,7 @@
       },
       deleteUsers() {
         const that = this
-        const usersIds = this.$store.state.admin.users
+        const usersIds = this.filteredItems
               .filter(user => user.selected)
               .map(user => user.id)
 
@@ -142,7 +147,7 @@
         })
       },
       async toggleAdminUsers() {
-        const usersIds = this.$store.state.admin.users
+        const usersIds = this.filteredItems
               .filter(user => user.selected)
               .map(user => user.id)
 
@@ -162,7 +167,7 @@
         }
       },
       async sudo() {
-        const usersIds = this.$store.state.admin.users
+        const usersIds = this.filteredItems
               .filter(user => user.selected)
               .map(user => user.id)
 
@@ -192,6 +197,9 @@
 
             return user
           })
+      },
+      superAdminFilterChanged(users) {
+        this.filteredItems = users
       },
     },
   }

@@ -13,8 +13,10 @@
 
     <div class="mb-4">
       <a class="button is-info mr-2" @click="saveCreditsSelected()">Set credits selected</a>
-      <a class="button is-info" @click="saveCreditsAll()">Save all</a>
+      <a class="button is-info" @click="saveCreditsAll()">Save all visible</a>
     </div>
+
+    <super-admin-filter :users="$store.state.admin.periodCredits?.credits" @change="superAdminFilterChanged" />
 
     <admin-table :tableClasses="['admin-periods-credits-table']">
       <thead>
@@ -28,17 +30,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="periodCredit in $store.state.admin.periodCredits?.credits">
+        <tr v-for="periodCredit in filteredItems">
           <td>
             <input type="checkbox" v-model="periodCredit.selected">
           </td>
-          <td>{{ cleanUsername(periodCredit.user.username) }}</td>
-          <td>{{ periodCredit.user.email }}</td>
+          <td>{{ cleanUsername(periodCredit.username) }}</td>
+          <td>{{ periodCredit.email }}</td>
           <td>
-            <input class="input" type="number" v-model="periodCredit.amount">
+            <input class="input" type="number" v-model="periodCredit.credit_amount">
           </td>
         </tr>
-        <tr v-if="$store.state.admin.periodCredits?.credits?.length === 0">
+        <tr v-if="filteredItems.length === 0">
           <td colspan="7">No records found.</td>
         </tr>
       </tbody>
@@ -57,15 +59,18 @@
   import cleanUsername from '@/lib/clean-username'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import Swal from 'sweetalert2'
+  import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
 
   export default {
     name: 'AdminPeriodsCredits',
     components: {
       AdminTable,
+      SuperAdminFilter,
     },
     data() {
       return {
         cleanUsername: cleanUsername,
+        filteredItems: [],
       }
     },
     created() {
@@ -93,7 +98,7 @@
       async saveCreditsAll() {
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
           id: this.$store.state.admin.periodCredits.period.id,
-          credits: this.$store.state.admin.periodCredits.credits,
+          credits: this.filteredItems,
         })
 
         if (response?.ok) {
@@ -105,8 +110,7 @@
       async saveCreditsSelected() {
         const that = this
         const inputSelector = '.swal2-html-container .periods-credits-selected-set-input'
-        const selected = this.$store.state.admin.periodCredits.credits
-          .filter(credit => credit.selected)
+        const selected = this.filteredItems.filter(credit => credit.selected)
 
         if (selected.length === 0) {
           this.awn.warning('No records selected.')
@@ -140,6 +144,9 @@
               }
           }
         })
+      },
+      superAdminFilterChanged(users) {
+        this.filteredItems = users
       },
     },
   }
