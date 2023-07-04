@@ -41,9 +41,9 @@
       <div class="container is-fluid mt-4">
         <router-view />
       </div>
-    </div>
 
-    <footer id="footer">© 2013 - {{ new Date().getFullYear() }} Timetracker</footer>
+      <footer id="footer">© 2013 - {{ new Date().getFullYear() }} Timetracker</footer>
+    </div>
   </div>
 </template>
 
