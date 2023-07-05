@@ -14,7 +14,7 @@
           <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs></defs><title/><g data-name="70-Menu" id="_70-Menu"><rect class="cls-1" height="6" width="6" x="1" y="1"/><rect class="cls-1" height="6" width="6" x="25" y="1"/><rect class="cls-1" height="6" width="6" x="13" y="1"/><rect class="cls-1" height="6" width="6" x="1" y="13"/><rect class="cls-1" height="6" width="6" x="1" y="25"/><rect class="cls-1" height="6" width="6" x="25" y="25"/><rect class="cls-1" height="6" width="6" x="25" y="13"/><rect class="cls-1" height="6" width="6" x="13" y="13"/><rect class="cls-1" height="6" width="6" x="13" y="25"/></g></svg>
         </a>
 
-        <router-link :to="'/'" class="top-nav-name-link">
+        <router-link :to="'/'" class="top-nav-name-link ml-4">
           <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACK</h3>
         </router-link>
       </div>
@@ -113,7 +113,6 @@
           text-overflow: ellipsis;
           display: flex;
           align-items: center;
-          margin-left: 1rem;
 
           img {
             width: 2rem;

@@ -120,11 +120,12 @@ const actions = {
   },
   async deleteEntry(context, entry) {
     const response = await fetchIt(`${apiUrl}/time_entries/${entry.id}/delete`)
-    const data = response.json()
 
-    context.commit('deleteEntry', entry)
+    if (response.ok) {
+      context.commit('deleteEntry', entry)
+    }
 
-    return data
+    return response
   },
   addEntry(context, entry) {
     const month = router.currentRoute._value.params?.month

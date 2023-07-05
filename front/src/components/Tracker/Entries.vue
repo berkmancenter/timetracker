@@ -146,11 +146,18 @@
           confirmButtonColor: this.colors.main,
         }).then(async (result) => {
           if (result.isConfirmed) {
-            await this.$store.dispatch('tracker/deleteEntry', entry)
-            const months = await this.$store.dispatch('tracker/fetchMonths')
+            const response = await this.$store.dispatch('tracker/deleteEntry', entry)
 
-            this.$store.dispatch('tracker/setMonths', months)
-            this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
+            if (response.ok) {
+              const months = await this.$store.dispatch('tracker/fetchMonths')
+
+              this.$store.dispatch('tracker/setMonths', months)
+              this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
+
+              this.redirectToSelectedMonth(this.$store)
+            } else {
+              this.awn.warning('Something went wrong, try again.')
+            }
           }
         })
       },
