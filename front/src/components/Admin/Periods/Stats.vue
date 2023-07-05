@@ -11,6 +11,10 @@
       <span class="tag is-black is-large">{{ $store.state.admin.periodStats?.period?.to }}</span>
     </h3>
 
+    <div class="mb-4">
+      <a class="button is-info" @click="getCsv()">Download CSV</a>
+    </div>
+
     <super-admin-filter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
 
     <admin-table :tableClasses="['admin-periods-stats-table']">
@@ -31,9 +35,9 @@
           <td>{{ periodStat.email }}</td>
           <td>{{ periodStat.credits }}</td>
           <td>{{ periodStat.total_hours }}</td>
-          <td>{{ periodStat.should_hours.toFixed(2) }}</td>
-          <td class="admin-periods-stats-period-balance" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance.toFixed(2) }}</td>
-          <td>{{ periodStat.balance_percent.toFixed(2) }}</td>
+          <td>{{ periodStat.should_hours }}</td>
+          <td class="admin-periods-stats-period-balance" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance }}</td>
+          <td>{{ periodStat.balance_percent }}</td>
         </tr>
         <tr v-if="filteredItems.length === 0">
           <td colspan="7">No records found.</td>
@@ -58,6 +62,7 @@
       return {
         cleanUsername: cleanUsername,
         filteredItems: [],
+        apiUrl: import.meta.env.VITE_API_URL,
       }
     },
     created() {
@@ -74,6 +79,14 @@
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users
+      },
+      getCsv() {
+        console.log(this.filteredItems)
+        const usersIds = this.filteredItems
+          .map(user => user.user_id)
+          .join(',')
+
+        window.location.href = `${this.apiUrl}/periods/${this.$route.params.id}/stats?csv=true&user_ids=${usersIds}`
       },
     },
   }

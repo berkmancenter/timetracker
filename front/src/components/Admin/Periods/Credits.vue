@@ -13,7 +13,7 @@
 
     <div class="mb-4">
       <a class="button is-info mr-2" @click="saveCreditsSelected()">Set credits selected</a>
-      <a class="button is-info" @click="saveCreditsAll()">Save all visible</a>
+      <a class="button is-info mr-2" @click="saveCreditsAll()">Save all visible</a>
     </div>
 
     <super-admin-filter :users="$store.state.admin.periodCredits?.credits" @change="superAdminFilterChanged" />

@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     member do
       get :credits
       get :stats
+      post :stats
       post :set_credits
     end
     collection do

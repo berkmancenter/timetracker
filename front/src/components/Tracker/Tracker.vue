@@ -25,7 +25,6 @@
       this.initialDataLoad()
     },
     updated() {
-      console.log(11)
       this.redirectToSelectedMonth(this.$store)
     },
     methods: {

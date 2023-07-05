@@ -10,15 +10,12 @@ class ApplicationController < ActionController::Base
 
   def render_csv(param)
     param[:filebase] = param[:filebase].blank? ? param[:model].to_s.tableize : param[:filebase]
-
-    if param[:columns].blank?
-      param[:columns] = param[:model].columns.collect{ |c| c.name }
-    end
+    param[:columns] = param[:model].columns.collect(&:name) if param[:columns].blank?
 
     csv_string = CSV.generate do |csv|
       csv << param[:columns]
       param[:objects].each do |record|
-        line = param[:columns].collect{|col| record[col].to_s.chomp}
+        line = param[:columns].collect { |col| record[col].to_s.chomp }
         csv << line
       end
     end

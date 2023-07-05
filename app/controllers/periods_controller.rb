@@ -110,7 +110,10 @@ class PeriodsController < ApplicationController
   end
 
   def stats
-    stats = @period.get_stats
+    user_ids = params[:user_ids] ? params[:user_ids].split(',') : []
+    stats = @period.get_stats(user_ids)
+
+    render_stats_csv(stats) and return if params[:csv]
 
     render json: {
       period: @period,
@@ -126,5 +129,23 @@ class PeriodsController < ApplicationController
 
   def period_params
     params.require(:period).permit(:id, :name, :from, :to)
+  end
+
+  def render_stats_csv(stats)
+    columns = ['username', 'email', 'credits', 'total_hours', 'should_hours', 'balance', 'balance_percent']
+
+    csv_string = CSV.generate do |csv|
+      csv << columns
+      stats.each do |record|
+        line = columns.collect { |col| record[col].to_s.chomp }
+        csv << line
+      end
+    end
+
+    send_data(
+      csv_string,
+      type: 'application/octet-stream',
+      filename: "#{@period.name.parameterize}-statistics-#{Time.now.to_s(:number)}.csv"
+    )
   end
 end

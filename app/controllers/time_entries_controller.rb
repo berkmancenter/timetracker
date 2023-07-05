@@ -3,22 +3,7 @@ class TimeEntriesController < ApplicationController
 
   def entries
     if params[:csv]
-      columns = ['username', 'category', 'project', 'entry_date', 'decimal_time', 'description']
-      objects = []
-      @entries = []
-
-      if current_month == 'all'
-        @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true)
-      else
-        @entries = TimeEntry.my_entries_by_month(get_active_users, current_month)
-      end
-
-      @entries.each do |te|
-        te.username = te.user.username
-        objects << te
-      end
-
-      render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
+      render_entries_csv and return
     else
       month = params[:month]
       render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all'), status: :ok
@@ -100,5 +85,24 @@ class TimeEntriesController < ApplicationController
     else
       [@session_user]
     end
+  end
+
+  def render_entries_csv
+    columns = ['username', 'category', 'project', 'entry_date', 'decimal_time', 'description']
+    objects = []
+    @entries = []
+
+    if current_month == 'all'
+      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true)
+    else
+      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month)
+    end
+
+    @entries.each do |te|
+      te.username = te.user.username
+      objects << te
+    end
+
+    render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
   end
 end
