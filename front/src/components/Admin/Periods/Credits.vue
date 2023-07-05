@@ -81,9 +81,13 @@
         this.loadCredits()
       },
       async loadCredits() {
+        this.mitt.emit('spinnerStart')
+
         const periodCredits = await this.$store.dispatch('admin/fetchPeriodCredits', this.$route.params.id)
 
         this.$store.dispatch('admin/setPeriodCredits', periodCredits)
+
+        this.mitt.emit('spinnerStop')
       },
       toggleAll() {
         const newStatus = this.$refs.toggleAllCheckbox.checked
@@ -96,6 +100,8 @@
           })
       },
       async saveCreditsAll() {
+        this.mitt.emit('spinnerStart')
+
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
           id: this.$store.state.admin.periodCredits.period.id,
           credits: this.filteredItems,
@@ -106,9 +112,10 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+
+        this.mitt.emit('spinnerStop')
       },
       async saveCreditsSelected() {
-        const that = this
         const inputSelector = '.swal2-html-container .periods-credits-selected-set-input'
         const selected = this.filteredItems.filter(credit => credit.selected)
 
@@ -127,21 +134,25 @@
           didOpen: () => document.querySelector(inputSelector).focus(),
         }).then(async (result) => {
           if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
             const newCreditValue = document.querySelector(inputSelector).value
 
             selected
               .map(credit => credit.amount = newCreditValue)
 
-              const response = await this.$store.dispatch('admin/savePeriodCredits', {
-                id: this.$store.state.admin.periodCredits.period.id,
-                credits: selected,
-              })
+            const response = await this.$store.dispatch('admin/savePeriodCredits', {
+              id: this.$store.state.admin.periodCredits.period.id,
+              credits: selected,
+            })
 
-              if (response?.ok) {
-                this.awn.success('Credits have been saved.')
-              } else {
-                this.awn.warning('Something went wrong, try again.')
-              }
+            if (response?.ok) {
+              this.awn.success('Credits have been saved.')
+            } else {
+              this.awn.warning('Something went wrong, try again.')
+            }
+
+            this.mitt.emit('spinnerStop')
           }
         })
       },

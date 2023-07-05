@@ -81,9 +81,13 @@
         this.loadPeriods()
       },
       async loadPeriods() {
+        this.mitt.emit('spinnerStart')
+
         const periods = await this.$store.dispatch('admin/fetchPeriods')
 
         this.$store.dispatch('admin/setPeriods', periods)
+
+        this.mitt.emit('spinnerStop')
       },
       deletePeriod(period) {
         const that = this
@@ -96,6 +100,8 @@
           confirmButtonColor: this.colors.main,
         }).then(async (result) => {
           if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
             const response = await this.$store.dispatch('admin/deletePeriods', [period.id])
 
             if (response.ok) {
@@ -104,10 +110,14 @@
             } else {
               this.awn.warning('Something went wrong, try again.')
             }
+
+            this.mitt.emit('spinnerStop')
           }
         })
       },
       async clonePeriod(period) {
+        this.mitt.emit('spinnerStart')
+
         const response = await this.$store.dispatch('admin/clonePeriod', period.id)
 
         if (response.ok) {
@@ -116,6 +126,8 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+
+        this.mitt.emit('spinnerStop')
       },
     },
   }

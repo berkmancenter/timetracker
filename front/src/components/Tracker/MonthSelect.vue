@@ -33,7 +33,9 @@
       }
     },
     methods: {
-      changeMonth() {
+      async changeMonth() {
+        this.mitt.emit('spinnerStart')
+
         this.$router.push(
           {
             name: 'tracker.index',
@@ -43,7 +45,9 @@
           }
         )
 
-        this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals'])
+
+        this.mitt.emit('spinnerStop')
       },
       getCsv() {
         window.location.href = `${this.apiUrl}/time_entries/entries?csv=true&month=${this.$store.state.tracker.selectedMonth}`

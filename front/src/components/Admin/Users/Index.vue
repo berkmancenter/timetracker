@@ -82,9 +82,13 @@
         this.loadUsers()
       },
       async loadUsers() {
+        this.mitt.emit('spinnerStart')
+
         const users = await this.$store.dispatch('admin/fetchUsers')
 
         this.$store.dispatch('admin/setUsers', users)
+
+        this.mitt.emit('spinnerStop')
       },
       iconBool(isAdmin) {
         if (isAdmin) {
@@ -104,6 +108,8 @@
           confirmButtonColor: this.colors.main,
         }).then(async (result) => {
           if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
             const response = await this.$store.dispatch('admin/deleteUsers', [user.id])
 
             if (response.ok) {
@@ -112,6 +118,8 @@
             } else {
               this.awn.warning('Something went wrong, try again.')
             }
+
+            this.mitt.emit('spinnerStop')
           }
         })
       },
@@ -135,6 +143,8 @@
           confirmButtonColor: this.colors.main,
         }).then(async (result) => {
           if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
             const response = await this.$store.dispatch('admin/deleteUsers', usersIds)
 
             if (response.ok) {
@@ -143,6 +153,8 @@
             } else {
               this.awn.warning('Something went wrong, try again.')
             }
+
+            this.mitt.emit('spinnerStop')
           }
         })
       },
@@ -157,6 +169,8 @@
           return
         }
 
+        this.mitt.emit('spinnerStart')
+
         const response = await this.$store.dispatch('admin/toggleAdminUsers', usersIds)
 
         if (response.ok) {
@@ -165,6 +179,8 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+
+        this.mitt.emit('spinnerStop')
       },
       async sudo() {
         const usersIds = this.filteredItems
@@ -177,6 +193,8 @@
           return
         }
 
+        this.mitt.emit('spinnerStart')
+
         const response = await this.$store.dispatch('admin/sudo', usersIds)
 
         if (response.ok) {
@@ -187,6 +205,8 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+
+        this.mitt.emit('spinnerStop')
       },
       toggleAll() {
         const newStatus = this.$refs.toggleAllCheckbox.checked

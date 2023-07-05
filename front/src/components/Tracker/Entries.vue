@@ -146,6 +146,8 @@
           confirmButtonColor: this.colors.main,
         }).then(async (result) => {
           if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
             const response = await this.$store.dispatch('tracker/deleteEntry', entry)
 
             if (response.ok) {
@@ -158,10 +160,14 @@
             } else {
               this.awn.warning('Something went wrong, try again.')
             }
+
+            this.mitt.emit('spinnerStop')
           }
         })
       },
       async unSudo() {
+        this.mitt.emit('spinnerStart')
+
         const response = await this.$store.dispatch('admin/unSudo')
 
         if (response.ok) {
@@ -180,6 +186,8 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+
+        this.mitt.emit('spinnerStop')
       },
     }
   }

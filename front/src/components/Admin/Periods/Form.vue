@@ -63,6 +63,8 @@
       },
       async loadPeriod() {
         if (this.$route.params.id) {
+          this.mitt.emit('spinnerStart')
+
           const response = await this.$store.dispatch('admin/fetchPeriod', this.$route.params.id)
 
           response.from = new Date(response.from).toLocaleDateString('en-US', {
@@ -78,9 +80,13 @@
           })
 
           this.$store.dispatch('admin/setPeriod', response)
+
+          this.mitt.emit('spinnerStop')
         }
       },
       async save() {
+        this.mitt.emit('spinnerStart')
+
         const response = await this.$store.dispatch('admin/savePeriod', this.$store.state.admin.period)
 
         if (response?.ok) {
@@ -91,6 +97,8 @@
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
+
+        this.mitt.emit('spinnerStop')
       },
     },
   }

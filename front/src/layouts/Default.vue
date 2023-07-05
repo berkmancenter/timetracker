@@ -20,6 +20,8 @@
       </div>
 
       <div class="top-nav-end">
+        <spinner />
+
         <div class="top-nav-user-menu">
           <VDropdown>
             <div class="top-nav-user-menu-toggler no-select">
@@ -50,11 +52,13 @@
 <script>
   import logoImg from '@/images/time.svg'
   import SwitMenu from '@/components/Shared/SwitMenu.vue'
+  import Spinner from '@/components/Shared/Spinner.vue'
 
   export default {
     name: 'DefaultLayout',
     components: {
       SwitMenu,
+      Spinner,
     },
     data() {
       return {

@@ -29,11 +29,15 @@
     },
     methods: {
       async initialDataLoad() {
+        this.mitt.emit('spinnerStart')
+
         const months = await this.$store.dispatch('tracker/fetchMonths')
 
         this.$store.dispatch('tracker/setMonths', months)
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals'])
         this.redirectToSelectedMonth(this.$store)
+
+        this.mitt.emit('spinnerStop')
       },
     },
   }

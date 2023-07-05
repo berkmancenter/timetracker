@@ -73,9 +73,13 @@
         this.loadStats()
       },
       async loadStats() {
+        this.mitt.emit('spinnerStart')
+
         const periodStats = await this.$store.dispatch('admin/fetchPeriodStats', this.$route.params.id)
 
         this.$store.dispatch('admin/setPeriodStats', periodStats)
+
+        this.mitt.emit('spinnerStop')
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users

@@ -69,6 +69,7 @@
     },
     methods: {
       async submitForm(ev) {
+        this.mitt.emit('spinnerStart')
         this.working = true
 
         const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
@@ -86,6 +87,7 @@
 
         this.$store.dispatch('tracker/clearEntryForm')
         this.working = false
+        this.mitt.emit('spinnerStop')
       },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {
