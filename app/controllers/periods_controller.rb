@@ -23,7 +23,7 @@ class PeriodsController < ApplicationController
     end
 
     if period.save
-      render json: { entry: period }, status: :ok
+      render json: { period: period }, status: :ok
     else
       render json: { message: period.errors.full_messages.join(', ') }, status: :bad_request
     end
@@ -119,6 +119,20 @@ class PeriodsController < ApplicationController
       period: @period,
       stats: stats
     }, status: :ok
+  end
+
+  def clone
+    cloned_period = @period.dup
+    cloned_period.name << ' clone'
+
+    cloned_credits = @period.credits.map(&:dup)
+    cloned_period.credits = cloned_credits
+
+    if cloned_period.save
+      render json: { period: @period }, status: :ok
+    else
+      render json: { message: @period.errors.full_messages.join(', ') }, status: :bad_request
+    end
   end
 
   private

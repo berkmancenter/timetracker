@@ -25,13 +25,16 @@
               <router-link :to="`/admin/periods/${period.id}/edit`">
                 <Icon :src="editIcon" />
               </router-link>
+              <a title="Clone this period" @click.prevent="clonePeriod(period)">
+                <Icon :src="cloneIcon" />
+              </a>
               <a title="Delete this period" @click.prevent="deletePeriod(period)">
                 <Icon :src="minusIcon" />
               </a>
-              <router-link :to="`/admin/periods/${period.id}/credits`">
+              <router-link title="Set period credits" :to="`/admin/periods/${period.id}/credits`">
                 <Icon :src="creditsIcon" />
               </router-link>
-              <router-link :to="`/admin/periods/${period.id}/stats`">
+              <router-link title="Period statistics" :to="`/admin/periods/${period.id}/stats`">
                 <Icon :src="statsIcon" />
               </router-link>
             </td>
@@ -51,6 +54,7 @@
   import statsIcon from '@/images/stats.svg'
   import creditsIcon from '@/images/credits.svg'
   import editIcon from '@/images/edit.svg'
+  import cloneIcon from '@/images/clone.svg'
   import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
 
@@ -66,6 +70,7 @@
         statsIcon,
         creditsIcon,
         editIcon,
+        cloneIcon,
       }
     },
     created() {
@@ -101,6 +106,16 @@
             }
           }
         })
+      },
+      async clonePeriod(period) {
+        const response = await this.$store.dispatch('admin/clonePeriod', period.id)
+
+        if (response.ok) {
+          this.awn.success(`Period "${period.name}" has been cloned.`)
+          this.loadPeriods()
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
       },
     },
   }

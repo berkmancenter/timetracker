@@ -185,6 +185,17 @@ const actions = {
 
     return response
   },
+  async clonePeriod(context, periodId) {
+    const response = await fetchIt(`${apiUrl}/periods/${periodId}/clone`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+
+    return response
+  },
 }
 
 const getters = {}

@@ -32,6 +32,7 @@ Rails.application.routes.draw do
       get :stats
       post :stats
       post :set_credits
+      post :clone
     end
     collection do
       post :upsert
