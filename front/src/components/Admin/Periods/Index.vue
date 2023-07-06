@@ -31,8 +31,8 @@
               <a title="Delete this period" @click.prevent="deletePeriod(period)">
                 <Icon :src="minusIcon" />
               </a>
-              <router-link title="Set period credits" :to="`/admin/periods/${period.id}/credits`">
-                <Icon :src="creditsIcon" />
+              <router-link title="Set period hours" :to="`/admin/periods/${period.id}/credits`">
+                <Icon :src="hoursIcon" />
               </router-link>
               <router-link title="Period statistics" :to="`/admin/periods/${period.id}/stats`">
                 <Icon :src="statsIcon" />
@@ -52,7 +52,7 @@
   import Icon from '@/components/Shared/Icon.vue'
   import minusIcon from '@/images/minus.svg'
   import statsIcon from '@/images/stats.svg'
-  import creditsIcon from '@/images/credits.svg'
+  import hoursIcon from '@/images/hours.svg'
   import editIcon from '@/images/edit.svg'
   import cloneIcon from '@/images/clone.svg'
   import Swal from 'sweetalert2'
@@ -68,7 +68,7 @@
       return {
         minusIcon,
         statsIcon,
-        creditsIcon,
+        hoursIcon,
         editIcon,
         cloneIcon,
       }

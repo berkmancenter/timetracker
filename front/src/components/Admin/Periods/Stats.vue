@@ -22,7 +22,7 @@
         <tr class="no-select">
           <th>Username</th>
           <th>Email</th>
-          <th>Credits</th>
+          <th>Hours</th>
           <th>Total hours</th>
           <th>Should have now</th>
           <th>Balance</th>
@@ -85,7 +85,6 @@
         this.filteredItems = users
       },
       getCsv() {
-        console.log(this.filteredItems)
         const usersIds = this.filteredItems
           .map(user => user.user_id)
           .join(',')

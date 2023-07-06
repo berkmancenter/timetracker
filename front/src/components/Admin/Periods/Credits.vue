@@ -1,6 +1,6 @@
 <template>
   <div class="content admin-periods-credits">
-    <h1 class="is-size-1">Credits</h1>
+    <h1 class="is-size-1">Hours</h1>
 
     <h3 class="is-size-4">
       for
@@ -12,7 +12,7 @@
     </h3>
 
     <div class="mb-4">
-      <a class="button is-info mr-2" @click="saveCreditsSelected()">Set credits selected</a>
+      <a class="button is-info mr-2" @click="saveCreditsSelected()">Set hours selected</a>
       <a class="button is-info mr-2" @click="saveCreditsAll()">Save all visible</a>
     </div>
 
@@ -26,7 +26,7 @@
           </th>
           <th>Username</th>
           <th>Email</th>
-          <th data-sort-method="none" class="no-sort">Credits</th>
+          <th data-sort-method="none" class="no-sort">Hours</th>
         </tr>
       </thead>
       <tbody>
@@ -48,7 +48,7 @@
 
     <div ref="periodCreditsSelectedSetTemplate" class="is-hidden">
       <div class="content">
-        <p>Input how many credits you want to set to selected users.</p>
+        <p>Input how many hours you want to set to selected users.</p>
         <input type="number" step="1" class="input periods-credits-selected-set-input" value="0.0">
       </div>
     </div>
@@ -108,7 +108,7 @@
         })
 
         if (response?.ok) {
-          this.awn.success('Credits have been saved.')
+          this.awn.success('Hours have been saved.')
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
@@ -147,7 +147,7 @@
             })
 
             if (response?.ok) {
-              this.awn.success('Credits have been saved.')
+              this.awn.success('Hours have been saved.')
             } else {
               this.awn.warning('Something went wrong, try again.')
             }
