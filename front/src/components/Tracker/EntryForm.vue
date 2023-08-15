@@ -131,7 +131,7 @@
         this.mitt.on('popularSelected', () => that.focusOnForm())
       },
       focusOnForm() {
-        this.$refs.entryForm.scrollIntoView({behavior: 'smooth'})
+        window.scrollTo(0, 0)
       },
     },
   }
