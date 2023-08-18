@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   root to: 'front#index'
 
+  get :ping, to: 'application#ping'
+
   resources :time_entries do
     collection do
       get :entries

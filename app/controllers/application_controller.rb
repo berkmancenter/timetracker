@@ -6,6 +6,10 @@ class ApplicationController < ActionController::Base
 
   layout 'regular'
 
+  def ping
+    render plain: 'pong'
+  end
+
   protected
 
   def render_csv(param)
