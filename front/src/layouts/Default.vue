@@ -150,10 +150,6 @@
     }
   }
 
-  .timetracker-content {
-    margin-top: 6rem;
-  }
-
   .side-menu-toggler {
     padding: .5rem;
     height: 3rem;
@@ -161,13 +157,6 @@
   }
 
   .switmenu-menu {
-    z-index: 1;
-    padding: 0;
-    padding-top: 4.5rem;
-    padding-bottom: 1rem;
-    border-right: 2px solid #F5F5F6;
-    background-color: var(--super-light-color);
-
     ul {
       a {
         display: flex;

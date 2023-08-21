@@ -75,6 +75,10 @@
 </script>
 
 <style lang="scss">
+  html {
+    background-color: var(--super-light-color);
+  }
+
   .switmenu-menu {
     position: fixed;
     padding: 1rem;
@@ -82,11 +86,15 @@
     overflow-x: hidden;
     height: 100%;
     width: 25%;
-    top: 0;
+    top: 5rem;
     left: 0;
-    z-index: 7777;
+    z-index: 1;
     display: none;
     background-color: #ffffff;
+    padding: 0;
+    padding-bottom: 1rem;
+    border-right: 2px solid #F5F5F6;
+    background-color: var(--super-light-color);
 
     @media all and (max-width: 1600px) {
       width: 30%;
@@ -113,18 +121,18 @@
     overflow: hidden;
 
     .switmenu-content {
-      margin-left: 25%;
+      margin-left: calc(25% + 1rem);
 
       @media all and (max-width: 1600px) {
-        margin-left: 30%;
+        margin-left: calc(30% + 1rem);
       }
 
       @media all and (max-width: 1300px) {
-        margin-left: 35%;
+        margin-left: calc(35% + 1rem);
       }
 
       @media all and (max-width: 900px) {
-        margin-left: 40%;
+        margin-left: calc(40% + 1rem);
       }
 
       @media all and (max-width: 700px) {
@@ -134,10 +142,11 @@
 
     .switmenu-section-header {
       margin-bottom: 0.5rem;
-      border-bottom: 0.2rem solid var(--main-color);
       padding: 0.25rem 1rem;
       background-color: #ffffff;
-      box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+      border-radius: 0 0.8rem 0.8rem 0;
+      box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+      user-select: none;
     }
 
     .switmenu-section-content {
@@ -146,6 +155,23 @@
       table {
         width: 100%;
       }
+    }
+  }
+
+  .switmenu-content {
+    background-color: #ffffff;
+    margin-top: 5.5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border-radius: 1rem;
+    padding-top: 0.5rem;
+    box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+
+    @media all and (max-width: 700px) {
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+      margin-top: 4rem;
     }
   }
 </style>
