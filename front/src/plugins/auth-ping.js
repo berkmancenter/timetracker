@@ -8,7 +8,7 @@ const ping = () => {
   xhr.open('GET', `${apiUrl}/ping`, true)
 
   xhr.onreadystatechange = function() {
-    if (xhr.status === 0) {
+    if (xhr.status === 0 && window.navigator.onLine) {
       window.location.reload()
     }
   }
