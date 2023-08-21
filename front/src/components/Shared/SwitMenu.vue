@@ -81,7 +81,6 @@
 
   .switmenu-menu {
     position: fixed;
-    padding: 1rem;
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
@@ -91,8 +90,8 @@
     z-index: 1;
     display: none;
     background-color: #ffffff;
-    padding: 0;
-    padding-bottom: 1rem;
+    padding-bottom: 6rem;
+    padding-right: 0.5rem;
     border-right: 2px solid #F5F5F6;
     background-color: var(--super-light-color);
 
