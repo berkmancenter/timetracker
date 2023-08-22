@@ -33,7 +33,7 @@
 
       this.button = document.querySelector(this.buttonSelector)
       this.content = document.querySelector(this.contentSelector)
-      this.body = document.querySelector('body')
+      this.html = document.querySelector('html')
 
       this.toggleBodyClass()
 
@@ -65,9 +65,9 @@
       },
       toggleBodyClass() {
         if (this.$store.state.shared.sideMenuStatus) {
-          this.body.classList.add('switmenu-body-open')
+          this.html.classList.add('switmenu-html-open')
         } else {
-          this.body.classList.remove('switmenu-body-open')
+          this.html.classList.remove('switmenu-html-open')
         }
       },
     },
@@ -85,11 +85,12 @@
     overflow-x: hidden;
     height: 100%;
     width: 25%;
-    top: 5rem;
+    top: 3.5rem;
     left: 0;
     z-index: 1;
     display: none;
     background-color: #ffffff;
+    padding-top: 1.5rem;
     padding-bottom: 6rem;
     padding-right: 0.5rem;
     border-right: 2px solid #F5F5F6;
@@ -116,8 +117,10 @@
     }
   }
 
-  .switmenu-body-open {
-    overflow: hidden;
+  .switmenu-html-open {
+    @media all and (max-width: 700px) {
+      overflow: hidden;
+    }
 
     .switmenu-content {
       margin-left: calc(25% + 1rem);
@@ -132,10 +135,6 @@
 
       @media all and (max-width: 900px) {
         margin-left: calc(40% + 1rem);
-      }
-
-      @media all and (max-width: 700px) {
-        margin-left: 100%;
       }
     }
 
