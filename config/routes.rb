@@ -42,5 +42,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :workspaces do
+    collection do
+      post :upsert
+      post :delete
+    end
+  end
+
   match '*unmatched', to: 'front#index', via: %i[get]
 end

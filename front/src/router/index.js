@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { globals } from '@/main.js'
 
 const basePath = import.meta.env.VITE_BASE_PATH
 
@@ -70,6 +69,30 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'periods.credits',
+        },
+        {
+          path: 'admin/workspaces',
+          components: {
+            default: () => import('@/components/Admin/Workspaces/Index.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'workspaces.index',
+        },
+        {
+          path: 'admin/workspaces/new',
+          components: {
+            default: () => import('@/components/Admin/Workspaces/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'workspaces.new',
+        },
+        {
+          path: 'admin/workspaces/:id/edit',
+          components: {
+            default: () => import('@/components/Admin/Workspaces/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'workspaces.edit',
         },
       ],
     }

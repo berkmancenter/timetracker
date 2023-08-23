@@ -23,6 +23,10 @@
             name: 'tracker.index',
           },
           {
+            label: 'Workspaces',
+            name: 'workspaces.index',
+          },
+          {
             label: 'Users',
             name: 'users.index',
           },

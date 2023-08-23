@@ -8,10 +8,16 @@ const defaultPeriod = {
   to: '',
 }
 
+const defaultWorkspace = {
+  name: '',
+}
+
 const state = {
   users: [],
   periods: [],
+  workspaces: [],
   period: JSON.parse(JSON.stringify(defaultPeriod)),
+  workspace: JSON.parse(JSON.stringify(defaultWorkspace)),
   periodStats: {
     stats: [],
   },
@@ -29,6 +35,12 @@ const mutations = {
   },
   setPeriod(state, period) {
     state.period = period
+  },
+  setWorkspaces(state, workspaces) {
+    state.workspaces = workspaces
+  },
+  setWorkspace(state, workspace) {
+    state.workspace = workspace
   },
   setPeriodStats(state, periodStats) {
     state.periodStats = periodStats
@@ -51,6 +63,24 @@ const actions = {
 
     return data
   },
+  async fetchPeriod(context, id) {
+    const response = await fetchIt(`${apiUrl}/periods/${id}`)
+    const data = await response.json()
+
+    return data
+  },
+  async fetchWorkspaces(context) {
+    const response = await fetchIt(`${apiUrl}/workspaces`)
+    const data = await response.json()
+
+    return data
+  },
+  async fetchWorkspace(context, id) {
+    const response = await fetchIt(`${apiUrl}/workspaces/${id}`)
+    const data = await response.json()
+
+    return data
+  },
   async fetchPeriodStats(context, id) {
     const response = await fetchIt(`${apiUrl}/periods/${id}/stats`)
     const data = await response.json()
@@ -59,12 +89,6 @@ const actions = {
   },
   async fetchPeriodCredits(context, id) {
     const response = await fetchIt(`${apiUrl}/periods/${id}/credits`)
-    const data = await response.json()
-
-    return data
-  },
-  async fetchPeriod(context, id) {
-    const response = await fetchIt(`${apiUrl}/periods/${id}`)
     const data = await response.json()
 
     return data
@@ -115,6 +139,15 @@ const actions = {
   setPeriod(context, period) {
     context.commit('setPeriod', period)
   },
+  setWorkspace(context, workspace) {
+    context.commit('setWorkspace', workspace)
+  },
+  setWorkspaces(context, workspaces) {
+    context.commit('setWorkspaces', workspaces)
+  },
+  clearWorkspace(context) {
+    context.commit('setWorkspace', JSON.parse(JSON.stringify(defaultWorkspace)))
+  },
   async sudo(context, users) {
     const response = await fetchIt(`${apiUrl}/users/sudo`, {
       method: 'POST',
@@ -152,6 +185,34 @@ const actions = {
       },
       body: JSON.stringify({
         period: period,
+      }),
+    })
+
+    return response
+  },
+  async deleteWorkspaces(context, workspaces) {
+    const response = await fetchIt(`${apiUrl}/workspaces/delete`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        workspaces: workspaces,
+      }),
+    })
+
+    return response
+  },
+  async saveWorkspace(context, workspace) {
+    const response = await fetchIt(`${apiUrl}/workspaces/upsert`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        workspace: workspace,
       }),
     })
 

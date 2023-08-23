@@ -1,5 +1,5 @@
 class PeriodsController < ApplicationController
-  before_action :set_period, except: [:index, :upsert, :delete]
+  before_action :set_period, except: %i[index upsert delete]
   before_action :is_admin
 
   layout 'admin'

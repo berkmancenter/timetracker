@@ -63,16 +63,6 @@
     data() {
       return {
         logoImg: logoImg,
-        topMenuItems: [
-          {
-            label: 'Users',
-            path: 'admin/users',
-          },
-          {
-            label: 'Periods',
-            path: 'admin/periods',
-          },
-        ],
         apiUrl: import.meta.env.VITE_API_URL,
       }
     },
