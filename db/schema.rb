@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_23_121354) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_24_105316) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -41,9 +41,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_23_121354) do
     t.date "entry_date", null: false
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
+    t.bigint "workspace_id", null: false
     t.index ["category"], name: "index_time_entries_on_category"
     t.index ["entry_date"], name: "index_time_entries_on_entry_date"
     t.index ["project"], name: "index_time_entries_on_project"
+    t.index ["workspace_id"], name: "index_time_entries_on_workspace_id"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
@@ -63,4 +65,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_23_121354) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "time_entries", "workspaces"
 end
