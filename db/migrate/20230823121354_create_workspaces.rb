@@ -3,6 +3,7 @@ class CreateWorkspaces < ActiveRecord::Migration[7.0]
     create_table :workspaces do |t|
       t.string :name
       t.string :public_code
+      t.string :uuid
 
       t.timestamps
     end

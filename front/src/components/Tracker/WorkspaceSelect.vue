@@ -5,8 +5,8 @@
     <div class="switmenu-section-content">
       <div class="select">
         <select v-model="$store.state.tracker.selectedWorkspace">
-          <option v-for="workspace in $store.state.tracker.workspaces" :key="workspace" :value="workspace">
-            {{ workspace }}
+          <option v-for="workspace in $store.state.tracker.workspaces" :key="workspace.id" :value="workspace">
+            {{ workspace.name }}
           </option>
         </select>
       </div>
@@ -41,7 +41,7 @@
           }
         )
 
-        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals', 'months'])
 
         this.mitt.emit('spinnerStop')
       },

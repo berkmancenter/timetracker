@@ -102,4 +102,8 @@ class ApplicationController < ActionController::Base
 
     @session_user = fake_user
   end
+
+  def generic_bad_request_response
+    render json: { message: 'Something went wrong.' }, status: :bad_request
+  end
 end

@@ -1,5 +1,5 @@
 <template>
-  <div class="tracker-months">
+  <div class="tracker-months" v-if="$store.state.tracker.months.length > 0">
     <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Month</h5>
 
     <div class="switmenu-section-content">

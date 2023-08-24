@@ -71,6 +71,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
   create_table "workspaces", force: :cascade do |t|
     t.string "name"
     t.string "public_code"
+    t.string "uuid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

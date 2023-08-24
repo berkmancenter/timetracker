@@ -15,7 +15,7 @@ const router = createRouter({
           name: 'app.index',
         },
         {
-          path: ':month?',
+          path: ':workspace?/:month?',
           components: {
             default: () => import('@/components/Tracker/Tracker.vue'),
             Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
@@ -104,6 +104,7 @@ const redirectToSelectedMonth = function(store) {
     {
       name: 'tracker.index',
       params: {
+        workspace: store.state.tracker.selectedWorkspace.uuid,
         month: store.state.tracker.selectedMonth,
       },
     },

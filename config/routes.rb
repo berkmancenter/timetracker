@@ -10,7 +10,6 @@ Rails.application.routes.draw do
       get :days
       get :months
       get :auto_complete
-      get :choose_user
       post :edit
       patch :edit
     end

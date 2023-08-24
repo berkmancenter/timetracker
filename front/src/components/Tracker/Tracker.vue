@@ -31,9 +31,12 @@
       async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
-        const months = await this.$store.dispatch('tracker/fetchMonths')
+        const workspaces = await this.$store.dispatch('tracker/fetchWorkspaces')
+        this.$store.dispatch('tracker/setWorkspaces', workspaces)
 
+        const months = await this.$store.dispatch('tracker/fetchMonths')
         this.$store.dispatch('tracker/setMonths', months)
+
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals'])
         this.redirectToSelectedMonth(this.$store)
 

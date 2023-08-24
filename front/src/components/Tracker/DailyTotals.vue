@@ -1,5 +1,5 @@
 <template>
-  <div class="tracker-daily-totals">
+  <div class="tracker-daily-totals" v-if="$store.state.tracker.dailyTotals.length > 0">
     <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Daily Totals</h5>
 
     <div class="switmenu-section-content">

@@ -5,7 +5,8 @@ class WorkspacesController < ApplicationController
   layout 'admin'
 
   def index
-    workspaces = Workspace.all
+    workspaces = Workspace.user_workspaces(@session_user)
+    workspaces = workspaces.select(:uuid, :name) unless @session_user.superadmin
 
     render json: workspaces, status: :ok
   end

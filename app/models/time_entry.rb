@@ -5,6 +5,7 @@ class TimeEntry < ActiveRecord::Base
   attribute :username
 
   validates :user, :entry_date, presence: true
+  validates :workspace, presence: true
 
   def self.my_popular_categories(user)
     self.get_popular('category', user)
@@ -14,7 +15,7 @@ class TimeEntry < ActiveRecord::Base
     self.get_popular('project', user)
   end
 
-  def self.my_entries_by_month(users, month = Time.now.year.to_s + '-' + Time.now.month.to_s, alltime = false)
+  def self.my_entries_by_month(users, month = Time.now.year.to_s + '-' + Time.now.month.to_s, alltime = false, workspace)
     user_ids = users.map(&:id)
     month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
 
@@ -22,6 +23,7 @@ class TimeEntry < ActiveRecord::Base
               .select('time_entries.*, users.username, users.id AS user_id')
               .joins(:user)
               .where(users: { id: user_ids })
+              .where(workspace: workspace)
               .order(entry_date: :desc, id: :desc)
 
     if alltime
@@ -32,7 +34,7 @@ class TimeEntry < ActiveRecord::Base
     end
   end
 
-  def self.total_hours_by_month_day(users, month)
+  def self.total_hours_by_month_day(users, month, workspace)
     return [] if month.nil?
 
     user_ids = users.map(&:id)
@@ -41,15 +43,17 @@ class TimeEntry < ActiveRecord::Base
       .joins(:user)
       .where("#{year_month_entry_sql} = ?", month)
       .where(user_id: user_ids)
+      .where(workspace: workspace)
       .group(:username, :entry_date)
       .order(entry_date: :desc)
   end
 
-  def self.entry_list_by_month(users)
+  def self.entry_list_by_month(users, workspace)
     user_ids = users.map(&:id)
     TimeEntry
       .select(year_month_entry_sql_as)
       .where(user_id: user_ids)
+      .where(workspace: workspace)
       .group('year_month_entry')
       .order('year_month_entry desc')
       .map(&:year_month_entry)
