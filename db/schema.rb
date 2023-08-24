@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_24_105316) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -58,6 +58,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_105316) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "users_workspaces", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "workspace_id"
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_users_workspaces_on_user_id"
+    t.index ["workspace_id"], name: "index_users_workspaces_on_workspace_id"
+  end
+
   create_table "workspaces", force: :cascade do |t|
     t.string "name"
     t.string "public_code"
@@ -66,4 +76,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_105316) do
   end
 
   add_foreign_key "time_entries", "workspaces"
+  add_foreign_key "users_workspaces", "users"
+  add_foreign_key "users_workspaces", "workspaces"
 end

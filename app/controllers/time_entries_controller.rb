@@ -2,11 +2,10 @@ class TimeEntriesController < ApplicationController
   before_action :is_admin, only: [:sudo, :unsudo, :choose_user, :clear_user, :view_other_timesheets]
 
   def entries
-    if params[:csv]
-      render_entries_csv and return
-    else
-      month = params[:month]
-      render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all'), status: :ok
+    render_entries_csv and return if params[:csv]
+
+    month = params[:month]
+    render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all'), status: :ok
     end
   end
 

@@ -1,23 +1,19 @@
 <template>
-  <div class="tracker-months">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Month</h5>
+  <div class="tracker-workspaces">
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Workspace</h5>
 
     <div class="switmenu-section-content">
       <div class="select">
-        <select v-model="$store.state.tracker.selectedMonth">
-          <option value="all">All</option>
-          <option v-for="month in $store.state.tracker.months" :key="month" :value="month">
-            {{ month }}
+        <select v-model="$store.state.tracker.selectedWorkspace">
+          <option v-for="workspace in $store.state.tracker.workspaces" :key="workspace" :value="workspace">
+            {{ workspace }}
           </option>
         </select>
       </div>
 
       <div class="columns">
         <div class="column">
-          <button class="button mt-2" @click="changeMonth">Change</button>
-        </div>
-        <div class="column">
-          <button class="button mt-2" @click="getCsv">CSV</button>
+          <button class="button mt-2" @click="changeWorkspace">Change</button>
         </div>
       </div>
     </div>
@@ -26,21 +22,21 @@
 
 <script>
   export default {
-    name: 'MonthSelect',
+    name: 'WorkspaceSelect',
     data() {
       return {
         apiUrl: import.meta.env.VITE_API_URL,
       }
     },
     methods: {
-      async changeMonth() {
+      async changeWorkspace() {
         this.mitt.emit('spinnerStart')
 
         this.$router.push(
           {
             name: 'tracker.index',
             params: {
-              month: this.$store.state.tracker.selectedMonth
+              workspace: this.$store.state.tracker.selectedWorkspace
             }
           }
         )
@@ -48,9 +44,6 @@
         await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals'])
 
         this.mitt.emit('spinnerStop')
-      },
-      getCsv() {
-        window.location.href = `${this.apiUrl}/time_entries/entries?csv=true&month=${this.$store.state.tracker.selectedMonth}`
       },
     },
   };
