@@ -9,6 +9,8 @@ class TimesheetsController < ApplicationController
   end
 
   def show
+    generic_unauthorized_response and return unless @timesheet.is_admin?(@session_user)
+
     render json: @timesheet, status: :ok
   end
 
@@ -16,6 +18,9 @@ class TimesheetsController < ApplicationController
     new_record = nil
     if timesheet_params[:id]
       timesheet = Timesheet.find(timesheet_params['id'])
+
+      generic_unauthorized_response and return unless timesheet.is_admin?(@session_user)
+
       timesheet.assign_attributes(timesheet_params)
     else
       new_record = true
@@ -32,6 +37,10 @@ class TimesheetsController < ApplicationController
 
   def delete
     timesheets_ids = params[:timesheets]
+
+    Timesheet.where(id: timesheets_ids).tap do |t|
+      generic_unauthorized_response and return unless t.is_admin?(@session_user)
+    end
 
     if timesheets_ids&.any?
       Timesheet.where(id: timesheets_ids).destroy_all

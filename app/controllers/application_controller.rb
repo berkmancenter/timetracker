@@ -104,10 +104,10 @@ class ApplicationController < ActionController::Base
   end
 
   def generic_bad_request_response
-    render json: { message: 'Something went wrong.' }, status: :bad_request
+    render json: { message: 'Bad request' }, status: :bad_request
   end
 
   def generic_unauthorized_response
-    render json: { message: 'Something went wrong.' }, status: :unauthorized
+    render json: { message: 'Unauthorized' }, status: :unauthorized
   end
 end

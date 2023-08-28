@@ -22,16 +22,16 @@ class Timesheet < ActiveRecord::Base
   end
 
   def is_user?(user)
+    return true if user.superadmin
+
     UsersTimesheet.where(
       timesheet: self,
       user: user,
-      role: 'user'
+      role: ['user', 'admin']
     ).any?
   end
 
   def self.user_timesheets(user)
-    return Timesheet.all if user.superadmin
-
     user.timesheets
   end
 

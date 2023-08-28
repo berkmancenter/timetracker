@@ -3,6 +3,7 @@ class TimeEntriesController < ApplicationController
 
   def entries
     generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return if unless @timesheet.is_user?(@session_user)
     render_entries_csv and return if params[:csv]
 
     month = params[:month]
@@ -14,7 +15,7 @@ class TimeEntriesController < ApplicationController
     time_entry = TimeEntry.find_by_id(params[:time_entry][:id]) || TimeEntry.new(entry_date: Time.now, decimal_time: 0)
 
     generic_bad_request_response and return unless request.post? || request.patch?
-    generic_bad_request_response and return if time_entry.id && time_entry.user != @session_user
+    generic_unauthorized_response and return if time_entry.id && time_entry.user != @session_user
     generic_bad_request_response and return if @timesheet.nil?
 
     time_entry.attributes = time_entry_params
@@ -31,20 +32,13 @@ class TimeEntriesController < ApplicationController
   end
 
   def delete
-    begin
-      te = TimeEntry.find(params[:id])
+    te = TimeEntry.find(params[:id])
 
-      if te.user != @session_user
-        render json: { message: 'Unauthorized' }, status: :unauthorized
-        return
-      end
+    generic_unauthorized_response and return if te.user != @session_user
 
-      te.destroy
+    te.destroy
 
-      render json: { message: 'ok' }, status: :ok
-    rescue Exception => exc
-      generic_bad_request_response
-    end
+    render json: { message: 'ok' }, status: :ok
   end
 
   def popular
@@ -56,12 +50,14 @@ class TimeEntriesController < ApplicationController
 
   def days
     generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return if unless @timesheet.is_user?(@session_user)
 
     render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet), status: :ok
   end
 
   def months
     generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return if unless @timesheet.is_user?(@session_user)
 
     render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
   end
