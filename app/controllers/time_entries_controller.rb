@@ -3,7 +3,7 @@ class TimeEntriesController < ApplicationController
 
   def entries
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return if unless @timesheet.is_user?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_user?(@session_user)
     render_entries_csv and return if params[:csv]
 
     month = params[:month]
@@ -50,14 +50,14 @@ class TimeEntriesController < ApplicationController
 
   def days
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return if unless @timesheet.is_user?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_user?(@session_user)
 
     render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet), status: :ok
   end
 
   def months
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return if unless @timesheet.is_user?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_user?(@session_user)
 
     render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
   end
