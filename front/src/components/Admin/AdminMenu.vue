@@ -23,8 +23,8 @@
             name: 'tracker.index',
           },
           {
-            label: 'Workspaces',
-            name: 'workspaces.index',
+            label: 'Timesheets',
+            name: 'timesheets.index',
           },
           {
             label: 'Users',

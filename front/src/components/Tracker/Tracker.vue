@@ -24,15 +24,12 @@
     created() {
       this.initialDataLoad()
     },
-    updated() {
-      this.redirectToSelectedMonth(this.$store)
-    },
     methods: {
       async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
-        const workspaces = await this.$store.dispatch('tracker/fetchWorkspaces')
-        this.$store.dispatch('tracker/setWorkspaces', workspaces)
+        const timesheets = await this.$store.dispatch('tracker/fetchTimesheets')
+        this.$store.dispatch('tracker/setTimesheets', timesheets)
 
         const months = await this.$store.dispatch('tracker/fetchMonths')
         this.$store.dispatch('tracker/setMonths', months)

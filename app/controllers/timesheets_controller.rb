@@ -1,0 +1,54 @@
+class TimesheetsController < ApplicationController
+  before_action :set_timesheet, except: %i[index upsert delete]
+  before_action :is_admin
+
+  layout 'admin'
+
+  def index
+    timesheets = Timesheet.user_timesheets(@session_user)
+    timesheets = timesheets.select(:uuid, :name) unless @session_user.superadmin
+
+    render json: timesheets, status: :ok
+  end
+
+  def show
+    render json: @timesheet, status: :ok
+  end
+
+  def upsert
+    if timesheet_params[:id]
+      timesheet = Timesheet.find(timesheet_params['id'])
+      timesheet.assign_attributes(timesheet_params)
+    else
+      timesheet = Timesheet.new(timesheet_params)
+    end
+
+    if timesheet.save
+      render json: { timesheet: timesheet }, status: :ok
+    else
+      render json: { message: timesheet.errors.full_messages.join(', ') }, status: :bad_request
+    end
+  end
+
+  def delete
+    timesheets_ids = params[:timesheets]
+
+    if timesheets_ids&.any?
+      Timesheet.where(id: timesheets_ids).destroy_all
+
+      render json: { message: 'ok' }, status: :ok
+    else
+      render json: { message: 'No timesheets selected.' }, status: :bad_request
+    end
+  end
+
+  private
+
+  def set_timesheet
+    @timesheet = Timesheet.find(params[:id])
+  end
+
+  def timesheet_params
+    params.require(:timesheet).permit(:id, :name)
+  end
+end

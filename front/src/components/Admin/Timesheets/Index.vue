@@ -1,13 +1,13 @@
 <template>
-  <div class="content admin-workspaces">
-    <h1 class="is-size-1">Workspaces</h1>
+  <div class="content admin-timesheets">
+    <h1 class="is-size-1">Timesheets</h1>
 
     <form class="form">
       <div class="mb-4">
-        <router-link :to="'/admin/workspaces/new'" class="button is-success">Add workspace</router-link>
+        <router-link :to="'/admin/timesheets/new'" class="button is-success">Add timesheet</router-link>
       </div>
 
-      <admin-table :tableClasses="['admin-workspaces-table']">
+      <admin-table :tableClasses="['admin-timesheets-table']">
         <thead>
           <tr class="no-select">
             <th>Name</th>
@@ -15,19 +15,19 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="workspace in $store.state.admin.workspaces" :key="workspace.id">
-            <td>{{ workspace.name }}</td>
+          <tr v-for="timesheet in $store.state.admin.timesheets" :key="timesheet.id">
+            <td>{{ timesheet.name }}</td>
             <td>
-              <router-link :to="`/admin/workspaces/${workspace.id}/edit`">
+              <router-link :to="`/admin/timesheets/${timesheet.id}/edit`">
                 <Icon :src="editIcon" />
               </router-link>
-              <a title="Delete this workspace" @click.prevent="deleteWorkspace(workspace)">
+              <a title="Delete this timesheet" @click.prevent="deleteTimesheet(timesheet)">
                 <Icon :src="minusIcon" />
               </a>
             </td>
           </tr>
-          <tr v-if="$store.state.admin.workspaces.length === 0">
-            <td colspan="7">No workspaces found.</td>
+          <tr v-if="$store.state.admin.timesheets.length === 0">
+            <td colspan="7">No timesheets found.</td>
           </tr>
         </tbody>
       </admin-table>
@@ -46,7 +46,7 @@
   import AdminTable from '@/components/Admin/AdminTable.vue'
 
   export default {
-    name: 'AdminWorkspaces',
+    name: 'AdminTimesheets',
     components: {
       Icon,
       AdminTable,
@@ -65,23 +65,23 @@
     },
     methods: {
       initialDataLoad() {
-        this.loadWorkspaces()
+        this.loadTimesheets()
       },
-      async loadWorkspaces() {
+      async loadTimesheets() {
         this.mitt.emit('spinnerStart')
 
-        const workspaces = await this.$store.dispatch('admin/fetchWorkspaces')
+        const timesheets = await this.$store.dispatch('admin/fetchTimesheets')
 
-        this.$store.dispatch('admin/setWorkspaces', workspaces)
+        this.$store.dispatch('admin/setTimesheets', timesheets)
 
         this.mitt.emit('spinnerStop')
       },
-      deleteWorkspace(workspace) {
+      deleteTimesheet(timesheet) {
         const that = this
 
         Swal.fire({
-          title: 'Removing workspace',
-          text: `Are you sure to remove ${workspace.name}?`,
+          title: 'Removing timesheet',
+          text: `Are you sure to remove ${timesheet.name}?`,
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: this.colors.main,
@@ -89,11 +89,11 @@
           if (result.isConfirmed) {
             this.mitt.emit('spinnerStart')
 
-            const response = await this.$store.dispatch('admin/deleteWorkspaces', [workspace.id])
+            const response = await this.$store.dispatch('admin/deleteTimesheets', [timesheet.id])
 
             if (response.ok) {
-              this.awn.success('Workspace has been removed.')
-              that.loadWorkspaces()
+              this.awn.success('Timesheet has been removed.')
+              that.loadTimesheets()
             } else {
               this.awn.warning('Something went wrong, try again.')
             }
@@ -102,14 +102,14 @@
           }
         })
       },
-      async cloneWorkspace(workspace) {
+      async cloneTimesheet(timesheet) {
         this.mitt.emit('spinnerStart')
 
-        const response = await this.$store.dispatch('admin/cloneWorkspace', workspace.id)
+        const response = await this.$store.dispatch('admin/cloneTimesheet', timesheet.id)
 
         if (response.ok) {
-          this.awn.success(`Workspace "${workspace.name}" has been cloned.`)
-          this.loadWorkspaces()
+          this.awn.success(`Timesheet "${timesheet.name}" has been cloned.`)
+          this.loadTimesheets()
         } else {
           this.awn.warning('Something went wrong, try again.')
         }

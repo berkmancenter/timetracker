@@ -1,19 +1,19 @@
 require 'securerandom'
 
-class Workspace < ActiveRecord::Base
+class Timesheet < ActiveRecord::Base
   has_many :time_entries
-  has_many :users_workspaces
-  has_many :users, through: :users_workspaces
+  has_many :users_timesheets
+  has_many :users, through: :users_timesheets
 
   before_validation :set_uuid
 
   validates :name, presence: true
   validates :uuid, presence: true
 
-  def self.user_workspaces(user)
-    return Workspace.all if user.superadmin
+  def self.user_timesheets(user)
+    return Timesheet.all if user.superadmin
 
-    user.workspaces
+    user.timesheets
   end
 
   private

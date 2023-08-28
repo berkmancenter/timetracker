@@ -14,7 +14,7 @@
           <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs></defs><title/><g data-name="70-Menu" id="_70-Menu"><rect class="cls-1" height="6" width="6" x="1" y="1"/><rect class="cls-1" height="6" width="6" x="25" y="1"/><rect class="cls-1" height="6" width="6" x="13" y="1"/><rect class="cls-1" height="6" width="6" x="1" y="13"/><rect class="cls-1" height="6" width="6" x="1" y="25"/><rect class="cls-1" height="6" width="6" x="25" y="25"/><rect class="cls-1" height="6" width="6" x="25" y="13"/><rect class="cls-1" height="6" width="6" x="13" y="13"/><rect class="cls-1" height="6" width="6" x="13" y="25"/></g></svg>
         </a>
 
-        <router-link :to="'/'" class="top-nav-name-link ml-4">
+        <router-link :to="'/'" @click="reloadPath" class="top-nav-name-link ml-4">
           <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACK</h3>
         </router-link>
       </div>
@@ -53,6 +53,7 @@
   import logoImg from '@/images/time.svg'
   import SwitMenu from '@/components/Shared/SwitMenu.vue'
   import Spinner from '@/components/Shared/Spinner.vue'
+  import { redirectToSelectedMonth } from '@/router/index'
 
   export default {
     name: 'DefaultLayout',
@@ -64,6 +65,7 @@
       return {
         logoImg: logoImg,
         apiUrl: import.meta.env.VITE_API_URL,
+        redirectToSelectedMonth: redirectToSelectedMonth,
       }
     },
     created() {
@@ -74,7 +76,10 @@
         const user = await this.$store.dispatch('shared/fetchUser')
 
         this.$store.dispatch('shared/setUser', user)
-      }
+      },
+      reloadPath() {
+        this.redirectToSelectedMonth(this.$store)
+      },
     },
   }
 </script>

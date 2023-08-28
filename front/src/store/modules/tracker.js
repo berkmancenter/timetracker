@@ -14,11 +14,11 @@ const defaultEntry = {
 }
 
 const state = {
-  workspaces: [],
+  timesheets: [],
   months: [],
   entries: [],
   selectedMonth: 'all',
-  selectedWorkspace: {},
+  selectedTimesheet: {},
   formEntry: JSON.parse(JSON.stringify(defaultEntry)),
   formMode: 'create',
   popular: {
@@ -29,8 +29,8 @@ const state = {
 }
 
 const mutations = {
-  setWorkspaces(state, workspaces) {
-    state.workspaces = workspaces
+  setTimesheets(state, timesheets) {
+    state.timesheets = timesheets
   },
   setMonths(state, months) {
     state.months = months
@@ -77,26 +77,26 @@ const mutations = {
   setSelectedMonth(state, month) {
     state.selectedMonth = month
   },
-  setSelectedWorkspace(state, workspace) {
-    state.selectedWorkspace = workspace
+  setSelectedTimesheet(state, timesheet) {
+    state.selectedTimesheet = timesheet
   },
 }
 
 const actions = {
   async fetchMonths(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/months?workspace_uuid=${context.state.selectedWorkspace.uuid}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/months?timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
     const data = await response.json()
 
     return data
   },
-  async fetchWorkspaces(context) {
-    const response = await fetchIt(`${apiUrl}/workspaces`)
+  async fetchTimesheets(context) {
+    const response = await fetchIt(`${apiUrl}/timesheets`)
     const data = await response.json()
 
     return data
   },
   async fetchEntries(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&workspace_uuid=${context.state.selectedWorkspace.uuid}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
     const data = await response.json()
 
     return data
@@ -108,7 +108,7 @@ const actions = {
     return data
   },
   async fetchDailyTotals(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&workspace_uuid=${context.state.selectedWorkspace.uuid}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
     const data = await response.json()
 
     return data
@@ -128,7 +128,7 @@ const actions = {
       },
       body: JSON.stringify({
         time_entry: context.state.formEntry,
-        workspace_uuid: context.state.selectedWorkspace.uuid,
+        timesheet_uuid: context.state.selectedTimesheet.uuid,
       }),
     })
     const data = response.json()
@@ -185,24 +185,24 @@ const actions = {
       context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
     }
   },
-  setWorkspaces(context, workspaces) {
-    context.commit('setWorkspaces', workspaces)
+  setTimesheets(context, timesheets) {
+    context.commit('setTimesheets', timesheets)
 
-    const currentWorkspaceParam = router.currentRoute._value.params?.workspace
-    const workspaceFromRoute = workspaces.find(workspace => workspace.uuid === currentWorkspaceParam)
-    if (workspaceFromRoute) {
-      context.dispatch('setSelectedWorkspace', workspaceFromRoute)
+    const currentTimesheetParam = router.currentRoute._value.params?.timesheet
+    const timesheetFromRoute = timesheets.find(timesheet => timesheet.uuid === currentTimesheetParam)
+    if (timesheetFromRoute) {
+      context.dispatch('setSelectedTimesheet', timesheetFromRoute)
     } else {
-      if (workspaces.length > 0) {
-        context.dispatch('setSelectedWorkspace', workspaces[0])
+      if (timesheets.length > 0) {
+        context.dispatch('setSelectedTimesheet', timesheets[0])
       }
     }
   },
   setSelectedMonth(context, month) {
     context.commit('setSelectedMonth', month)
   },
-  setSelectedWorkspace(context, workspace) {
-    context.commit('setSelectedWorkspace', workspace)
+  setSelectedTimesheet(context, timesheet) {
+    context.commit('setSelectedTimesheet', timesheet)
   },
   async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''

@@ -15,7 +15,7 @@ const router = createRouter({
           name: 'app.index',
         },
         {
-          path: ':workspace?/:month?',
+          path: ':timesheet?/:month?',
           components: {
             default: () => import('@/components/Tracker/Tracker.vue'),
             Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
@@ -71,28 +71,28 @@ const router = createRouter({
           name: 'periods.credits',
         },
         {
-          path: 'admin/workspaces',
+          path: 'admin/timesheets',
           components: {
-            default: () => import('@/components/Admin/Workspaces/Index.vue'),
+            default: () => import('@/components/Admin/Timesheets/Index.vue'),
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
-          name: 'workspaces.index',
+          name: 'timesheets.index',
         },
         {
-          path: 'admin/workspaces/new',
+          path: 'admin/timesheets/new',
           components: {
-            default: () => import('@/components/Admin/Workspaces/Form.vue'),
+            default: () => import('@/components/Admin/Timesheets/Form.vue'),
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
-          name: 'workspaces.new',
+          name: 'timesheets.new',
         },
         {
-          path: 'admin/workspaces/:id/edit',
+          path: 'admin/timesheets/:id/edit',
           components: {
-            default: () => import('@/components/Admin/Workspaces/Form.vue'),
+            default: () => import('@/components/Admin/Timesheets/Form.vue'),
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
-          name: 'workspaces.edit',
+          name: 'timesheets.edit',
         },
       ],
     }
@@ -104,7 +104,7 @@ const redirectToSelectedMonth = function(store) {
     {
       name: 'tracker.index',
       params: {
-        workspace: store.state.tracker.selectedWorkspace.uuid,
+        timesheet: store.state.tracker.selectedTimesheet.uuid,
         month: store.state.tracker.selectedMonth,
       },
     },

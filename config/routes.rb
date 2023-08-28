@@ -41,7 +41,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :workspaces do
+  resources :timesheets do
     collection do
       post :upsert
       post :delete

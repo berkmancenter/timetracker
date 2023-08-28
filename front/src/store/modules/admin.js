@@ -8,16 +8,16 @@ const defaultPeriod = {
   to: '',
 }
 
-const defaultWorkspace = {
+const defaultTimesheet = {
   name: '',
 }
 
 const state = {
   users: [],
   periods: [],
-  workspaces: [],
+  timesheets: [],
   period: JSON.parse(JSON.stringify(defaultPeriod)),
-  workspace: JSON.parse(JSON.stringify(defaultWorkspace)),
+  timesheet: JSON.parse(JSON.stringify(defaultTimesheet)),
   periodStats: {
     stats: [],
   },
@@ -36,11 +36,11 @@ const mutations = {
   setPeriod(state, period) {
     state.period = period
   },
-  setWorkspaces(state, workspaces) {
-    state.workspaces = workspaces
+  setTimesheets(state, timesheets) {
+    state.timesheets = timesheets
   },
-  setWorkspace(state, workspace) {
-    state.workspace = workspace
+  setTimesheet(state, timesheet) {
+    state.timesheet = timesheet
   },
   setPeriodStats(state, periodStats) {
     state.periodStats = periodStats
@@ -69,14 +69,14 @@ const actions = {
 
     return data
   },
-  async fetchWorkspaces(context) {
-    const response = await fetchIt(`${apiUrl}/workspaces`)
+  async fetchTimesheets(context) {
+    const response = await fetchIt(`${apiUrl}/timesheets`)
     const data = await response.json()
 
     return data
   },
-  async fetchWorkspace(context, id) {
-    const response = await fetchIt(`${apiUrl}/workspaces/${id}`)
+  async fetchTimesheet(context, id) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${id}`)
     const data = await response.json()
 
     return data
@@ -139,14 +139,14 @@ const actions = {
   setPeriod(context, period) {
     context.commit('setPeriod', period)
   },
-  setWorkspace(context, workspace) {
-    context.commit('setWorkspace', workspace)
+  setTimesheet(context, timesheet) {
+    context.commit('setTimesheet', timesheet)
   },
-  setWorkspaces(context, workspaces) {
-    context.commit('setWorkspaces', workspaces)
+  setTimesheets(context, timesheets) {
+    context.commit('setTimesheets', timesheets)
   },
-  clearWorkspace(context) {
-    context.commit('setWorkspace', JSON.parse(JSON.stringify(defaultWorkspace)))
+  clearTimesheet(context) {
+    context.commit('setTimesheet', JSON.parse(JSON.stringify(defaultTimesheet)))
   },
   async sudo(context, users) {
     const response = await fetchIt(`${apiUrl}/users/sudo`, {
@@ -190,29 +190,29 @@ const actions = {
 
     return response
   },
-  async deleteWorkspaces(context, workspaces) {
-    const response = await fetchIt(`${apiUrl}/workspaces/delete`, {
+  async deleteTimesheets(context, timesheets) {
+    const response = await fetchIt(`${apiUrl}/timesheets/delete`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        workspaces: workspaces,
+        timesheets: timesheets,
       }),
     })
 
     return response
   },
-  async saveWorkspace(context, workspace) {
-    const response = await fetchIt(`${apiUrl}/workspaces/upsert`, {
+  async saveTimesheet(context, timesheet) {
+    const response = await fetchIt(`${apiUrl}/timesheets/upsert`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        workspace: workspace,
+        timesheet: timesheet,
       }),
     })
 

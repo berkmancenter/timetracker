@@ -1,13 +1,13 @@
 class TimeEntriesController < ApplicationController
   before_action :is_admin, only: %i[sudo unsudo clear_user view_other_timesheets]
-  before_action :set_workspace, only: %i[entries edit popular days months]
+  before_action :set_timesheet, only: %i[entries edit popular days months]
 
   def entries
-    generic_bad_request_response and return if @workspace.nil?
+    generic_bad_request_response and return if @timesheet.nil?
     render_entries_csv and return if params[:csv]
 
     month = params[:month]
-    render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all', @workspace), status: :ok
+    render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all', @timesheet), status: :ok
   end
 
   def edit
@@ -16,10 +16,10 @@ class TimeEntriesController < ApplicationController
 
     generic_bad_request_response and return unless request.post? || request.patch?
     generic_bad_request_response and return if time_entry.id && time_entry.user != @session_user
-    generic_bad_request_response and return if @workspace.nil?
+    generic_bad_request_response and return if @timesheet.nil?
 
     time_entry.attributes = time_entry_params
-    time_entry.workspace = @workspace
+    time_entry.timesheet = @timesheet
     time_entry.category = time_entry.category.downcase.strip
     time_entry.project = time_entry.project.downcase.strip
     time_entry.user = @session_user
@@ -56,15 +56,15 @@ class TimeEntriesController < ApplicationController
   end
 
   def days
-    generic_bad_request_response and return if @workspace.nil?
+    generic_bad_request_response and return if @timesheet.nil?
 
-    render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @workspace), status: :ok
+    render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet), status: :ok
   end
 
   def months
-    generic_bad_request_response and return if @workspace.nil?
+    generic_bad_request_response and return if @timesheet.nil?
 
-    render json: TimeEntry.entry_list_by_month(get_active_users, @workspace)
+    render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
   end
 
   def auto_complete
@@ -93,9 +93,9 @@ class TimeEntriesController < ApplicationController
     @entries = []
 
     if current_month == 'all'
-      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true, @workspace)
+      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true, @timesheet)
     else
-      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, false, @workspace)
+      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, false, @timesheet)
     end
 
     @entries.each do |te|
@@ -106,7 +106,7 @@ class TimeEntriesController < ApplicationController
     render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
   end
 
-  def set_workspace
-    @workspace = Workspace.where(uuid: params.permit(:workspace_uuid)[:workspace_uuid]).first
+  def set_timesheet
+    @timesheet = Timesheet.where(uuid: params.permit(:timesheet_uuid)[:timesheet_uuid]).first
   end
 end

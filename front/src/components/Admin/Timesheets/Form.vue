@@ -1,12 +1,12 @@
 <template>
-  <div class="content admin-workspaces-form">
+  <div class="content admin-timesheets-form">
     <h1 class="is-size-1">{{ title }}</h1>
 
     <form class="form" @submit.prevent="save">
       <div class="field">
         <label class="label">Name</label>
         <div class="control">
-          <input class="input" type="text" v-model="$store.state.admin.workspace.name" required="true">
+          <input class="input" type="text" v-model="$store.state.admin.timesheet.name" required="true" ref="name">
         </div>
       </div>
 
@@ -23,7 +23,7 @@
   import Icon from '@/components/Shared/Icon.vue'
 
   export default {
-    name: 'AdminWorkspacesForm',
+    name: 'AdminTimesheetsForm',
     components: {
       Icon,
     },
@@ -33,27 +33,30 @@
     computed: {
       title() {
         if (this.$route.params.id) {
-          return 'Edit workspace'
+          return 'Edit timesheet'
         } else {
-          return 'New workspace'
+          return 'New timesheet'
         }
       }
     },
     created() {
-      this.$store.dispatch('admin/clearWorkspace')
+      this.$store.dispatch('admin/clearTimesheet')
       this.initialDataLoad()
+    },
+    mounted() {
+      this.$refs.name.focus()
     },
     methods: {
       initialDataLoad() {
-        this.loadWorkspace()
+        this.loadTimesheet()
       },
-      async loadWorkspace() {
+      async loadTimesheet() {
         if (this.$route.params.id) {
           this.mitt.emit('spinnerStart')
 
-          const response = await this.$store.dispatch('admin/fetchWorkspace', this.$route.params.id)
+          const response = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.id)
 
-          this.$store.dispatch('admin/setWorkspace', response)
+          this.$store.dispatch('admin/setTimesheet', response)
 
           this.mitt.emit('spinnerStop')
         }
@@ -61,12 +64,12 @@
       async save() {
         this.mitt.emit('spinnerStart')
 
-        const response = await this.$store.dispatch('admin/saveWorkspace', this.$store.state.admin.workspace)
+        const response = await this.$store.dispatch('admin/saveTimesheet', this.$store.state.admin.timesheet)
 
         if (response?.ok) {
-          this.awn.success('Workspace has been saved.')
+          this.awn.success('Timesheet has been saved.')
           this.$router.push({
-            path: '/admin/workspaces'
+            path: '/admin/timesheets'
           })
         } else {
           this.awn.warning('Something went wrong, try again.')
