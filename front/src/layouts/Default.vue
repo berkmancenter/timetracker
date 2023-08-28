@@ -207,6 +207,6 @@
     text-align: center;
     color: #ffffff;
     font-weight: bold;
-    margin-top: 2rem;
+    margin: 2rem 0;
   }
 </style>

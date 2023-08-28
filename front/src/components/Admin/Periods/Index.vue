@@ -11,6 +11,7 @@
         <thead>
           <tr class="no-select">
             <th>Name</th>
+            <th>Timesheet</th>
             <th>From</th>
             <th>To</th>
             <th data-sort-method="none" class="no-sort">Actions</th>
@@ -19,6 +20,7 @@
         <tbody>
           <tr v-for="period in $store.state.admin.periods" :key="period.id">
             <td>{{ period.name }}</td>
+            <td>{{ period.timesheet.name }}</td>
             <td>{{ period.from }}</td>
             <td>{{ period.to }}</td>
             <td>

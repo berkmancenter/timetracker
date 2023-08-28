@@ -203,10 +203,6 @@
     }
 
     .entry {
-      td {
-        border-bottom: none;
-      }
-
       td:first-child {
         text-align: center;
         min-width: 12rem;

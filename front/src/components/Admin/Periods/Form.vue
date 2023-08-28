@@ -11,6 +11,19 @@
       </div>
 
       <div class="field">
+        <label class="label">Timesheet</label>
+        <div class="control">
+          <div class="select">
+            <select v-model="$store.state.admin.period.timesheet_id">
+              <option v-for="timesheet in timesheets" :key="timesheet.id" :value="timesheet.id">
+                {{ timesheet.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
         <label class="label">From</label>
         <div class="control">
           <date-picker v-model:value="$store.state.admin.period.from" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="from"></date-picker>
@@ -42,7 +55,9 @@
       Icon,
     },
     data() {
-      return {}
+      return {
+        timesheets: [],
+      }
     },
     computed: {
       title() {
@@ -62,6 +77,8 @@
         this.loadPeriod()
       },
       async loadPeriod() {
+        this.timesheets = await this.$store.dispatch('admin/fetchTimesheets')
+
         if (this.$route.params.id) {
           this.mitt.emit('spinnerStart')
 

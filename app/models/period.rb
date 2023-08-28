@@ -4,6 +4,7 @@ class Period < ActiveRecord::Base
   validates :to, presence: true
 
   has_many :credits, dependent: :destroy, autosave: true
+  belongs_to :timesheet
 
   def get_stats(user_ids = [])
     total_num_of_days = (self.to - self.from).to_f
@@ -15,6 +16,7 @@ class Period < ActiveRecord::Base
             .select('users.id AS user_id, users.username, users.email, users.superadmin, COALESCE(SUM(time_entries.decimal_time), 0) AS total_hours, credits.amount AS credits')
             .joins("LEFT JOIN time_entries ON time_entries.user_id = users.id AND (time_entries.created_at >= '#{self.from.to_time}' AND time_entries.created_at <= '#{self.to.to_time.end_of_day}')")
             .joins(:credits)
+            .where('time_entries.timesheet_id = ?', self.timesheet_id)
             .where('credits.period_id = ?', self.id)
             .group('users.username, users.email, users.superadmin, users.id, credits.amount')
             .order('users.username')

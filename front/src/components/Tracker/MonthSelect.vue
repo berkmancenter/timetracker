@@ -33,7 +33,8 @@
           {
             name: 'tracker.index',
             params: {
-              month: this.$store.state.tracker.selectedMonth
+              timesheet: this.$store.state.tracker.selectedTimesheet.uuid,
+              month: this.$store.state.tracker.selectedMonth,
             }
           }
         )

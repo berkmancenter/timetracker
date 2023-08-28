@@ -4,6 +4,7 @@ class Timesheet < ActiveRecord::Base
   has_many :time_entries
   has_many :users_timesheets
   has_many :users, through: :users_timesheets
+  has_many :periods
 
   before_validation :set_uuid
 

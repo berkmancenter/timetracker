@@ -1,17 +1,21 @@
 class PeriodsController < ApplicationController
   before_action :set_period, except: %i[index upsert delete]
-  before_action :is_admin
 
-  layout 'admin'
+  PERIOD_PUBLIC_FIELDS = {
+    only: [:id, :timesheet_id, :name, :from, :to],
+    include: {
+      timesheet: { only: [:id, :name] }
+    }
+  }.freeze
 
   def index
     periods = Period.all
 
-    render json: periods, status: :ok
+    render json: periods.to_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
   def show
-    render json: @period, status: :ok
+    render json: @period.to_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
   def upsert
@@ -23,7 +27,7 @@ class PeriodsController < ApplicationController
     end
 
     if period.save
-      render json: { period: period }, status: :ok
+      render json: { period: period.to_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
     else
       render json: { message: period.errors.full_messages.join(', ') }, status: :bad_request
     end
@@ -54,7 +58,7 @@ class PeriodsController < ApplicationController
     end
 
     render json: {
-      period: @period,
+      period: @period.as_json(PERIOD_PUBLIC_FIELDS),
       credits: credits
     }, status: :ok
   end
@@ -129,7 +133,7 @@ class PeriodsController < ApplicationController
     cloned_period.credits = cloned_credits
 
     if cloned_period.save
-      render json: { period: @period }, status: :ok
+      render json: { period: @period.to_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
     else
       render json: { message: @period.errors.full_messages.join(', ') }, status: :bad_request
     end
@@ -142,7 +146,7 @@ class PeriodsController < ApplicationController
   end
 
   def period_params
-    params.require(:period).permit(:id, :name, :from, :to)
+    params.require(:period).permit(:id, :name, :timesheet_id, :from, :to)
   end
 
   def render_stats_csv(stats)

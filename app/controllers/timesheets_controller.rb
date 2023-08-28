@@ -16,14 +16,17 @@ class TimesheetsController < ApplicationController
   end
 
   def upsert
+    new_record = nil
     if timesheet_params[:id]
       timesheet = Timesheet.find(timesheet_params['id'])
       timesheet.assign_attributes(timesheet_params)
     else
+      new_record = true
       timesheet = Timesheet.new(timesheet_params)
     end
 
     if timesheet.save
+      UsersTimesheet.create(user: @session_user, timesheet: timesheet, role: 'admin') if new_record
       render json: { timesheet: timesheet }, status: :ok
     else
       render json: { message: timesheet.errors.full_messages.join(', ') }, status: :bad_request

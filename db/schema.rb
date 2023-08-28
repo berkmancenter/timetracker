@@ -30,6 +30,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
     t.date "to", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "timesheet_id", null: false
+    t.index ["timesheet_id"], name: "index_periods_on_timesheet_id"
   end
 
   create_table "time_entries", id: :serial, force: :cascade do |t|
@@ -94,6 +96,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "periods", "timesheets"
   add_foreign_key "time_entries", "timesheets"
   add_foreign_key "users_timesheets", "timesheets"
   add_foreign_key "users_timesheets", "users"
