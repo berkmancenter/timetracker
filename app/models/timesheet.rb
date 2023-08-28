@@ -1,10 +1,10 @@
 require 'securerandom'
 
 class Timesheet < ActiveRecord::Base
-  has_many :time_entries
-  has_many :users_timesheets
+  has_many :time_entries, dependent: :destroy
+  has_many :users_timesheets, dependent: :destroy
   has_many :users, through: :users_timesheets
-  has_many :periods
+  has_many :periods, dependent: :destroy
 
   before_validation :set_uuid
 

@@ -39,7 +39,7 @@ class TimesheetsController < ApplicationController
     timesheets_ids = params[:timesheets]
 
     unauth = false
-    Timesheet.where(id: timesheets_ids).tap do |t|
+    Timesheet.where(id: timesheets_ids).each do |t|
       unauth = true unless t.is_admin?(@session_user)
     end
     generic_unauthorized_response and return if unauth
