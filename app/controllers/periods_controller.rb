@@ -41,9 +41,11 @@ class PeriodsController < ApplicationController
   def delete
     periods_ids = params[:periods]
 
+    unauth = false
     Period.where(id: periods_ids).tap do |p|
-      generic_unauthorized_response and return unless p.timesheet.is_admin?(@session_user)
+      unauth = true unless p.timesheet.is_admin?(@session_user)
     end
+    generic_unauthorized_response and return if unauth
 
     if periods_ids&.any?
       Period.where(id: periods_ids).destroy_all

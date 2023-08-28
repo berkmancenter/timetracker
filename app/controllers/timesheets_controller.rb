@@ -38,9 +38,11 @@ class TimesheetsController < ApplicationController
   def delete
     timesheets_ids = params[:timesheets]
 
+    unauth = false
     Timesheet.where(id: timesheets_ids).tap do |t|
-      generic_unauthorized_response and return unless t.is_admin?(@session_user)
+      unauth = true unless t.is_admin?(@session_user)
     end
+    generic_unauthorized_response and return if unauth
 
     if timesheets_ids&.any?
       Timesheet.where(id: timesheets_ids).destroy_all
