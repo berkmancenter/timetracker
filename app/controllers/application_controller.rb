@@ -85,7 +85,7 @@ class ApplicationController < ActionController::Base
     @session_user = user
   end
 
-  def is_admin
+  def is_superadmin?
     redirect_to root_url unless @session_user.superadmin
   end
 
@@ -105,5 +105,9 @@ class ApplicationController < ActionController::Base
 
   def generic_bad_request_response
     render json: { message: 'Something went wrong.' }, status: :bad_request
+  end
+
+  def generic_unauthorized_response
+    render json: { message: 'Something went wrong.' }, status: :unauthorized
   end
 end

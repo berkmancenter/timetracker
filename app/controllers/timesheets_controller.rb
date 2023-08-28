@@ -1,12 +1,9 @@
 class TimesheetsController < ApplicationController
   before_action :set_timesheet, except: %i[index upsert delete]
-  before_action :is_admin
-
-  layout 'admin'
 
   def index
     timesheets = Timesheet.user_timesheets(@session_user)
-    timesheets = timesheets.select(:uuid, :name) unless @session_user.superadmin
+    timesheets = timesheets.select(:id, :uuid, :name)
 
     render json: timesheets, status: :ok
   end

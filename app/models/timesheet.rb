@@ -11,6 +11,24 @@ class Timesheet < ActiveRecord::Base
   validates :name, presence: true
   validates :uuid, presence: true
 
+  def is_admin?(user)
+    return true if user.superadmin
+
+    UsersTimesheet.where(
+      timesheet: self,
+      user: user,
+      role: 'admin'
+    ).any?
+  end
+
+  def is_user?(user)
+    UsersTimesheet.where(
+      timesheet: self,
+      user: user,
+      role: 'user'
+    ).any?
+  end
+
   def self.user_timesheets(user)
     return Timesheet.all if user.superadmin
 

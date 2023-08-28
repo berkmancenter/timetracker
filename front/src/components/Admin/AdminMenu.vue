@@ -28,10 +28,6 @@
             name: 'timesheets.index',
           },
           {
-            label: 'Users',
-            name: 'users.index',
-          },
-          {
             label: 'Periods',
             name: 'periods.index',
           },

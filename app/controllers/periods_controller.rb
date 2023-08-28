@@ -9,18 +9,23 @@ class PeriodsController < ApplicationController
   }.freeze
 
   def index
-    periods = Period.all
+    periods = Period.user_periods(@session_user)
 
     render json: periods.to_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
   def show
+    generic_unauthorized_response unless @period.timesheet.is_admin?(@session_user)
+
     render json: @period.to_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
   def upsert
     if period_params[:id]
       period = Period.find(period_params['id'])
+
+      generic_unauthorized_response unless period.timesheet.is_admin?(@session_user)
+
       period.assign_attributes(period_params)
     else
       period = Period.new(period_params)
@@ -36,6 +41,10 @@ class PeriodsController < ApplicationController
   def delete
     periods_ids = params[:periods]
 
+    Period.where(id: periods_ids).tap do |p|
+      generic_unauthorized_response unless p.timesheet.is_admin?(@session_user)
+    end
+
     if periods_ids&.any?
       Period.where(id: periods_ids).destroy_all
 
@@ -46,6 +55,8 @@ class PeriodsController < ApplicationController
   end
 
   def credits
+    generic_unauthorized_response unless @period.timesheet.is_admin?(@session_user)
+
     users = User.order(:username)
     credits = users.map do |user|
       {
@@ -64,6 +75,8 @@ class PeriodsController < ApplicationController
   end
 
   def set_credits
+    generic_unauthorized_response unless @period.timesheet.is_admin?(@session_user)
+
     unless params[:credits].any?
       render json: { message: 'No users or credits selected.' }, status: :bad_request
       return
@@ -114,6 +127,8 @@ class PeriodsController < ApplicationController
   end
 
   def stats
+    generic_unauthorized_response unless @period.timesheet.is_admin?(@session_user)
+
     user_ids = params[:user_ids] ? params[:user_ids].split(',') : []
     stats = @period.get_stats(user_ids)
 
@@ -126,6 +141,8 @@ class PeriodsController < ApplicationController
   end
 
   def clone
+    generic_unauthorized_response unless @period.timesheet.is_admin?(@session_user)
+
     cloned_period = @period.dup
     cloned_period.name << ' clone'
 

@@ -2,6 +2,8 @@
   <div class="content admin-periods">
     <h1 class="is-size-1">Periods</h1>
 
+    <p>Periods offer a comprehensive way to access statistical data regarding timesheet usage by users within a specified timeframe.</p>
+
     <form class="form">
       <div class="mb-4">
         <router-link :to="'/admin/periods/new'" class="button is-success">Add period</router-link>

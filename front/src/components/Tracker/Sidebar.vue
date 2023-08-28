@@ -4,7 +4,7 @@
     <month-select></month-select>
     <daily-totals v-if="$store.state.tracker.selectedMonth !== 'all'"></daily-totals>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
-    <admin-menu v-if="$store.state.shared.user.is_admin" />
+    <admin-menu />
   </div>
 </template>
 

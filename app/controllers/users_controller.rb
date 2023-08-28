@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :is_admin, except: %i[current_user]
+  before_action :is_superadmin?, except: %i[current_user]
 
   layout 'admin'
 

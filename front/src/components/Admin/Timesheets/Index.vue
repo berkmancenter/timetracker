@@ -2,6 +2,8 @@
   <div class="content admin-timesheets">
     <h1 class="is-size-1">Timesheets</h1>
 
+    <p>Create new timesheets for yourself, ensuring a seamless record of your activities. You can send invitations to other users, facilitating collaborative participation.</p>
+
     <form class="form">
       <div class="mb-4">
         <router-link :to="'/admin/timesheets/new'" class="button is-success">Add timesheet</router-link>

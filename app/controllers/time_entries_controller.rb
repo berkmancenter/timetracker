@@ -1,5 +1,4 @@
 class TimeEntriesController < ApplicationController
-  before_action :is_admin, only: %i[sudo unsudo clear_user view_other_timesheets]
   before_action :set_timesheet, only: %i[entries edit popular days months]
 
   def entries

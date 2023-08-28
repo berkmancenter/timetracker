@@ -34,4 +34,16 @@ class Period < ActiveRecord::Base
       record
     end
   end
+
+  def self.user_periods(user)
+    return Period.all if user.superadmin
+
+    Period.joins(timesheet: :users_timesheets)
+          .where(
+            users_timesheets: {
+              user_id: user.id,
+              role: 'admin'
+            }
+          )
+  end
 end

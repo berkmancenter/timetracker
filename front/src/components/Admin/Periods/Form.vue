@@ -104,6 +104,8 @@
       async save() {
         this.mitt.emit('spinnerStart')
 
+      console.log(this.$store.state.admin.period)
+
         const response = await this.$store.dispatch('admin/savePeriod', this.$store.state.admin.period)
 
         if (response?.ok) {
