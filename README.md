@@ -9,7 +9,6 @@ Time Tracker is a simple open-source time reporting application.
 * Vue `3.2.x`
 * Vite
 * Bundler
-* Yarn
 
 ## Development
 
@@ -41,7 +40,6 @@ Time Tracker is a simple open-source time reporting application.
 * Every time
   * `git pull`
   * `bundle install`
-  * `yarn install`
   * `rails assets:clobber && rails assets:precompile` if assets changes
   * `rails db:migrate` if db schema changes.
   * `cd front && ./deploy.sh` if you had changes in the Vue application
