@@ -2,22 +2,19 @@ class PeriodsController < ApplicationController
   before_action :set_period, except: %i[index upsert delete]
 
   PERIOD_PUBLIC_FIELDS = {
-    only: [:id, :timesheet_id, :name, :from, :to],
-    include: {
-      timesheet: { only: [:id, :name] }
-    }
+    only: %i[id timesheet_id name from to]
   }.freeze
 
   def index
     periods = Period.user_periods(@session_user)
 
-    render json: periods.to_json(PERIOD_PUBLIC_FIELDS), status: :ok
+    render json: periods.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
   def show
     generic_unauthorized_response and return unless @period.timesheet.is_admin?(@session_user)
 
-    render json: @period.to_json(PERIOD_PUBLIC_FIELDS), status: :ok
+    render json: @period.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
   def upsert
@@ -32,7 +29,7 @@ class PeriodsController < ApplicationController
     end
 
     if period.save
-      render json: { period: period.to_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
+      render json: { period: period.as_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
     else
       render json: { message: period.errors.full_messages.join(', ') }, status: :bad_request
     end
@@ -152,7 +149,7 @@ class PeriodsController < ApplicationController
     cloned_period.credits = cloned_credits
 
     if cloned_period.save
-      render json: { period: @period.to_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
+      render json: { period: @period.as_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
     else
       render json: { message: @period.errors.full_messages.join(', ') }, status: :bad_request
     end

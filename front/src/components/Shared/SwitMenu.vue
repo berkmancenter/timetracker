@@ -1,5 +1,5 @@
 <template>
-  <div class="switmenu-menu" :class="{ 'switmenu-menu-active': $store.state.shared.sideMenuStatus }">
+  <div class="switmenu-menu" :class="{ 'switmenu-menu-active': $store.state.shared.layout.sideMenuStatus }">
     <slot></slot>
   </div>
 </template>
@@ -56,7 +56,7 @@
     },
     methods: {
       toggleMenu() {
-        this.$store.dispatch('shared/setSideMenuStatus', !this.$store.state.shared.sideMenuStatus)
+        this.$store.dispatch('shared/setSideMenuStatus', !this.$store.state.shared.layout.sideMenuStatus)
         this.toggleBodyClass()
       },
       closeMenu() {
@@ -64,7 +64,7 @@
         this.toggleBodyClass()
       },
       toggleBodyClass() {
-        if (this.$store.state.shared.sideMenuStatus) {
+        if (this.$store.state.shared.layout.sideMenuStatus) {
           this.html.classList.add('switmenu-html-open')
         } else {
           this.html.classList.remove('switmenu-html-open')

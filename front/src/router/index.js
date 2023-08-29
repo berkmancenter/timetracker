@@ -94,6 +94,22 @@ const router = createRouter({
           },
           name: 'timesheets.edit',
         },
+        {
+          path: 'admin/timesheets/:id/invite',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Invite.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'timesheets.invite',
+        },
+        {
+          path: 'join/:code',
+          components: {
+            default: () => import('@/components/Tracker/Join.vue'),
+            Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
+          },
+          name: 'timesheets.join',
+        },
       ],
     }
   ]

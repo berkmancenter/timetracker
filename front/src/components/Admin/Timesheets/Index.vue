@@ -19,12 +19,20 @@
         <tbody>
           <tr v-for="timesheet in $store.state.admin.timesheets" :key="timesheet.id">
             <td>{{ timesheet.name }}</td>
-            <td>
-              <router-link :to="`/admin/timesheets/${timesheet.id}/edit`">
-                <Icon :src="editIcon" />
-              </router-link>
-              <a title="Delete this timesheet" @click.prevent="deleteTimesheet(timesheet)">
-                <Icon :src="minusIcon" />
+            <td class="admin-table-actions">
+              <div v-if="adminInTimesheet(timesheet)">
+                <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`">
+                  <Icon :src="editIcon" />
+                </router-link>
+                <router-link title="Invite users to timesheet" :to="`/admin/timesheets/${timesheet.id}/invite`">
+                  <Icon :src="inviteIcon" />
+                </router-link>
+                <a title="Delete timesheet" @click.prevent="deleteTimesheet(timesheet)">
+                  <Icon :src="minusIcon" />
+                </a>
+              </div>
+              <a title="Leave timesheet" @click.prevent="leaveTimesheet(timesheet)">
+                <Icon :src="leaveIcon" />
               </a>
             </td>
           </tr>
@@ -34,6 +42,13 @@
         </tbody>
       </admin-table>
     </form>
+
+    <div ref="leaveTimesheetTemplate" class="is-hidden">
+      <div class="content">
+        <p>Input how many hours you want to set to selected users.</p>
+        <input type="number" step="1" class="input periods-credits-selected-set-input" value="0.0">
+      </div>
+    </div>
   </div>
 </template>
 
@@ -44,6 +59,8 @@
   import hoursIcon from '@/images/hours.svg'
   import editIcon from '@/images/edit.svg'
   import cloneIcon from '@/images/clone.svg'
+  import inviteIcon from '@/images/invite.svg'
+  import leaveIcon from '@/images/leave.svg'
   import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
 
@@ -60,6 +77,8 @@
         hoursIcon,
         editIcon,
         cloneIcon,
+        inviteIcon,
+        leaveIcon,
       }
     },
     created() {
@@ -104,6 +123,32 @@
           }
         })
       },
+      leaveTimesheet(timesheet) {
+        const that = this
+
+        Swal.fire({
+          title: 'Leaving timesheet',
+          html: `Are you sure to leave ${timesheet.name}?<br>After leaving the timesheet you won't be able to use it any more.`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: this.colors.main,
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
+            const response = await this.$store.dispatch('admin/leaveTimesheet', timesheet)
+
+            if (response.ok) {
+              this.awn.success('You have left the timesheet successfully.')
+              that.loadTimesheets()
+            } else {
+              this.awn.warning('Something went wrong, try again.')
+            }
+
+            this.mitt.emit('spinnerStop')
+          }
+        })
+      },
       async cloneTimesheet(timesheet) {
         this.mitt.emit('spinnerStart')
 
@@ -117,6 +162,9 @@
         }
 
         this.mitt.emit('spinnerStop')
+      },
+      adminInTimesheet(timesheet) {
+        return timesheet.roles.includes('admin')
       },
     },
   }

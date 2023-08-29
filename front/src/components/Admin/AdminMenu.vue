@@ -1,6 +1,6 @@
 <template>
   <div class="admin-menu">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Admin</h5>
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Manage</h5>
 
     <div class="switmenu-section-content">
       <ul>
@@ -19,7 +19,7 @@
       return {
         adminMenuItems: [
           {
-            label: 'Exit Admin',
+            label: 'Back to tracking',
             name: 'tracker.index',
             class: 'admin-menu-item-hidden-active',
           },

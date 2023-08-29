@@ -8,7 +8,10 @@ const state = {
     username: '',
     sudo_users: [],
     sudoMode: false,
+  },
+  layout: {
     sideMenuStatus: false,
+    sideMenuEnabled: true,
   },
 }
 
@@ -20,7 +23,10 @@ const mutations = {
     state.user.sudoMode = isSudoMode
   },
   setSideMenuStatus(state, status) {
-    state.sideMenuStatus = status
+    state.layout.sideMenuStatus = status
+  },
+  setSideMenuEnabled(state, enabled) {
+    state.layout.sideMenuEnabled = enabled
   },
 }
 
@@ -39,6 +45,9 @@ const actions = {
     context.commit('setSideMenuStatus', status)
     store2('timetracker.side_menu_status', status)
   },
+  setSideMenuEnabled(context, enabled) {
+    context.commit('setSideMenuEnabled', enabled)
+  },
 }
 
 const getters = {}
@@ -48,7 +57,7 @@ function initLocalStorage() {
     store2('timetracker.side_menu_status', false)
   }
 
-  state.sideMenuStatus = store2('timetracker.side_menu_status')
+  state.layout.sideMenuStatus = store2('timetracker.side_menu_status')
 }
 
 initLocalStorage()

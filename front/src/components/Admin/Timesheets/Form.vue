@@ -12,7 +12,7 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button">Save</button>
+          <button class="button" ref="submitButton">Save</button>
         </div>
       </div>
     </form>
@@ -63,6 +63,7 @@
       },
       async save() {
         this.mitt.emit('spinnerStart')
+        this.$refs.submitButton.disabled = true
 
         const response = await this.$store.dispatch('admin/saveTimesheet', this.$store.state.admin.timesheet)
 
@@ -76,6 +77,7 @@
         }
 
         this.mitt.emit('spinnerStop')
+        this.$refs.submitButton.disabled = false
       },
     },
   }

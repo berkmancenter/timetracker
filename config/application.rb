@@ -95,5 +95,10 @@ module Timetracker
 
     # Set the default value for bypassing the authentication
     config.use_fakeauth = false
+
+    # Mailer settings
+    config.default_sender = ENV['DEFAULT_SENDER'] || 'no-reply@example.com'
+    config.return_path = ENV['RETURN_PATH'] || 'user@example.com'
+    config.front_host = ENV['FRONT_URL'] || 'https://example.com'
   end
 end

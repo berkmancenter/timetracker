@@ -1,11 +1,8 @@
 class TimesheetsController < ApplicationController
-  before_action :set_timesheet, except: %i[index upsert delete]
+  before_action :set_timesheet, only: %i[show send_invitations leave]
 
   def index
-    timesheets = Timesheet.user_timesheets(@session_user)
-    timesheets = timesheets.select(:id, :uuid, :name)
-
-    render json: timesheets, status: :ok
+    render json: @session_user.user_timesheets, status: :ok
   end
 
   def show
@@ -51,6 +48,54 @@ class TimesheetsController < ApplicationController
     else
       render json: { message: 'No timesheets selected.' }, status: :bad_request
     end
+  end
+
+  def send_invitations
+    generic_unauthorized_response and return unless @timesheet.is_admin?(@session_user)
+
+    email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
+    emails = params[:emails].scan(email_regex)
+
+    invitations = []
+    emails.each do |e|
+      invitations << Invitation.new(email: e, sender: @session_user, timesheet: @timesheet)
+    end
+
+    Invitation.import!(invitations)
+
+    invitations.each do |i|
+      InvitationMailer.send_invitation(
+        @timesheet, i
+      ).deliver_later
+    end
+  end
+
+  def join
+    invitation = Invitation.where(code: params[:code]).first
+
+    generic_bad_request_response and return if invitation.nil? || invitation.used
+
+    timesheet = invitation.timesheet
+
+    ut = UsersTimesheet.new(user: @session_user, timesheet: timesheet, role: 'user')
+
+    if ut.save
+      invitation.used_by = @session_user
+      invitation.used = true
+      invitation.save
+
+      render json: { timesheet: timesheet }, status: :ok
+    else
+      render json: { message: ut.errors.full_messages.join(', ') }, status: :bad_request
+    end
+  end
+
+  def leave
+    UsersTimesheet
+      .where(user: @session_user, timesheet: @timesheet)
+      .destroy_all
+
+    render json: { message: 'ok' }, status: :ok
   end
 
   private

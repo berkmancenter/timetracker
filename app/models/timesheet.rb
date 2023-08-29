@@ -5,6 +5,7 @@ class Timesheet < ActiveRecord::Base
   has_many :users_timesheets, dependent: :destroy
   has_many :users, through: :users_timesheets
   has_many :periods, dependent: :destroy
+  has_many :invitations, dependent: :destroy
 
   before_validation :set_uuid
 
@@ -27,12 +28,8 @@ class Timesheet < ActiveRecord::Base
     UsersTimesheet.where(
       timesheet: self,
       user: user,
-      role: ['user', 'admin']
+      role: %w[user admin]
     ).any?
-  end
-
-  def self.user_timesheets(user)
-    user.timesheets
   end
 
   private

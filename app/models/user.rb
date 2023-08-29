@@ -10,4 +10,15 @@ class User < ActiveRecord::Base
         .group(:id, :username)
         .order(:username)
   end
+
+  def user_timesheets
+    timesheets
+      .select('
+        timesheets.id,
+        timesheets.name,
+        timesheets.uuid,
+        ARRAY_AGG(users_timesheets.role) AS roles
+      ')
+      .group('timesheets.id')
+  end
 end

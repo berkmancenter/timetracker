@@ -18,6 +18,7 @@ const state = {
   timesheets: [],
   period: JSON.parse(JSON.stringify(defaultPeriod)),
   timesheet: JSON.parse(JSON.stringify(defaultTimesheet)),
+  timesheetInvitations: '',
   periodStats: {
     stats: [],
   },
@@ -44,6 +45,9 @@ const mutations = {
   },
   setPeriodStats(state, periodStats) {
     state.periodStats = periodStats
+  },
+  setTimesheetInvitations(state, invitations) {
+    state.timesheetInvitations = invitations
   },
   setPeriodCredits(state, periodCredits) {
     state.periodCredits = periodCredits
@@ -148,6 +152,9 @@ const actions = {
   clearTimesheet(context) {
     context.commit('setTimesheet', JSON.parse(JSON.stringify(defaultTimesheet)))
   },
+  setTimesheetInvitations(context, invitations) {
+    context.commit('setTimesheetInvitations', invitations)
+  },
   async sudo(context, users) {
     const response = await fetchIt(`${apiUrl}/users/sudo`, {
       method: 'POST',
@@ -249,6 +256,31 @@ const actions = {
   async clonePeriod(context, periodId) {
     const response = await fetchIt(`${apiUrl}/periods/${periodId}/clone`, {
       method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+
+    return response
+  },
+  async sendTimesheetInvitations(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/send_invitations`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        emails: data.emails,
+      }),
+    })
+
+    return response
+  },
+  async leaveTimesheet(context, timesheet) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${timesheet.id}/leave`, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

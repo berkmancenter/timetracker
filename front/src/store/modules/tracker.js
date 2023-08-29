@@ -219,6 +219,11 @@ const actions = {
   
     return await Promise.all(promises)
   },
+  async joinTimesheet(context, code) {
+    const response = await fetchIt(`${apiUrl}/timesheets/join/${code}`)
+
+    return response
+  },
 }
 
 const getters = {}

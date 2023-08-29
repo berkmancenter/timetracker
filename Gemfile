@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'activerecord-import'
 gem 'bootsnap'
-gem 'calendar_date_select'
 gem 'carmen'
 gem 'couchrest'
 gem 'csv'

@@ -1,7 +1,10 @@
 <template>
   <div>
-    <entry-form></entry-form>
-    <entries></entries>
+    <entry-form v-if="$store.state.tracker.selectedTimesheet.uuid"></entry-form>
+    <entries v-if="$store.state.tracker.selectedTimesheet.uuid"></entries>
+    <div v-if="!$store.state.tracker.selectedTimesheet.uuid">
+      Select a timesheet or create new to add new entries.
+    </div>
   </div>
 </template>
 
@@ -30,6 +33,13 @@
 
         const timesheets = await this.$store.dispatch('tracker/fetchTimesheets')
         this.$store.dispatch('tracker/setTimesheets', timesheets)
+
+        if (timesheets.length === 0) {
+          this.mitt.emit('spinnerStop')
+          this.redirectToSelectedMonth(this.$store)
+
+          return
+        }
 
         const months = await this.$store.dispatch('tracker/fetchMonths')
         this.$store.dispatch('tracker/setMonths', months)

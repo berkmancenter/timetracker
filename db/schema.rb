@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_29_111507) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -22,6 +22,22 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
     t.datetime "updated_at", null: false
     t.index ["period_id"], name: "index_credits_on_period_id"
     t.index ["user_id"], name: "index_credits_on_user_id"
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "email"
+    t.datetime "expiration"
+    t.boolean "used", default: false, null: false
+    t.bigint "timesheet_id"
+    t.bigint "sender_id", null: false
+    t.bigint "used_by_id"
+    t.string "itype", default: "single", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sender_id"], name: "index_invitations_on_sender_id"
+    t.index ["timesheet_id"], name: "index_invitations_on_timesheet_id"
+    t.index ["used_by_id"], name: "index_invitations_on_used_by_id"
   end
 
   create_table "periods", force: :cascade do |t|
@@ -96,6 +112,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_132726) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "invitations", "timesheets"
+  add_foreign_key "invitations", "users", column: "sender_id"
+  add_foreign_key "invitations", "users", column: "used_by_id"
   add_foreign_key "periods", "timesheets"
   add_foreign_key "time_entries", "timesheets"
   add_foreign_key "users_timesheets", "timesheets"

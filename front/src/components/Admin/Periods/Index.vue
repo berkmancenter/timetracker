@@ -25,14 +25,14 @@
             <td>{{ period.timesheet.name }}</td>
             <td>{{ period.from }}</td>
             <td>{{ period.to }}</td>
-            <td>
-              <router-link :to="`/admin/periods/${period.id}/edit`">
+            <td class="admin-table-actions">
+              <router-link title="Edit period" :to="`/admin/periods/${period.id}/edit`">
                 <Icon :src="editIcon" />
               </router-link>
-              <a title="Clone this period" @click.prevent="clonePeriod(period)">
+              <a title="Clone period" @click.prevent="clonePeriod(period)">
                 <Icon :src="cloneIcon" />
               </a>
-              <a title="Delete this period" @click.prevent="deletePeriod(period)">
+              <a title="Delete period" @click.prevent="deletePeriod(period)">
                 <Icon :src="minusIcon" />
               </a>
               <router-link title="Set period hours" :to="`/admin/periods/${period.id}/credits`">

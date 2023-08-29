@@ -14,7 +14,7 @@
         <label class="label">Timesheet</label>
         <div class="control">
           <div class="select">
-            <select v-model="$store.state.admin.period.timesheet_id">
+            <select v-model="$store.state.admin.period.timesheet_id" required="true">
               <option v-for="timesheet in timesheets" :key="timesheet.id" :value="timesheet.id">
                 {{ timesheet.name }}
               </option>
@@ -39,7 +39,7 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button">Save</button>
+          <button class="button" ref="submitButton">Save</button>
         </div>
       </div>
     </form>
@@ -103,8 +103,7 @@
       },
       async save() {
         this.mitt.emit('spinnerStart')
-
-      console.log(this.$store.state.admin.period)
+        this.$refs.submitButton.disabled = true
 
         const response = await this.$store.dispatch('admin/savePeriod', this.$store.state.admin.period)
 
@@ -118,6 +117,7 @@
         }
 
         this.mitt.emit('spinnerStop')
+        this.$refs.submitButton.disabled = false
       },
     },
   }
