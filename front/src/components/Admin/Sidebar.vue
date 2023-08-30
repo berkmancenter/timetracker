@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-menu v-if="$store.state.shared.user.is_admin" />
+    <admin-menu />
   </div>
 </template>
 

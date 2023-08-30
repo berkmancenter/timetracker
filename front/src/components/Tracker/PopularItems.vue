@@ -8,7 +8,7 @@
       </li>
     </ul>
 
-    <p v-if="items.length === 0">Your top {{ title.toLowerCase() }} will show up here.</p>
+    <p v-if="items.length === 0">Your most used {{ title.toLowerCase() }} will show up here.</p>
   </div>
 </template>
 

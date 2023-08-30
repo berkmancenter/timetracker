@@ -8,10 +8,17 @@ const defaultPeriod = {
   to: '',
 }
 
+const defaultTimesheet = {
+  name: '',
+}
+
 const state = {
   users: [],
   periods: [],
+  timesheets: [],
   period: JSON.parse(JSON.stringify(defaultPeriod)),
+  timesheet: JSON.parse(JSON.stringify(defaultTimesheet)),
+  timesheetInvitations: '',
   periodStats: {
     stats: [],
   },
@@ -30,8 +37,17 @@ const mutations = {
   setPeriod(state, period) {
     state.period = period
   },
+  setTimesheets(state, timesheets) {
+    state.timesheets = timesheets
+  },
+  setTimesheet(state, timesheet) {
+    state.timesheet = timesheet
+  },
   setPeriodStats(state, periodStats) {
     state.periodStats = periodStats
+  },
+  setTimesheetInvitations(state, invitations) {
+    state.timesheetInvitations = invitations
   },
   setPeriodCredits(state, periodCredits) {
     state.periodCredits = periodCredits
@@ -51,6 +67,24 @@ const actions = {
 
     return data
   },
+  async fetchPeriod(context, id) {
+    const response = await fetchIt(`${apiUrl}/periods/${id}`)
+    const data = await response.json()
+
+    return data
+  },
+  async fetchTimesheets(context) {
+    const response = await fetchIt(`${apiUrl}/timesheets`)
+    const data = await response.json()
+
+    return data
+  },
+  async fetchTimesheet(context, id) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${id}`)
+    const data = await response.json()
+
+    return data
+  },
   async fetchPeriodStats(context, id) {
     const response = await fetchIt(`${apiUrl}/periods/${id}/stats`)
     const data = await response.json()
@@ -59,12 +93,6 @@ const actions = {
   },
   async fetchPeriodCredits(context, id) {
     const response = await fetchIt(`${apiUrl}/periods/${id}/credits`)
-    const data = await response.json()
-
-    return data
-  },
-  async fetchPeriod(context, id) {
-    const response = await fetchIt(`${apiUrl}/periods/${id}`)
     const data = await response.json()
 
     return data
@@ -115,6 +143,18 @@ const actions = {
   setPeriod(context, period) {
     context.commit('setPeriod', period)
   },
+  setTimesheet(context, timesheet) {
+    context.commit('setTimesheet', timesheet)
+  },
+  setTimesheets(context, timesheets) {
+    context.commit('setTimesheets', timesheets)
+  },
+  clearTimesheet(context) {
+    context.commit('setTimesheet', JSON.parse(JSON.stringify(defaultTimesheet)))
+  },
+  setTimesheetInvitations(context, invitations) {
+    context.commit('setTimesheetInvitations', invitations)
+  },
   async sudo(context, users) {
     const response = await fetchIt(`${apiUrl}/users/sudo`, {
       method: 'POST',
@@ -157,6 +197,34 @@ const actions = {
 
     return response
   },
+  async deleteTimesheets(context, timesheets) {
+    const response = await fetchIt(`${apiUrl}/timesheets/delete`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        timesheets: timesheets,
+      }),
+    })
+
+    return response
+  },
+  async saveTimesheet(context, timesheet) {
+    const response = await fetchIt(`${apiUrl}/timesheets/upsert`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        timesheet: timesheet,
+      }),
+    })
+
+    return response
+  },
   async deletePeriods(context, periods) {
     const response = await fetchIt(`${apiUrl}/periods/delete`, {
       method: 'POST',
@@ -188,6 +256,31 @@ const actions = {
   async clonePeriod(context, periodId) {
     const response = await fetchIt(`${apiUrl}/periods/${periodId}/clone`, {
       method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+
+    return response
+  },
+  async sendTimesheetInvitations(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/send_invitations`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        emails: data.emails,
+      }),
+    })
+
+    return response
+  },
+  async leaveTimesheet(context, timesheet) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${timesheet.id}/leave`, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

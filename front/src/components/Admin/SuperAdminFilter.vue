@@ -32,9 +32,9 @@ export default {
     filteredUsers() {
       switch (this.activeTab) {
         case 'users':
-          return this.users.filter((user) => !user.superadmin)
+          return this.users.filter((user) => !user.admin)
         case 'admins':
-          return this.users.filter((user) => user.superadmin)
+          return this.users.filter((user) => user.admin)
         case 'all':
           return this.users
         default:

@@ -1,32 +1,32 @@
 <template>
-  <div class="tracker-months" v-if="$store.state.tracker.months.length > 0">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Month</h5>
+  <div class="tracker-timesheets">
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Timesheet</h5>
 
     <div class="switmenu-section-content">
       <div class="select">
-        <select v-model="$store.state.tracker.selectedMonth" @change="changeMonth">
-          <option value="all">All</option>
-          <option v-for="month in $store.state.tracker.months" :key="month" :value="month">
-            {{ month }}
+        <select v-model="$store.state.tracker.selectedTimesheet" @change="changeTimesheet">
+          <option v-for="timesheet in $store.state.tracker.timesheets" :key="timesheet.id" :value="timesheet">
+            {{ timesheet.name }}
           </option>
         </select>
       </div>
-
-      <button class="button mt-2" @click="getCsv">CSV</button>
     </div>
   </div>
 </template>
 
 <script>
+  import { redirectToSelectedMonth } from '@/router/index'
+
   export default {
-    name: 'MonthSelect',
+    name: 'TimesheetSelect',
     data() {
       return {
         apiUrl: import.meta.env.VITE_API_URL,
+        redirectToSelectedMonth: redirectToSelectedMonth,
       }
     },
     methods: {
-      async changeMonth() {
+      async changeTimesheet() {
         this.mitt.emit('spinnerStart')
 
         this.$router.push(
@@ -34,17 +34,19 @@
             name: 'tracker.index',
             params: {
               timesheet: this.$store.state.tracker.selectedTimesheet.uuid,
-              month: this.$store.state.tracker.selectedMonth,
+              month: null,
             }
           }
         )
 
+        const months = await this.$store.dispatch('tracker/fetchMonths')
+        this.$store.dispatch('tracker/setMonths', months)
+
+        this.redirectToSelectedMonth(this.$store)
+
         await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals'])
 
         this.mitt.emit('spinnerStop')
-      },
-      getCsv() {
-        window.location.href = `${this.apiUrl}/time_entries/entries?csv=true&month=${this.$store.state.tracker.selectedMonth}`
       },
     },
   };
@@ -55,6 +57,10 @@
   .select {
     width: 100%;
     text-align: center;
+  }
+
+  button {
+    width: 100%;
   }
 
   @media screen and (max-width: 768px) {

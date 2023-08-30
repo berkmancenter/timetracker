@@ -4,17 +4,18 @@
       button-selector=".side-menu-toggler"
       content-selector=".timetracker-content"
       :close-on-click="false"
+      v-if="$store.state.shared.layout.sideMenuEnabled"
     >
       <router-view name="Sidebar"></router-view>
     </swit-menu>
 
     <nav class="top-nav">
       <div class="top-nav-brand no-select">
-        <a class="side-menu-toggler hvr-grow">
+        <a class="side-menu-toggler" v-if="$store.state.shared.layout.sideMenuEnabled">
           <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs></defs><title/><g data-name="70-Menu" id="_70-Menu"><rect class="cls-1" height="6" width="6" x="1" y="1"/><rect class="cls-1" height="6" width="6" x="25" y="1"/><rect class="cls-1" height="6" width="6" x="13" y="1"/><rect class="cls-1" height="6" width="6" x="1" y="13"/><rect class="cls-1" height="6" width="6" x="1" y="25"/><rect class="cls-1" height="6" width="6" x="25" y="25"/><rect class="cls-1" height="6" width="6" x="25" y="13"/><rect class="cls-1" height="6" width="6" x="13" y="13"/><rect class="cls-1" height="6" width="6" x="13" y="25"/></g></svg>
         </a>
 
-        <router-link :to="'/'" class="top-nav-name-link ml-4">
+        <router-link :to="'/'" @click="reloadPath" class="top-nav-name-link ml-4">
           <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACK</h3>
         </router-link>
       </div>
@@ -53,6 +54,7 @@
   import logoImg from '@/images/time.svg'
   import SwitMenu from '@/components/Shared/SwitMenu.vue'
   import Spinner from '@/components/Shared/Spinner.vue'
+  import { redirectToSelectedMonth } from '@/router/index'
 
   export default {
     name: 'DefaultLayout',
@@ -63,17 +65,8 @@
     data() {
       return {
         logoImg: logoImg,
-        topMenuItems: [
-          {
-            label: 'Users',
-            path: 'admin/users',
-          },
-          {
-            label: 'Periods',
-            path: 'admin/periods',
-          },
-        ],
         apiUrl: import.meta.env.VITE_API_URL,
+        redirectToSelectedMonth: redirectToSelectedMonth,
       }
     },
     created() {
@@ -84,7 +77,10 @@
         const user = await this.$store.dispatch('shared/fetchUser')
 
         this.$store.dispatch('shared/setUser', user)
-      }
+      },
+      reloadPath() {
+        this.redirectToSelectedMonth(this.$store)
+      },
     },
   }
 </script>
@@ -204,6 +200,23 @@
     }
   }
 
+  .timetracker-content {
+    background-color: #ffffff;
+    margin-top: 5.5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border-radius: 1rem;
+    padding-top: 0.5rem;
+    box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+
+    @media all and (max-width: 700px) {
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+      margin-top: 4rem;
+    }
+  }
+
   footer#footer {
     background: var(--main-color);
     padding: 1rem;
@@ -212,6 +225,6 @@
     text-align: center;
     color: #ffffff;
     font-weight: bold;
-    margin-top: 2rem;
+    margin: 2rem 0;
   }
 </style>

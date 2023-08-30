@@ -1,11 +1,11 @@
 <template>
-  <div>
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Admin</h5>
+  <div class="admin-menu">
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Manage</h5>
 
     <div class="switmenu-section-content">
       <ul>
-        <li v-for="topMenuItem in topMenuItems">
-          <router-link :to="topMenuItem">{{ topMenuItem.label }}</router-link>
+        <li v-for="adminMenuItem in adminMenuItems">
+          <router-link :to="adminMenuItem" :class="adminMenuItem.class">{{ adminMenuItem.label }}</router-link>
         </li>
       </ul>
     </div>
@@ -17,14 +17,15 @@
     name: 'AdminMenu',
     data() {
       return {
-        topMenuItems: [
+        adminMenuItems: [
           {
-            label: 'Timetracker',
+            label: 'Back to tracking',
             name: 'tracker.index',
+            class: 'admin-menu-item-hidden-active',
           },
           {
-            label: 'Users',
-            name: 'users.index',
+            label: 'Timesheets',
+            name: 'timesheets.index',
           },
           {
             label: 'Periods',
@@ -35,3 +36,11 @@
     },
   }
 </script>
+
+<style lang="scss">
+  .router-link-active {
+    &.admin-menu-item-hidden-active {
+      display: none;
+    }
+  }
+</style>

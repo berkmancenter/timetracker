@@ -12,8 +12,8 @@
     </h3>
 
     <div class="mb-4">
-      <a class="button is-info mr-2" @click="saveCreditsSelected()">Set hours selected</a>
-      <a class="button is-info mr-2" @click="saveCreditsAll()">Save all visible</a>
+      <a class="button is-info mr-2" @click="saveCreditsSelected()" ref="saveSelectedButton">Set hours selected</a>
+      <a class="button is-info mr-2" @click="saveCreditsAll()" ref="saveAllButton">Save all visible</a>
     </div>
 
     <super-admin-filter :users="$store.state.admin.periodCredits?.credits" @change="superAdminFilterChanged" />
@@ -101,6 +101,7 @@
       },
       async saveCreditsAll() {
         this.mitt.emit('spinnerStart')
+        this.$refs.saveAllButton.disabled = true
 
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
           id: this.$store.state.admin.periodCredits.period.id,
@@ -114,6 +115,7 @@
         }
 
         this.mitt.emit('spinnerStop')
+        this.$refs.saveAllButton.disabled = false
       },
       async saveCreditsSelected() {
         const inputSelector = '.swal2-html-container .periods-credits-selected-set-input'
@@ -135,6 +137,7 @@
         }).then(async (result) => {
           if (result.isConfirmed) {
             this.mitt.emit('spinnerStart')
+            this.$refs.saveSelectedButton.disabled = true
 
             const newCreditValue = document.querySelector(inputSelector).value
 
@@ -153,6 +156,7 @@
             }
 
             this.mitt.emit('spinnerStop')
+            this.$refs.saveSelectedButton.disabled = false
           }
         })
       },

@@ -2,6 +2,8 @@
   <div class="content admin-periods">
     <h1 class="is-size-1">Periods</h1>
 
+    <p>Periods offer a comprehensive way to access statistical data regarding timesheet usage by users within a specified timeframe.</p>
+
     <form class="form">
       <div class="mb-4">
         <router-link :to="'/admin/periods/new'" class="button is-success">Add period</router-link>
@@ -11,6 +13,7 @@
         <thead>
           <tr class="no-select">
             <th>Name</th>
+            <th>Timesheet</th>
             <th>From</th>
             <th>To</th>
             <th data-sort-method="none" class="no-sort">Actions</th>
@@ -19,16 +22,17 @@
         <tbody>
           <tr v-for="period in $store.state.admin.periods" :key="period.id">
             <td>{{ period.name }}</td>
+            <td>{{ period.timesheet.name }}</td>
             <td>{{ period.from }}</td>
             <td>{{ period.to }}</td>
-            <td>
-              <router-link :to="`/admin/periods/${period.id}/edit`">
+            <td class="admin-table-actions">
+              <router-link title="Edit period" :to="`/admin/periods/${period.id}/edit`">
                 <Icon :src="editIcon" />
               </router-link>
-              <a title="Clone this period" @click.prevent="clonePeriod(period)">
+              <a title="Clone period" @click.prevent="clonePeriod(period)">
                 <Icon :src="cloneIcon" />
               </a>
-              <a title="Delete this period" @click.prevent="deletePeriod(period)">
+              <a title="Delete period" @click.prevent="deletePeriod(period)">
                 <Icon :src="minusIcon" />
               </a>
               <router-link title="Set period hours" :to="`/admin/periods/${period.id}/credits`">

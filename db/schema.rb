@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_02_102440) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_29_111507) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -24,12 +24,30 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_02_102440) do
     t.index ["user_id"], name: "index_credits_on_user_id"
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "email"
+    t.datetime "expiration"
+    t.boolean "used", default: false, null: false
+    t.bigint "timesheet_id"
+    t.bigint "sender_id", null: false
+    t.bigint "used_by_id"
+    t.string "itype", default: "single", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sender_id"], name: "index_invitations_on_sender_id"
+    t.index ["timesheet_id"], name: "index_invitations_on_timesheet_id"
+    t.index ["used_by_id"], name: "index_invitations_on_used_by_id"
+  end
+
   create_table "periods", force: :cascade do |t|
     t.string "name", null: false
     t.date "from", null: false
     t.date "to", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "timesheet_id", null: false
+    t.index ["timesheet_id"], name: "index_periods_on_timesheet_id"
   end
 
   create_table "time_entries", id: :serial, force: :cascade do |t|
@@ -41,9 +59,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_02_102440) do
     t.date "entry_date", null: false
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
+    t.bigint "timesheet_id", null: false
     t.index ["category"], name: "index_time_entries_on_category"
     t.index ["entry_date"], name: "index_time_entries_on_entry_date"
     t.index ["project"], name: "index_time_entries_on_project"
+    t.index ["timesheet_id"], name: "index_time_entries_on_timesheet_id"
+  end
+
+  create_table "timesheets", force: :cascade do |t|
+    t.string "name"
+    t.string "public_code"
+    t.string "uuid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
@@ -56,4 +84,41 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_02_102440) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "users_timesheets", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "timesheet_id"
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["timesheet_id"], name: "index_users_timesheets_on_timesheet_id"
+    t.index ["user_id"], name: "index_users_timesheets_on_user_id"
+  end
+
+  create_table "users_workspaces", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "workspace_id"
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_users_workspaces_on_user_id"
+    t.index ["workspace_id"], name: "index_users_workspaces_on_workspace_id"
+  end
+
+  create_table "workspaces", force: :cascade do |t|
+    t.string "name"
+    t.string "public_code"
+    t.string "uuid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "invitations", "timesheets"
+  add_foreign_key "invitations", "users", column: "sender_id"
+  add_foreign_key "invitations", "users", column: "used_by_id"
+  add_foreign_key "periods", "timesheets"
+  add_foreign_key "time_entries", "timesheets"
+  add_foreign_key "users_timesheets", "timesheets"
+  add_foreign_key "users_timesheets", "users"
+  add_foreign_key "users_workspaces", "users"
+  add_foreign_key "users_workspaces", "workspaces"
 end

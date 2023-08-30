@@ -24,7 +24,7 @@
       </FormField>
 
       <FormField label="" accessKey="s">
-        <button type="submit" name="commit" class="button is-success entry-form-submit ld-ext-right" :class="{ running: working }" accesskey="s">
+        <button type="submit" name="commit" class="button is-success entry-form-submit ld-ext-right" :class="{ running: working }" accesskey="s" ref="submitButton">
           {{ submitButtonName }}
           <div class="ld ld-ring ld-spin"></div>
         </button>
@@ -70,6 +70,7 @@
     methods: {
       async submitForm(ev) {
         this.mitt.emit('spinnerStart')
+        this.$refs.submitButton.disabled = true
         this.working = true
 
         const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
@@ -88,6 +89,7 @@
         this.$store.dispatch('tracker/clearEntryForm')
         this.working = false
         this.mitt.emit('spinnerStop')
+        this.$refs.submitButton.disabled = false
       },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {

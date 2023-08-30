@@ -10,7 +10,6 @@ Rails.application.routes.draw do
       get :days
       get :months
       get :auto_complete
-      get :choose_user
       post :edit
       patch :edit
     end
@@ -39,6 +38,18 @@ Rails.application.routes.draw do
     collection do
       post :upsert
       post :delete
+    end
+  end
+
+  resources :timesheets do
+    collection do
+      post :upsert
+      post :delete
+      get 'join/:code', action: :join
+    end
+    member do
+      post :send_invitations
+      get :leave
     end
   end
 

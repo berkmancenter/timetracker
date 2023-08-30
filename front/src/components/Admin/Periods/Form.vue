@@ -11,6 +11,19 @@
       </div>
 
       <div class="field">
+        <label class="label">Timesheet</label>
+        <div class="control">
+          <div class="select">
+            <select v-model="$store.state.admin.period.timesheet_id" required="true">
+              <option v-for="timesheet in timesheets" :key="timesheet.id" :value="timesheet.id">
+                {{ timesheet.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
         <label class="label">From</label>
         <div class="control">
           <date-picker v-model:value="$store.state.admin.period.from" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="from"></date-picker>
@@ -26,7 +39,7 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button">Save</button>
+          <button class="button" ref="submitButton">Save</button>
         </div>
       </div>
     </form>
@@ -42,7 +55,9 @@
       Icon,
     },
     data() {
-      return {}
+      return {
+        timesheets: [],
+      }
     },
     computed: {
       title() {
@@ -62,6 +77,8 @@
         this.loadPeriod()
       },
       async loadPeriod() {
+        this.timesheets = await this.$store.dispatch('admin/fetchTimesheets')
+
         if (this.$route.params.id) {
           this.mitt.emit('spinnerStart')
 
@@ -86,6 +103,7 @@
       },
       async save() {
         this.mitt.emit('spinnerStart')
+        this.$refs.submitButton.disabled = true
 
         const response = await this.$store.dispatch('admin/savePeriod', this.$store.state.admin.period)
 
@@ -99,6 +117,7 @@
         }
 
         this.mitt.emit('spinnerStop')
+        this.$refs.submitButton.disabled = false
       },
     },
   }

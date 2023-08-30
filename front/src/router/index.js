@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { globals } from '@/main.js'
 
 const basePath = import.meta.env.VITE_BASE_PATH
 
@@ -16,7 +15,7 @@ const router = createRouter({
           name: 'app.index',
         },
         {
-          path: ':month?',
+          path: ':timesheet?/:month?',
           components: {
             default: () => import('@/components/Tracker/Tracker.vue'),
             Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
@@ -71,6 +70,46 @@ const router = createRouter({
           },
           name: 'periods.credits',
         },
+        {
+          path: 'admin/timesheets',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Index.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'timesheets.index',
+        },
+        {
+          path: 'admin/timesheets/new',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'timesheets.new',
+        },
+        {
+          path: 'admin/timesheets/:id/edit',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'timesheets.edit',
+        },
+        {
+          path: 'admin/timesheets/:id/invite',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Invite.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'timesheets.invite',
+        },
+        {
+          path: 'join/:code',
+          components: {
+            default: () => import('@/components/Tracker/Join.vue'),
+            Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
+          },
+          name: 'timesheets.join',
+        },
       ],
     }
   ]
@@ -81,6 +120,7 @@ const redirectToSelectedMonth = function(store) {
     {
       name: 'tracker.index',
       params: {
+        timesheet: store.state.tracker.selectedTimesheet.uuid,
         month: store.state.tracker.selectedMonth,
       },
     },

@@ -14,9 +14,11 @@ const defaultEntry = {
 }
 
 const state = {
+  timesheets: [],
   months: [],
   entries: [],
   selectedMonth: 'all',
+  selectedTimesheet: {},
   formEntry: JSON.parse(JSON.stringify(defaultEntry)),
   formMode: 'create',
   popular: {
@@ -27,6 +29,9 @@ const state = {
 }
 
 const mutations = {
+  setTimesheets(state, timesheets) {
+    state.timesheets = timesheets
+  },
   setMonths(state, months) {
     state.months = months
   },
@@ -72,17 +77,26 @@ const mutations = {
   setSelectedMonth(state, month) {
     state.selectedMonth = month
   },
+  setSelectedTimesheet(state, timesheet) {
+    state.selectedTimesheet = timesheet
+  },
 }
 
 const actions = {
   async fetchMonths(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/months`)
+    const response = await fetchIt(`${apiUrl}/time_entries/months?timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
+    const data = await response.json()
+
+    return data
+  },
+  async fetchTimesheets(context) {
+    const response = await fetchIt(`${apiUrl}/timesheets`)
     const data = await response.json()
 
     return data
   },
   async fetchEntries(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
     const data = await response.json()
 
     return data
@@ -94,7 +108,7 @@ const actions = {
     return data
   },
   async fetchDailyTotals(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}`)
+    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
     const data = await response.json()
 
     return data
@@ -112,7 +126,10 @@ const actions = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ time_entry: context.state.formEntry }),
+      body: JSON.stringify({
+        time_entry: context.state.formEntry,
+        timesheet_uuid: context.state.selectedTimesheet.uuid,
+      }),
     })
     const data = response.json()
 
@@ -168,8 +185,24 @@ const actions = {
       context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
     }
   },
+  setTimesheets(context, timesheets) {
+    context.commit('setTimesheets', timesheets)
+
+    const currentTimesheetParam = router.currentRoute._value.params?.timesheet
+    const timesheetFromRoute = timesheets.find(timesheet => timesheet.uuid === currentTimesheetParam)
+    if (timesheetFromRoute) {
+      context.dispatch('setSelectedTimesheet', timesheetFromRoute)
+    } else {
+      if (timesheets.length > 0) {
+        context.dispatch('setSelectedTimesheet', timesheets[0])
+      }
+    }
+  },
   setSelectedMonth(context, month) {
     context.commit('setSelectedMonth', month)
+  },
+  setSelectedTimesheet(context, timesheet) {
+    context.commit('setSelectedTimesheet', timesheet)
   },
   async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
@@ -185,6 +218,11 @@ const actions = {
     }
   
     return await Promise.all(promises)
+  },
+  async joinTimesheet(context, code) {
+    const response = await fetchIt(`${apiUrl}/timesheets/join/${code}`)
+
+    return response
   },
 }
 

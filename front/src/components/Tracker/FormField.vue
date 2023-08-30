@@ -1,7 +1,7 @@
 <template>
   <div class="tracker-entry-form-field field">
     <div class="field-label is-normal mb-2">
-      <label class="label">{{ label }}</label>
+      <label class="label no-select">{{ label }}</label>
     </div>
     <div class="field-body">
       <div class="field">

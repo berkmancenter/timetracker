@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :is_admin, except: %i[current_user]
+  before_action :is_superadmin?, except: %i[current_user]
 
   layout 'admin'
 
@@ -45,7 +45,7 @@ class UsersController < ApplicationController
     render json: {
       username: helpers.clean_username(@session_user.username),
       user_id: @session_user.id,
-      is_admin: @session_user.superadmin,
+      is_superadmin: @session_user.superadmin,
       sudo_users: get_sudo_users_usernames
     }, status: :ok
   end
