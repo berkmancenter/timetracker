@@ -2,7 +2,10 @@ class PeriodsController < ApplicationController
   before_action :set_period, except: %i[index upsert delete]
 
   PERIOD_PUBLIC_FIELDS = {
-    only: %i[id timesheet_id name from to]
+    only: %i[id timesheet_id name from to],
+    include: {
+      timesheet: { only: %i[id name] }
+    }
   }.freeze
 
   def index
