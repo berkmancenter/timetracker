@@ -7,5 +7,9 @@ class CreateUsersTimesheets < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
+
+    User.all.each do |u|
+      UsersTimesheet.create(user: u, timesheet_id: Timesheet.all.first, role: 'user')
+    end
   end
 end
