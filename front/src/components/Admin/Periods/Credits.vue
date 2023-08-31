@@ -142,7 +142,7 @@
             const newCreditValue = document.querySelector(inputSelector).value
 
             selected
-              .map(credit => credit.amount = newCreditValue)
+              .map(credit => credit.credit_amount = newCreditValue)
 
             const response = await this.$store.dispatch('admin/savePeriodCredits', {
               id: this.$store.state.admin.periodCredits.period.id,
