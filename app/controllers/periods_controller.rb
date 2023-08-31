@@ -59,12 +59,12 @@ class PeriodsController < ApplicationController
   def credits
     generic_unauthorized_response and return unless @period.timesheet.is_admin?(@session_user)
 
-    users = User.order(:username)
+    users = @period.timesheet.users.group(:id).order(:username)
     credits = users.map do |user|
       {
         user_id: user.id,
         username: user.username,
-        superadmin: user.superadmin,
+        admin: @period.timesheet.is_admin?(user),
         email: user.email,
         credit_amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
       }
@@ -86,10 +86,14 @@ class PeriodsController < ApplicationController
 
     new_credits_values = {}
 
-    params[:credits].each do |credit_data|
-      next if !credit_data['credit_amount'].present? || credit_data['credit_amount'].to_d == 0.0.to_d
+    timesheet_user_ids = @period.timesheet.users.pluck(:id)
 
-      new_credits_values[credit_data['user_id'].to_i] = credit_data['credit_amount']
+    params[:credits].each do |credit_data|
+      user_id = credit_data['user_id'].to_i
+
+      next if !credit_data['credit_amount'].present? || credit_data['credit_amount'].to_d == 0.0.to_d || !timesheet_user_ids.include?(user_id)
+
+      new_credits_values[user_id] = credit_data['credit_amount']
     end
 
     new_credits = []
@@ -131,8 +135,7 @@ class PeriodsController < ApplicationController
   def stats
     generic_unauthorized_response and return unless @period.timesheet.is_admin?(@session_user)
 
-    user_ids = params[:user_ids] ? params[:user_ids].split(',') : []
-    stats = @period.get_stats(user_ids)
+    stats = @period.get_stats
 
     render_stats_csv(stats) and return if params[:csv]
 
