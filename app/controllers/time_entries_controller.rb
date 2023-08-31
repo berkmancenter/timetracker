@@ -3,7 +3,7 @@ class TimeEntriesController < ApplicationController
 
   def entries
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.is_user?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_user?(current_user)
     render_entries_csv and return if params[:csv]
 
     month = params[:month]
@@ -15,14 +15,14 @@ class TimeEntriesController < ApplicationController
     time_entry = TimeEntry.find_by_id(params[:time_entry][:id]) || TimeEntry.new(entry_date: Time.now, decimal_time: 0)
 
     generic_bad_request_response and return unless request.post? || request.patch?
-    generic_unauthorized_response and return if time_entry.id && time_entry.user != @session_user
+    generic_unauthorized_response and return if time_entry.id && time_entry.user != current_user
     generic_bad_request_response and return if @timesheet.nil?
 
     time_entry.attributes = time_entry_params
     time_entry.timesheet = @timesheet
     time_entry.category = time_entry.category.downcase.strip
     time_entry.project = time_entry.project.downcase.strip
-    time_entry.user = @session_user
+    time_entry.user = current_user
 
     if time_entry.save
       render json: { entry: time_entry }, status: :ok
@@ -34,7 +34,7 @@ class TimeEntriesController < ApplicationController
   def delete
     te = TimeEntry.find(params[:id])
 
-    generic_unauthorized_response and return if te.user != @session_user
+    generic_unauthorized_response and return if te.user != current_user
 
     te.destroy
 
@@ -43,21 +43,21 @@ class TimeEntriesController < ApplicationController
 
   def popular
     render json: {
-      categories: TimeEntry.my_popular_categories(@session_user),
-      projects: TimeEntry.my_popular_projects(@session_user)
+      categories: TimeEntry.my_popular_categories(current_user),
+      projects: TimeEntry.my_popular_projects(current_user)
     }, status: :ok
   end
 
   def days
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.is_user?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_user?(current_user)
 
     render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet), status: :ok
   end
 
   def months
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.is_user?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_user?(current_user)
 
     render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
   end
@@ -65,7 +65,7 @@ class TimeEntriesController < ApplicationController
   def auto_complete
     generic_bad_request_response and return if params[:field].nil? || params[:term].nil? || !['category', 'project'].include?(params[:field])
 
-    render json: TimeEntry.where(user: @session_user).where("#{params[:field]} ilike ?", "%#{params[:term]}%").group(params[:field]).pluck(params[:field])
+    render json: TimeEntry.where(user: current_user).where("#{params[:field]} ilike ?", "%#{params[:term]}%").group(params[:field]).pluck(params[:field])
   end
 
   private
@@ -75,10 +75,10 @@ class TimeEntriesController < ApplicationController
   end
 
   def get_active_users
-    unless session["#{@session_user.id}_active_users"].blank?
-      session["#{@session_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
+    unless session["#{current_user.id}_active_users"].blank?
+      session["#{current_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
     else
-      [@session_user]
+      [current_user]
     end
   end
 
@@ -103,5 +103,24 @@ class TimeEntriesController < ApplicationController
 
   def set_timesheet
     @timesheet = Timesheet.where(uuid: params.permit(:timesheet_uuid)[:timesheet_uuid]).first
+  end
+
+  def render_csv(param)
+    param[:filebase] = param[:filebase].blank? ? param[:model].to_s.tableize : param[:filebase]
+    param[:columns] = param[:model].columns.collect(&:name) if param[:columns].blank?
+
+    csv_string = CSV.generate do |csv|
+      csv << param[:columns]
+      param[:objects].each do |record|
+        line = param[:columns].collect { |col| record[col].to_s.chomp }
+        csv << line
+      end
+    end
+
+    send_data(
+      csv_string,
+      type: 'application/octet-stream',
+      filename: "#{param[:filebase]}-#{Time.now.to_s(:number)}.csv"
+    )
   end
 end

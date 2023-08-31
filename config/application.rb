@@ -94,5 +94,9 @@ module Timetracker
     config.default_sender = ENV['DEFAULT_SENDER'] || 'no-reply@example.com'
     config.return_path = ENV['RETURN_PATH'] || 'user@example.com'
     config.front_url = ENV['FRONT_URL'] || 'https://example.com'
+
+    # devise_cas_authenticatable configuration
+    config.rack_cas.server_url = ENV['DEVISE_CAS_AUTH_URL'] || 'https://cas.example.com'
+    config.rack_cas.service = ENV['DEVISE_CAS_AUTH_SERVICE_PATH'] || '/users/service'
   end
 end

@@ -2,11 +2,11 @@ class TimesheetsController < ApplicationController
   before_action :set_timesheet, only: %i[show send_invitations leave]
 
   def index
-    render json: @session_user.user_timesheets, status: :ok
+    render json: current_user.user_timesheets, status: :ok
   end
 
   def show
-    generic_unauthorized_response and return unless @timesheet.is_admin?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_admin?(current_user)
 
     render json: @timesheet, status: :ok
   end
@@ -16,7 +16,7 @@ class TimesheetsController < ApplicationController
     if timesheet_params[:id]
       timesheet = Timesheet.find(timesheet_params['id'])
 
-      generic_unauthorized_response and return unless timesheet.is_admin?(@session_user)
+      generic_unauthorized_response and return unless timesheet.is_admin?(current_user)
 
       timesheet.assign_attributes(timesheet_params)
     else
@@ -25,7 +25,7 @@ class TimesheetsController < ApplicationController
     end
 
     if timesheet.save
-      UsersTimesheet.create(user: @session_user, timesheet: timesheet, role: 'admin') if new_record
+      UsersTimesheet.create(user: current_user, timesheet: timesheet, role: 'admin') if new_record
       render json: { timesheet: timesheet }, status: :ok
     else
       render json: { message: timesheet.errors.full_messages.join(', ') }, status: :bad_request
@@ -37,7 +37,7 @@ class TimesheetsController < ApplicationController
 
     unauth = false
     Timesheet.where(id: timesheets_ids).each do |t|
-      unauth = true unless t.is_admin?(@session_user)
+      unauth = true unless t.is_admin?(current_user)
     end
     generic_unauthorized_response and return if unauth
 
@@ -51,14 +51,14 @@ class TimesheetsController < ApplicationController
   end
 
   def send_invitations
-    generic_unauthorized_response and return unless @timesheet.is_admin?(@session_user)
+    generic_unauthorized_response and return unless @timesheet.is_admin?(current_user)
 
     email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
     emails = params[:emails].scan(email_regex)
 
     invitations = []
     emails.each do |e|
-      invitations << Invitation.new(email: e, sender: @session_user, timesheet: @timesheet)
+      invitations << Invitation.new(email: e, sender: current_user, timesheet: @timesheet)
     end
 
     Invitation.import!(invitations)
@@ -77,10 +77,10 @@ class TimesheetsController < ApplicationController
 
     timesheet = invitation.timesheet
 
-    ut = UsersTimesheet.new(user: @session_user, timesheet: timesheet, role: 'user')
+    ut = UsersTimesheet.new(user: current_user, timesheet: timesheet, role: 'user')
 
     if ut.save
-      invitation.used_by = @session_user
+      invitation.used_by = current_user
       invitation.used = true
       invitation.save
 
@@ -92,7 +92,7 @@ class TimesheetsController < ApplicationController
 
   def leave
     UsersTimesheet
-      .where(user: @session_user, timesheet: @timesheet)
+      .where(user: current_user, timesheet: @timesheet)
       .destroy_all
 
     render json: { message: 'ok' }, status: :ok
