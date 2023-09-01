@@ -32,7 +32,7 @@ const mutations = {
 
 const actions = {
   async fetchUser(context) {
-    const response = await fetchIt(`${apiUrl}/users/current_user`)
+    const response = await fetchIt(`${apiUrl}/users/current_user_data`)
     const data = await response.json()
 
     return data

@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
-  devise :cas_authenticatable, :recoverable, :rememberable, :validatable
+  devise :cas_authenticatable, :recoverable, :rememberable, :validatable if Rails.application.config.devise_auth_type == 'cas'
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable if Rails.application.config.devise_auth_type == 'db'
   has_many :time_entries, dependent: :destroy
   has_many :credits, dependent: :destroy
   has_many :users_timesheets, dependent: :destroy

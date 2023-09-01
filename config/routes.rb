@@ -21,7 +21,7 @@ Rails.application.routes.draw do
 
   resources :users do
     collection do
-      get :current_user
+      get :current_user_data
       post :sudo
       post :delete
       post :toggle_admin

@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :is_superadmin?, except: %i[current_user]
+  before_action :is_superadmin?, except: %i[current_user_data]
 
   def index
     users = User.order(:username)
@@ -39,7 +39,7 @@ class UsersController < ApplicationController
     render json: { message: 'ok' }, status: :ok
   end
 
-  def current_user
+  def current_user_data
     render json: {
       username: helpers.clean_username(current_user.username),
       user_id: current_user.id,

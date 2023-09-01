@@ -98,5 +98,8 @@ module Timetracker
     # devise_cas_authenticatable configuration
     config.rack_cas.server_url = ENV['DEVISE_CAS_AUTH_URL'] || 'https://cas.example.com'
     config.rack_cas.service = ENV['DEVISE_CAS_AUTH_SERVICE_PATH'] || '/users/service'
+
+    # Devise authentication type
+    config.devise_auth_type = ENV['DEVISE_AUTH_TYPE'] || 'db'
   end
 end
