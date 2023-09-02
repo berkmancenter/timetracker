@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'activerecord-import'
+gem 'activerecord-session_store'
 gem 'bootsnap'
 gem 'carmen'
 gem 'couchrest'
