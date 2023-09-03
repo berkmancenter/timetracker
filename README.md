@@ -5,7 +5,7 @@ Time Tracker is a simple open-source time reporting application.
 ## Stack
 * Ruby `3.0.x`
 * Ruby on Rails `7.0.x`
-* PostgreSQL `9.x` - `14.x`
+* PostgreSQL `12.x` - `14.x`
 * Vue `3.2.x`
 * Vite
 * Bundler
