@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   has_many :timesheets, through: :users_timesheets
 
   if Rails.application.config.devise_auth_type == 'cas'
-    devise :cas_authenticatable, :recoverable, :rememberable, :validatable
+    devise :cas_authenticatable, :rememberable
     before_validation :match_existing_user
   end
 
@@ -41,8 +41,8 @@ class User < ActiveRecord::Base
     existing_user = User.where(email: self.email).first
 
     unless existing_user.nil?
-      self.id = existing_user.id
-      self.password = existing_user.password
+      self.attributes = existing_user.attributes.except('username')
+      @new_record = false
     end
 
     self.password = SecureRandom.base64(15) unless self.password.present?
