@@ -1,10 +1,19 @@
+require 'securerandom'
+
 class User < ActiveRecord::Base
-  devise :cas_authenticatable, :recoverable, :rememberable, :validatable if Rails.application.config.devise_auth_type == 'cas'
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable if Rails.application.config.devise_auth_type == 'db'
   has_many :time_entries, dependent: :destroy
   has_many :credits, dependent: :destroy
   has_many :users_timesheets, dependent: :destroy
   has_many :timesheets, through: :users_timesheets
+
+  if Rails.application.config.devise_auth_type == 'cas'
+    devise :cas_authenticatable, :recoverable, :rememberable, :validatable
+    before_validation :match_existing_user
+  end
+
+  if Rails.application.config.devise_auth_type == 'db'
+    devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
+  end
 
   def user_timesheets
     timesheets
@@ -24,5 +33,18 @@ class User < ActiveRecord::Base
         self.email = value
       end
     end
+  end
+
+  private
+
+  def match_existing_user
+    existing_user = User.where(email: self.email).first
+
+    unless existing_user.nil?
+      self.id = existing_user.id
+      self.password = existing_user.password
+    end
+
+    self.password = SecureRandom.base64(15) unless self.password.present?
   end
 end
