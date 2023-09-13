@@ -1,4 +1,4 @@
-class CreateTimeEntries < ActiveRecord::Migration
+class CreateTimeEntries < ActiveRecord::Migration[7.0]
   def self.up
     create_table :time_entries do |t|
       t.references :user
