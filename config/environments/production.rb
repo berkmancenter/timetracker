@@ -61,7 +61,7 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = (ENV['MAILER_DELIVERY_METHOD'] || :smtp).to_sym
   config.action_mailer.default_url_options = {
-      host: (ENV['EMAIL_DOMAIN'] || 'lumendatabase.org')
+      host: (ENV['EMAIL_DOMAIN'] || 'example.com')
     }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

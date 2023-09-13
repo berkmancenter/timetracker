@@ -16,17 +16,9 @@ Time Tracker is a simple open-source time reporting application.
 * `docker-compose exec website bash`
 * `bundle install`
 * Copy `config/database.yml.example` to `config/database.yml` and set up your database accordingly.
-* Copy `config/secrets.yml.example` to `config/secrets.yml` and fill in the `secret_key_base` values for dev/test.
-* Add the following to .env:
-  * `USE_FAKEAUTH` (optional; set to to `true` if you want to bypass CAS for development; any username/password will work; cannot be used in production).
-  * `SECRET_KEY_BASE` (required in production, optional otherwise; use `rails secret` to generate a value).
-  * `ALLOWED_HOST` (localhost is allowed by default; anything else must be explicit; may be a single string or a regex)
-  * `CAS_DATA_DIRECTORY` (required in production, directory for storing CAS data, in development use `USE_FAKEAUTH`)
+* `cp .env.dev .env`
 * `cd front`
-* Add the following to .env:
-  * `VITE_API_URL` (required, URL of the Rails API, in `development` it will most likely be `http://127.0.0.1:6868`)
-  * `VITE_SITE_URL` (required, URL of the Vue application, in `development` it will most likely be `http://127.0.0.1:6767`)
-  * `VITE_ENVIRONMENT` (optional, Vue application environment, default is `development`)
+* cp .env.dev .env
 * `cd ..`
 * `rails db:migrate`
 * `rails s -b 0.0.0.0`
@@ -44,6 +36,30 @@ Time Tracker is a simple open-source time reporting application.
   * `rails db:migrate` if db schema changes.
   * `cd front && ./deploy.sh` if you had changes in the Vue application
   * Run your web server, whatever it is (e.g. https://github.com/phusion/passenger).
+
+## Environment variables
+
+### API (.env)
+
+| Variable    | Description | Required |
+| ----------- | ----------- | -------- |
+| `SECRET_KEY_BASE` | Use `rails secret` to generate a value | `Yes` |
+| `FRONT_URL` | Application URL | `Yes` |
+| `ALLOWED_HOST` | `localhost` is allowed by default, anything else must be explicit, may be a single string or a regex | `No` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of CORS allowed origins | `No`
+| `DEVISE_AUTH_TYPE` | Authentication type, allowed values are `db` and `cas`, default is `db` | `No` |
+| `DEVISE_CAS_AUTH_URL` | CAS server URL | `Yes` when `DEVISE_AUTH_TYPE` is `cas`, optional otherwise |
+| `DEVISE_CAS_AUTH_SERVICE_PATH` | CAS callback service path, use it only if you want to customize the path, usually not needed | `No` |
+| `DEFAULT_SENDER` | Application emails sender e.g. `Tony Hawk <tony@example.com>` | `Yes` when `DEVISE_AUTH_TYPE` is `db`, optional otherwise |
+| `RETURN_PATH` | Email address for bounced messages | `Yes` when `DEVISE_AUTH_TYPE` is `db`, optional otherwise |
+
+### Front-end (front/.env)
+
+| Variable    | Description | Required |
+| ----------- | ----------- | -------- |
+| `VITE_API_URL` | URL of the Rails API, in `development` it will most likely be `http://127.0.0.1:6868` | `Yes` |
+| `VITE_SITE_URL` | URL of the Vue application, in `development` it will most likely be `http://127.0.0.1:6767` | `Yes` |
+| `VITE_ENVIRONMENT` | Vue application environment, default is `development` | `No` |
 
 ## License
 
