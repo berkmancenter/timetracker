@@ -33,6 +33,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 USER $USERNAME
 
 # Install and cache gems
+RUN sudo gem update --system
 WORKDIR /
 COPY Gemfile* /tmp/
 RUN sudo chown -R $USERNAME:$USERNAME /tmp
