@@ -3,10 +3,10 @@
 Time Tracker is a simple open-source time reporting application.
 
 ## Stack
-* Ruby `3.0.x`
-* Ruby on Rails `7.0.x`
-* PostgreSQL `12.x` - `14.x`
-* Vue `3.2.x`
+* Ruby
+* Ruby on Rails
+* PostgreSQL
+* Vue
 * Vite
 * Bundler
 
@@ -15,10 +15,8 @@ Time Tracker is a simple open-source time reporting application.
 * `docker-composer up`
 * `docker-compose exec website bash`
 * `bundle install`
-* Copy `config/database.yml.example` to `config/database.yml` and set up your database accordingly.
-* `cp .env.dev .env`
 * `cd front`
-* cp .env.dev .env
+* `./deploy.sh`
 * `cd ..`
 * `rails db:migrate`
 * `rails s -b 0.0.0.0`
@@ -28,14 +26,13 @@ Time Tracker is a simple open-source time reporting application.
 
 * The first time
   * Follow the steps above for development.
-  * Make sure you've set the server hostname in ALLOWED_HOST.
 * Every time
   * `git pull`
   * `bundle install`
   * `rails assets:clobber && rails assets:precompile` if assets changes
   * `rails db:migrate` if db schema changes.
   * `cd front && ./deploy.sh` if you had changes in the Vue application
-  * Run your web server, whatever it is (e.g. https://github.com/phusion/passenger).
+  * Run your web server, whatever it is (e.g. https://github.com/phusion/passenger) in the `production` environment (RAILS_ENV=production).
 
 ## Environment variables
 
@@ -45,6 +42,12 @@ Time Tracker is a simple open-source time reporting application.
 | ----------- | ----------- | -------- |
 | `SECRET_KEY_BASE` | Use `rails secret` to generate a value | `Yes` |
 | `FRONT_URL` | Application URL | `Yes` |
+| `DATABASE_USERNAME` | Database username | `Yes` |
+| `DATABASE_PASSWORD` | Database password | `Yes` |
+| `DATABASE_DB_NAME` | Database name | `Yes` |
+| `DATABASE_HOST` | Database host | `Yes` |
+| `DATABASE_PORT` | Database port, default `5432` | `No` |
+| `DATABASE_TIMEOUT` | Database timeout, default `5000 ms` | `No` |
 | `ALLOWED_HOST` | `localhost` is allowed by default, anything else must be explicit, may be a single string or a regex | `No` |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of CORS allowed origins | `No`
 | `DEVISE_AUTH_TYPE` | Authentication type, allowed values are `db` and `cas`, default is `db` | `No` |

@@ -31,11 +31,41 @@ gem 'unf_ext'
 
 group :development, :test, :assets do
   gem 'mini_racer'
-  gem 'puma', '~> 6.0'
+  gem 'puma'
   gem 'sassc-rails'
   gem 'terser'
 end
 
 group :development do
   gem 'bundle-audit'
+end
+
+group :development, :test do
+  gem 'pry'
+  gem 'pry-byebug'
+  gem 'pry-rails'
+  gem 'ruby-prof'
+  gem 'sham_rack'
+end
+
+group :test do
+  gem 'capybara-selenium'
+  gem 'curb'
+  gem 'database_cleaner'
+  gem 'factory_bot_rails'
+  gem 'parallel_tests'
+  gem 'rack-test', require: 'rack/test'
+  gem 'rails-controller-testing'
+  gem 'rspec-collection_matchers'
+  gem 'rspec_junit_formatter'
+  gem 'rspec-pride'
+  gem 'rspec-rails'
+  gem 'shoulda-matchers'
+  gem 'simplecov', require: false
+  gem 'test-prof'
+  gem 'timecop'
+  gem 'vcr'
+  gem 'webdrivers'
+  gem 'webmock'
+  gem 'webrick'
 end
