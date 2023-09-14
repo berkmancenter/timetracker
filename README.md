@@ -1,4 +1,4 @@
-[![Build Status](https://circleci.com/gh/berkmancenter/timetracker.svg?style=shield)](https://circleci.com/gh/berkmancenter/circleci)
+[![Build Status](https://circleci.com/gh/berkmancenter/timetracker.svg?style=shield)](https://circleci.com/gh/berkmancenter/timetracker)
 
 # Time Tracker
 
