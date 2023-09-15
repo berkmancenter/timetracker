@@ -41,7 +41,7 @@ class UsersController < ApplicationController
 
   def current_user_data
     render json: {
-      username: helpers.clean_username(current_user.username),
+      username: helpers.clean_username(current_user.username) || current_user.email,
       user_id: current_user.id,
       is_superadmin: current_user.superadmin,
       sudo_users: get_sudo_users_usernames

@@ -1,6 +1,10 @@
 #!/bin/bash
+
+: ${VITE_ENV:=development}
+env_filename=".env.$VITE_ENV"
+
 set -o allexport
-source .env
+source $env_filename
 set +o allexport
 
 CONFIG_FILE=vite.config.js

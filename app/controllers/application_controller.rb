@@ -15,6 +15,8 @@ class ApplicationController < ActionController::Base
     redirect_to root_url unless current_user.superadmin
   end
 
+  private
+
   def generic_bad_request_response
     render json: { message: 'Bad request' }, status: :bad_request
   end
