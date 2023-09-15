@@ -14,8 +14,8 @@ Time Tracker is a simple open-source time reporting application.
 
 ## Development
 
-* `docker-composer up`
-* `docker-compose exec website bash`
+* `docker-compose -f docker-compose.dev.yml --env-file .env.dev up`
+* `docker-compose -f docker-compose.dev.yml --env-file .env.dev exec app bash`
 * `bundle install`
 * `cd front`
 * `./deploy.sh`
