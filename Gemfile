@@ -53,6 +53,7 @@ group :test do
   gem 'curb'
   gem 'database_cleaner'
   gem 'factory_bot_rails'
+  gem 'faker'
   gem 'parallel_tests'
   gem 'rack-test', require: 'rack/test'
   gem 'rails-controller-testing'
