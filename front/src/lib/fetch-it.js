@@ -1,17 +1,13 @@
 import { globals } from '@/main.js'
 
-const environment = import.meta.env.VITE_ENVIRONMENT
-
 const fetchIt = async (url, options = {}) => {
-  if (environment === 'development') {
-    options.credentials = 'include'
-  }
+  options.credentials = 'include'
 
   let response
   try {
     response = await fetch(url, options)
   } catch (error) {
-    globals.awn.warning('Your Harvard Key session has expired.<br>Please refresh the page.')
+    globals.awn.warning('Something went wrong.<br>Please refresh the page or try again later.')
   }
 
   const responsePromise = new Promise((resolve, reject) => {
@@ -23,4 +19,4 @@ const fetchIt = async (url, options = {}) => {
   return responsePromise
 }
 
-export default fetchIt;
+export default fetchIt
