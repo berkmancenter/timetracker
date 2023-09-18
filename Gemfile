@@ -7,7 +7,7 @@ gem 'carmen'
 gem 'couchrest'
 gem 'csv'
 gem 'devise'
-gem 'devise_cas_authenticatable'
+gem 'devise_cas_authenticatable', require: false
 gem 'domain_name'
 gem 'dotenv-rails'
 gem 'http-cookie'

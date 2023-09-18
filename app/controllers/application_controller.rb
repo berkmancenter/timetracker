@@ -26,8 +26,8 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user_json!
-    unless user_signed_in?
-      render json: { message: 'Unauthorized' }, status: :unauthorized
+    if current_user.nil?
+      render json: { message: 'Unauthorized' }, status: :unauthorized and return false
     end
   end
 end
