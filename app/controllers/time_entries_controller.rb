@@ -17,11 +17,12 @@ class TimeEntriesController < ApplicationController
     generic_bad_request_response and return unless request.post? || request.patch?
     generic_unauthorized_response and return if time_entry.id && time_entry.user != current_user
     generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return unless @timesheet.is_user?(current_user)
 
     time_entry.attributes = time_entry_params
     time_entry.timesheet = @timesheet
-    time_entry.category = time_entry.category.downcase.strip
-    time_entry.project = time_entry.project.downcase.strip
+    time_entry.category = time_entry&.category&.downcase&.strip || ''
+    time_entry.project = time_entry&.project&.downcase&.strip || ''
     time_entry.user = current_user
 
     if time_entry.save
@@ -98,7 +99,7 @@ class TimeEntriesController < ApplicationController
       objects << te
     end
 
-    render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns) and return
+    render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns)
   end
 
   def set_timesheet

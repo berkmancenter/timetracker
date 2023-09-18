@@ -52,4 +52,10 @@ FactoryBot.define do
     email { Faker::Internet.unique.email }
     password { Devise.friendly_token(10) }
   end
+
+  factory :users_timesheet do
+    association :user
+    association :timesheet
+    role { 'user' }
+  end
 end

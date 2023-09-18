@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
-  before_action :authenticate_user!
+  before_action :authenticate_user_json!
 
   skip_before_action :verify_authenticity_token
 
@@ -23,5 +23,11 @@ class ApplicationController < ActionController::Base
 
   def generic_unauthorized_response
     render json: { message: 'Unauthorized' }, status: :unauthorized
+  end
+
+  def authenticate_user_json!
+    unless user_signed_in?
+      render json: { message: 'Unauthorized' }, status: :unauthorized
+    end
   end
 end

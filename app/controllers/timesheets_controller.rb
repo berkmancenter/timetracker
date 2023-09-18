@@ -68,6 +68,8 @@ class TimesheetsController < ApplicationController
         @timesheet, i
       ).deliver_later
     end
+
+    render json: { message: 'ok' }, status: :ok
   end
 
   def join

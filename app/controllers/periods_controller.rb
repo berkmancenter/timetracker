@@ -79,7 +79,7 @@ class PeriodsController < ApplicationController
   def set_credits
     generic_unauthorized_response and return unless @period.timesheet.is_admin?(current_user)
 
-    unless params[:credits].any?
+    unless params[:credits]&.any?
       render json: { message: 'No users or credits selected.' }, status: :bad_request
       return
     end

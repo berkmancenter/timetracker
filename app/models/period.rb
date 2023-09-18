@@ -2,6 +2,7 @@ class Period < ActiveRecord::Base
   validates :name, presence: true
   validates :from, presence: true
   validates :to, presence: true
+  validates :timesheet, presence: true
 
   has_many :credits, dependent: :destroy, autosave: true
   belongs_to :timesheet

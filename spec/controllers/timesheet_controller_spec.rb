@@ -1,0 +1,150 @@
+require 'rails_helper'
+
+RSpec.describe TimesheetsController, type: :controller do
+  let(:user) { create(:user) }
+  let(:timesheet) { create(:timesheet) }
+
+  before do
+    sign_in user
+  end
+
+  describe 'GET #index' do
+    it 'returns a list of user timesheets' do
+      timesheet1 = create(:timesheet, name: 'Timesheet 1')
+      timesheet2 = create(:timesheet, name: 'Timesheet 2')
+      create(:users_timesheet, user: user, timesheet: timesheet1, role: 'admin')
+      create(:users_timesheet, user: user, timesheet: timesheet2, role: 'user')
+
+      get :index
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to match_array([
+        { 'id' => timesheet1.id, 'name' => 'Timesheet 1', 'uuid' => timesheet1.uuid, 'roles' => ['admin'] },
+        { 'id' => timesheet2.id, 'name' => 'Timesheet 2', 'uuid' => timesheet2.uuid, 'roles' => ['user'] }
+      ])
+    end
+
+    it 'returns an empty list when the user has no timesheets' do
+      get :index
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to eq([])
+    end
+
+    it 'returns unauthorized when the user is not signed in' do
+      sign_out user
+
+      get :index
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+    describe 'POST #upsert' do
+    it 'creates a new timesheet' do
+      expect do
+        post :upsert, params: { timesheet: { name: 'New Timesheet' } }
+      end.to change(Timesheet, :count).by(1)
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['timesheet']['name']).to eq('New Timesheet')
+    end
+
+    it 'updates an existing timesheet' do
+      existing_timesheet = create(:timesheet, name: 'Existing Timesheet')
+      create(:users_timesheet, user: user, timesheet: existing_timesheet, role: 'admin')
+
+      post :upsert, params: { timesheet: { id: existing_timesheet.id, name: 'Updated Timesheet' } }
+
+      existing_timesheet.reload
+      expect(existing_timesheet.name).to eq('Updated Timesheet')
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns a bad request if there are validation errors' do
+      post :upsert, params: { timesheet: { name: nil } }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(JSON.parse(response.body)['message']).to include("Name can't be blank")
+    end
+  end
+
+  describe 'DELETE #delete' do
+    it 'deletes timesheets' do
+      timesheet1 = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet1, role: 'admin')
+      timesheet2 = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet2, role: 'admin')
+
+      delete :delete, params: { timesheets: [timesheet1.id, timesheet2.id] }
+
+      expect(response).to have_http_status(:ok)
+      expect(Timesheet.where(id: [timesheet1.id, timesheet2.id])).to be_empty
+    end
+
+    it 'returns a bad request if the user is not authorized' do
+      timesheet = create(:timesheet)
+      sign_in create(:user)
+
+      delete :delete, params: { timesheets: [timesheet.id] }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe 'POST #send_invitations' do
+    it 'sends invitations to specified emails' do
+      timesheet = create(:timesheet, name: 'Test Timesheet')
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+      emails = 'test1@example.com, test2@example.com'
+      emails_arr = ['test1@example.com', 'test2@example.com']
+
+      expect do
+        post :send_invitations, params: { id: timesheet.id, emails: emails }, format: :json
+      end.to change(Invitation, :count).by(2)
+
+      expect(response).to have_http_status(:ok)
+      expect(Invitation.pluck(:email)).to match_array(emails_arr)
+    end
+
+    it 'returns unauthorized if the user is not an admin' do
+      timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
+      emails = 'test1@example.com, test2@example.com'
+
+      post :send_invitations, params: { id: timesheet.id, emails: emails }, format: :json
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe 'POST #join' do
+    it 'allows a user to join a timesheet using a valid invitation code' do
+      invitation = create(:invitation, used: false)
+
+      post :join, params: { code: invitation.code }, format: :json
+
+      invitation.reload
+      expect(invitation.used).to be(true)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns bad request for an invalid invitation code' do
+      post :join, params: { code: 'invalid_code' }, format: :json
+
+      expect(response).to have_http_status(:bad_request)
+    end
+  end
+
+  describe 'DELETE #leave' do
+    it 'allows a user to leave a timesheet' do
+      timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet)
+
+      delete :leave, params: { id: timesheet.id }, format: :json
+
+      expect(UsersTimesheet.where(user: user, timesheet: timesheet)).to be_empty
+      expect(response).to have_http_status(:ok)
+    end
+  end
+end
