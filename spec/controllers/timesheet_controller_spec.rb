@@ -173,4 +173,40 @@ RSpec.describe TimesheetsController, type: :controller do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe 'POST #delete_users' do
+    let(:timesheet) { create(:timesheet) }
+    let(:user1) { create(:user) }
+    let(:user2) { create(:user) }
+    let(:user3) { create(:user) }
+
+    it 'deletes selected users from the timesheet for the admin user' do
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+      create(:users_timesheet, user: user1, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: user2, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: user3, timesheet: timesheet, role: 'user')
+
+      post :delete_users, params: { id: timesheet.id, users: [user1.id, user2.id] }
+
+      expect(response).to have_http_status(:ok)
+      expect(User.where(id: timesheet.users.pluck(:id))).to eq(User.where(id: [user.id, user3.id]))
+    end
+
+    it 'returns a bad request if no users are selected' do
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+
+      post :delete_users, params: { id: timesheet.id }
+
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'returns unauthorized for non-admin user' do
+      sign_out user
+      sign_in user1
+
+      post :delete_users, params: { id: timesheet.id, users: [user.id] }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
 end
