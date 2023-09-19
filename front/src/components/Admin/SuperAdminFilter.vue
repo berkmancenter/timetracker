@@ -25,16 +25,15 @@ export default {
         { label: 'All', value: 'all' },
       ],
       activeTab: 'users',
-      initialized: false,
     }
   },
   computed: {
     filteredUsers() {
       switch (this.activeTab) {
         case 'users':
-          return this.users.filter((user) => !user.admin)
+          return this.users.filter((user) => user.roles.includes('user'))
         case 'admins':
-          return this.users.filter((user) => user.admin)
+          return this.users.filter((user) => user.roles.includes('admin'))
         case 'all':
           return this.users
         default:
@@ -50,10 +49,7 @@ export default {
   },
   watch: {
     users(_newValue, _oldValue) {
-      if (this.initialized === false) {
-        this.setActiveTab(this.activeTab)
-        this.initialized = true
-      }
+      this.setActiveTab(this.activeTab)
     },
   },
 }

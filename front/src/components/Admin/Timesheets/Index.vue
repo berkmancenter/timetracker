@@ -20,17 +20,18 @@
           <tr v-for="timesheet in $store.state.admin.timesheets" :key="timesheet.id">
             <td>{{ timesheet.name }}</td>
             <td class="admin-table-actions">
-              <div v-if="adminInTimesheet(timesheet)">
-                <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`">
-                  <Icon :src="editIcon" />
-                </router-link>
-                <router-link title="Invite users to timesheet" :to="`/admin/timesheets/${timesheet.id}/invite`">
-                  <Icon :src="inviteIcon" />
-                </router-link>
-                <a title="Delete timesheet" @click.prevent="deleteTimesheet(timesheet)">
-                  <Icon :src="minusIcon" />
-                </a>
-              </div>
+              <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`" v-if="adminInTimesheet(timesheet)">
+                <Icon :src="editIcon" />
+              </router-link>
+              <router-link title="Invite users to timesheet" :to="`/admin/timesheets/${timesheet.id}/invite`" v-if="adminInTimesheet(timesheet)">
+                <Icon :src="inviteIcon" />
+              </router-link>
+              <router-link title="List of timesheet users" :to="`/admin/timesheets/${timesheet.id}/users`" v-if="adminInTimesheet(timesheet)">
+                <Icon :src="usersIcon" />
+              </router-link>
+              <a title="Delete timesheet" @click.prevent="deleteTimesheet(timesheet)" v-if="adminInTimesheet(timesheet)">
+                <Icon :src="minusIcon" />
+              </a>
               <a title="Leave timesheet" @click.prevent="leaveTimesheet(timesheet)">
                 <Icon :src="leaveIcon" />
               </a>
@@ -61,6 +62,7 @@
   import cloneIcon from '@/images/clone.svg'
   import inviteIcon from '@/images/invite.svg'
   import leaveIcon from '@/images/leave.svg'
+  import usersIcon from '@/images/users.svg'
   import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
 
@@ -79,6 +81,7 @@
         cloneIcon,
         inviteIcon,
         leaveIcon,
+        usersIcon,
       }
     },
     created() {

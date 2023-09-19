@@ -20,7 +20,6 @@
     <admin-table :tableClasses="['admin-periods-stats-table']">
       <thead>
         <tr class="no-select">
-          <th>Username</th>
           <th>Email</th>
           <th>Hours</th>
           <th>Total hours</th>
@@ -31,7 +30,6 @@
       </thead>
       <tbody>
         <tr v-for="periodStat in filteredItems">
-          <td>{{ cleanUsername(periodStat.username) }}</td>
           <td>{{ periodStat.email }}</td>
           <td>{{ periodStat.credits }}</td>
           <td>{{ periodStat.total_hours }}</td>
@@ -48,7 +46,6 @@
 </template>
 
 <script>
-  import cleanUsername from '@/lib/clean-username'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
 
@@ -60,7 +57,6 @@
     },
     data() {
       return {
-        cleanUsername: cleanUsername,
         filteredItems: [],
         apiUrl: import.meta.env.VITE_API_URL,
       }

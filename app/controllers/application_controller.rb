@@ -1,8 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
-  before_action :authenticate_user_json!
-
   skip_before_action :verify_authenticity_token
 
   def ping
@@ -11,8 +9,8 @@ class ApplicationController < ActionController::Base
 
   protected
 
-  def is_superadmin?
-    redirect_to root_url unless current_user.superadmin
+  def superadmin?
+    redirect_to root_url unless current_user&.superadmin?
   end
 
   private

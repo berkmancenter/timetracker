@@ -55,8 +55,8 @@ const mutations = {
 }
 
 const actions = {
-  async fetchUsers(context) {
-    const response = await fetchIt(`${apiUrl}/users`)
+  async fetchTimesheetUsers(context, timesheetId) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${timesheetId}/users`)
     const data = await response.json()
 
     return data
@@ -97,15 +97,15 @@ const actions = {
 
     return data
   },
-  async deleteUsers(context, users) {
-    const response = await fetchIt(`${apiUrl}/users/delete`, {
+  async deleteUsersFromTimesheet(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/delete_users`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        users: users,
+        users: data.users,
       }),
     })
 
@@ -155,7 +155,7 @@ const actions = {
   setTimesheetInvitations(context, invitations) {
     context.commit('setTimesheetInvitations', invitations)
   },
-  async sudo(context, users) {
+  async sudoUsersTimesheet(context, data) {
     const response = await fetchIt(`${apiUrl}/users/sudo`, {
       method: 'POST',
       headers: {
@@ -163,14 +163,15 @@ const actions = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        users: users,
+        users: data.users,
+        timesheet_id: data.timesheetId,
       }),
     })
 
     return response
   },
-  async unSudo(context, users) {
-    const response = await fetchIt(`${apiUrl}/users/sudo`, {
+  async unsudoUsersTimesheet(context, users) {
+    const response = await fetchIt(`${apiUrl}/users/unsudo`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',

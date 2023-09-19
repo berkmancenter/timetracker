@@ -1,12 +1,13 @@
 class TimesheetsController < ApplicationController
-  before_action :set_timesheet, only: %i[show send_invitations leave]
+  before_action :set_timesheet, only: %i[show send_invitations leave users delete_users]
+  before_action :authenticate_user_json!
 
   def index
     render json: current_user.user_timesheets, status: :ok
   end
 
   def show
-    generic_unauthorized_response and return unless @timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
 
     render json: @timesheet, status: :ok
   end
@@ -16,7 +17,7 @@ class TimesheetsController < ApplicationController
     if timesheet_params[:id]
       timesheet = Timesheet.find(timesheet_params['id'])
 
-      generic_unauthorized_response and return unless timesheet.is_admin?(current_user)
+      generic_unauthorized_response and return unless timesheet.admin?(current_user)
 
       timesheet.assign_attributes(timesheet_params)
     else
@@ -37,7 +38,7 @@ class TimesheetsController < ApplicationController
 
     unauth = false
     Timesheet.where(id: timesheets_ids).each do |t|
-      unauth = true unless t.is_admin?(current_user)
+      unauth = true unless t.admin?(current_user)
     end
     generic_unauthorized_response and return if unauth
 
@@ -51,7 +52,7 @@ class TimesheetsController < ApplicationController
   end
 
   def send_invitations
-    generic_unauthorized_response and return unless @timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
 
     email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
     emails = params[:emails].scan(email_regex)
@@ -100,10 +101,32 @@ class TimesheetsController < ApplicationController
     render json: { message: 'ok' }, status: :ok
   end
 
+  def users
+    generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return unless @timesheet.user?(current_user)
+
+    render json: @timesheet.all_users, status: :ok
+  end
+
+  def delete_users
+    generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+
+    user_ids = params[:users]&.reject { |uid| uid.to_i == current_user.id }
+
+    if user_ids&.any?
+      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).destroy_all
+
+      render json: { message: 'ok' }, status: :ok
+    else
+      render json: { message: 'No users selected.' }, status: :bad_request
+    end
+  end
+
   private
 
   def set_timesheet
-    @timesheet = Timesheet.find(params[:id])
+    @timesheet = Timesheet.where(id: params[:id]).first
   end
 
   def timesheet_params

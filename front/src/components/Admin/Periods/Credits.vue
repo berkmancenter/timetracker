@@ -24,7 +24,6 @@
           <th data-sort-method="none" class="no-sort">
             <input type="checkbox" ref="toggleAllCheckbox" @click="toggleAll()">
           </th>
-          <th>Username</th>
           <th>Email</th>
           <th data-sort-method="none" class="no-sort">Hours</th>
         </tr>
@@ -34,7 +33,6 @@
           <td>
             <input type="checkbox" v-model="periodCredit.selected">
           </td>
-          <td>{{ cleanUsername(periodCredit.username) }}</td>
           <td>{{ periodCredit.email }}</td>
           <td>
             <input class="input" type="number" v-model="periodCredit.credit_amount">
@@ -56,7 +54,6 @@
 </template>
 
 <script>
-  import cleanUsername from '@/lib/clean-username'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import Swal from 'sweetalert2'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
@@ -69,7 +66,6 @@
     },
     data() {
       return {
-        cleanUsername: cleanUsername,
         filteredItems: [],
       }
     },

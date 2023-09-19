@@ -23,14 +23,6 @@ const router = createRouter({
           name: 'tracker.index',
         },
         {
-          path: 'admin/users',
-          components: {
-            default: () => import('@/components/Admin/Users/Index.vue'),
-            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
-          },
-          name: 'users.index',
-        },
-        {
           path: 'admin/periods',
           components: {
             default: () => import('@/components/Admin/Periods/Index.vue'),
@@ -101,6 +93,14 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.invite',
+        },
+        {
+          path: 'admin/timesheets/:id/users',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Users.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'timesheets.users',
         },
         {
           path: 'join/:code',

@@ -20,7 +20,7 @@ class TimeEntry < ActiveRecord::Base
     month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
 
     entries = TimeEntry
-              .select('time_entries.*, users.username, users.id AS user_id')
+              .select('time_entries.*, users.email, users.id AS user_id')
               .joins(:user)
               .where(users: { id: user_ids })
               .where(timesheet: timesheet)
@@ -39,12 +39,12 @@ class TimeEntry < ActiveRecord::Base
 
     user_ids = users.map(&:id)
     TimeEntry
-      .select("users.username, entry_date, SUM(decimal_time) AS total_hours")
+      .select("users.email, entry_date, SUM(decimal_time) AS total_hours")
       .joins(:user)
       .where("#{year_month_entry_sql} = ?", month)
       .where(user_id: user_ids)
       .where(timesheet: timesheet)
-      .group(:username, :entry_date)
+      .group(:email, :entry_date)
       .order(entry_date: :desc)
   end
 

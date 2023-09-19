@@ -1,5 +1,6 @@
 class PeriodsController < ApplicationController
   before_action :set_period, except: %i[index upsert delete]
+  before_action :authenticate_user_json!
 
   PERIOD_PUBLIC_FIELDS = {
     only: %i[id timesheet_id name from to],
@@ -15,7 +16,7 @@ class PeriodsController < ApplicationController
   end
 
   def show
-    generic_unauthorized_response and return unless @period.timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
 
     render json: @period.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
@@ -24,7 +25,7 @@ class PeriodsController < ApplicationController
     if period_params[:id]
       period = Period.find(period_params['id'])
 
-      generic_unauthorized_response and return unless period.timesheet.is_admin?(current_user)
+      generic_unauthorized_response and return unless period.timesheet.admin?(current_user)
 
       period.assign_attributes(period_params)
     else
@@ -43,7 +44,7 @@ class PeriodsController < ApplicationController
 
     unauth = false
     Period.where(id: periods_ids).each do |p|
-      unauth = true unless p.timesheet.is_admin?(current_user)
+      unauth = true unless p.timesheet.admin?(current_user)
     end
     generic_unauthorized_response and return if unauth
 
@@ -57,14 +58,14 @@ class PeriodsController < ApplicationController
   end
 
   def credits
-    generic_unauthorized_response and return unless @period.timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
 
     users = @period.timesheet.users.group(:id).order(:username)
     credits = users.map do |user|
       {
         user_id: user.id,
         username: user.username,
-        admin: @period.timesheet.is_admin?(user),
+        admin: @period.timesheet.admin?(user),
         email: user.email,
         credit_amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
       }
@@ -77,7 +78,7 @@ class PeriodsController < ApplicationController
   end
 
   def set_credits
-    generic_unauthorized_response and return unless @period.timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
 
     unless params[:credits]&.any?
       render json: { message: 'No users or credits selected.' }, status: :bad_request
@@ -133,7 +134,7 @@ class PeriodsController < ApplicationController
   end
 
   def stats
-    generic_unauthorized_response and return unless @period.timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
 
     stats = @period.get_stats
 
@@ -146,7 +147,7 @@ class PeriodsController < ApplicationController
   end
 
   def clone
-    generic_unauthorized_response and return unless @period.timesheet.is_admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
 
     cloned_period = @period.dup
     cloned_period.name << ' clone'

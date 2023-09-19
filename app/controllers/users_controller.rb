@@ -1,23 +1,6 @@
 class UsersController < ApplicationController
-  before_action :is_superadmin?, except: %i[current_user_data]
-
-  def index
-    users = User.order(:username)
-
-    render json: users, status: :ok
-  end
-
-  def delete
-    user_ids = params[:users]&.reject { |uid| uid.to_i == current_user.id }
-
-    if user_ids&.any?
-      User.where(id: user_ids).destroy_all
-
-      render json: { message: 'ok' }, status: :ok
-    else
-      render json: { message: 'No users selected.' }, status: :bad_request
-    end
-  end
+  before_action :superadmin?, except: %i[current_user_data sudo unsudo]
+  before_action :authenticate_user_json!
 
   def toggle_admin
     user_ids = params[:users]&.reject { |uid| uid.to_i == current_user.id }
@@ -34,17 +17,30 @@ class UsersController < ApplicationController
   end
 
   def sudo
-    session["#{current_user.id}_active_users"] = params[:users]
+    timesheet = Timesheet.where(id: params[:timesheet_id]).first
+
+    generic_bad_request_response and return if timesheet.nil?
+    generic_unauthorized_response and return unless timesheet.admin?(current_user)
+
+    allowed_user_ids = params[:users].map(&:to_i) & timesheet.users.pluck(:id)
+
+    session["#{current_user.id}_active_users"] = allowed_user_ids
+
+    render json: { message: 'ok' }, status: :ok
+  end
+
+  def unsudo
+    session["#{current_user.id}_active_users"] = []
 
     render json: { message: 'ok' }, status: :ok
   end
 
   def current_user_data
     render json: {
-      username: helpers.clean_username(current_user.username) || current_user.email,
+      username: current_user.email,
       user_id: current_user.id,
       is_superadmin: current_user.superadmin,
-      sudo_users: get_sudo_users_usernames
+      sudo_users: get_sudo_users_emails
     }, status: :ok
   end
 
@@ -58,7 +54,7 @@ class UsersController < ApplicationController
     end
   end
 
-  def get_sudo_users_usernames
-    get_sudo_users.map { |u| User.where(id: u).first&.username }.compact
+  def get_sudo_users_emails
+    get_sudo_users.map { |u| User.where(id: u).first&.email }.compact
   end
 end

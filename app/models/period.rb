@@ -24,7 +24,7 @@ class Period < ActiveRecord::Base
 
     query.map do |record|
       record = record.attributes
-      record['admin'] = self.timesheet.is_admin?(User.find(record['user_id']))
+      record['admin'] = self.timesheet.admin?(User.find(record['user_id']))
       record['should_hours'] = current_passed * record['credits']
       record['balance'] = format('%.2f', record['total_hours'] - record['should_hours'])
       record['balance_percent'] = format('%.2f', (record['total_hours'] / record['should_hours']) * 100)

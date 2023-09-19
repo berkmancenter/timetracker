@@ -23,7 +23,7 @@ Rails.application.routes.draw do
     collection do
       get :current_user_data
       post :sudo
-      post :delete
+      post :unsudo
       post :toggle_admin
     end
   end
@@ -51,6 +51,8 @@ Rails.application.routes.draw do
     member do
       post :send_invitations
       get :leave
+      get :users
+      post :delete_users
     end
   end
 

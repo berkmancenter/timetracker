@@ -13,28 +13,28 @@ RSpec.describe Timesheet, type: :model do
     it { should validate_presence_of(:name) }
   end
 
-  describe 'is_admin?' do
+  describe 'admin?' do
     let(:timesheet) { create(:timesheet) }
     let(:superadmin) { create(:user, superadmin: true) }
     let(:admin_user) { create(:user) }
     let(:non_admin_user) { create(:user) }
 
     it 'returns true for superadmin users' do
-      expect(timesheet.is_admin?(superadmin)).to be true
+      expect(timesheet.admin?(superadmin)).to be true
     end
 
     it 'returns true for admin users in the timesheet' do
       timesheet.users_timesheets.create(user: admin_user, role: 'admin')
-      expect(timesheet.is_admin?(admin_user)).to be true
+      expect(timesheet.admin?(admin_user)).to be true
     end
 
     it 'returns false for non-admin users in the timesheet' do
       timesheet.users_timesheets.create(user: non_admin_user, role: 'user')
-      expect(timesheet.is_admin?(non_admin_user)).to be false
+      expect(timesheet.admin?(non_admin_user)).to be false
     end
   end
 
-  describe 'is_user?' do
+  describe 'user?' do
     let(:timesheet) { create(:timesheet) }
     let(:superadmin) { create(:user, superadmin: true) }
     let(:user_user) { create(:user) }
@@ -42,21 +42,21 @@ RSpec.describe Timesheet, type: :model do
     let(:non_admin_user) { create(:user) }
 
     it 'returns true for superadmin users' do
-      expect(timesheet.is_user?(superadmin)).to be true
+      expect(timesheet.user?(superadmin)).to be true
     end
 
     it 'returns true for user users in the timesheet' do
       timesheet.users_timesheets.create(user: user_user, role: 'user')
-      expect(timesheet.is_user?(user_user)).to be true
+      expect(timesheet.user?(user_user)).to be true
     end
 
     it 'returns true for admin users in the timesheet' do
       timesheet.users_timesheets.create(user: admin_user, role: 'admin')
-      expect(timesheet.is_user?(admin_user)).to be true
+      expect(timesheet.user?(admin_user)).to be true
     end
 
     it 'returns false for non-admin users not in the timesheet' do
-      expect(timesheet.is_user?(non_admin_user)).to be false
+      expect(timesheet.user?(non_admin_user)).to be false
     end
   end
 

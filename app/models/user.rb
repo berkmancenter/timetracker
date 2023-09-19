@@ -16,14 +16,14 @@ class User < ActiveRecord::Base
   end
 
   def user_timesheets
-    timesheets
-      .select('
-        timesheets.id,
-        timesheets.name,
-        timesheets.uuid,
-        ARRAY_AGG(users_timesheets.role) AS roles
-      ')
-      .group('timesheets.id')
+    self.timesheets
+        .select('
+          timesheets.id,
+          timesheets.name,
+          timesheets.uuid,
+          ARRAY_AGG(users_timesheets.role) AS roles
+        ')
+        .group('timesheets.id')
   end
 
   def cas_extra_attributes=(extra_attributes)
@@ -33,6 +33,10 @@ class User < ActiveRecord::Base
         self.email = value
       end
     end
+  end
+
+  def superadmin?
+    superadmin
   end
 
   private

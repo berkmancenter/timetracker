@@ -2,7 +2,6 @@ require 'rails_helper'
 
 RSpec.describe TimesheetsController, type: :controller do
   let(:user) { create(:user) }
-  let(:timesheet) { create(:timesheet) }
 
   before do
     sign_in user
@@ -145,6 +144,33 @@ RSpec.describe TimesheetsController, type: :controller do
 
       expect(UsersTimesheet.where(user: user, timesheet: timesheet)).to be_empty
       expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe 'GET #users' do
+    let(:timesheet) { create(:timesheet) }
+    let(:user1) { create(:user) }
+    let(:user2) { create(:user) }
+    let(:user3) { create(:user) }
+
+    it 'returns users for the timesheet for the admin user' do
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+      create(:users_timesheet, user: user1, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: user2, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: user3, timesheet: timesheet, role: 'user')
+
+      get :users, params: { id: timesheet.id }
+
+      expect(response).to have_http_status(:ok)
+      response_parsed = JSON.parse(response.body)
+      expect(response_parsed).to be_an(Array)
+      expect(response_parsed.pluck('id')).to eq([user.id, user1.id, user2.id, user3.id])
+    end
+
+    it 'returns a bad request for non-admin user' do
+      get :users, params: { id: timesheet.id }
+
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 end

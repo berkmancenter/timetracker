@@ -45,7 +45,7 @@
                 <td class="category">{{ entry.category }}</td>
                 <td class="project">{{ entry.project }}</td>
                 <td class="decimal_time">{{ entry.decimal_time }}</td>
-                <td class="username" v-if="$store.state.shared.user.sudoMode">{{ cleanUsername(entry.username) }}</td>
+                <td class="username" v-if="$store.state.shared.user.sudoMode">{{ entry.email }}</td>
               </tr>
 
               <tr v-if="entry.description">
@@ -70,7 +70,6 @@
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
-  import cleanUsername from '@/lib/clean-username'
   import { redirectToSelectedMonth } from '@/router/index'
 
   export default {
@@ -83,7 +82,6 @@
         minusIcon,
         cloneIcon,
         editIcon,
-        cleanUsername,
         redirectToSelectedMonth,
       }
     },
@@ -168,7 +166,7 @@
       async unSudo() {
         this.mitt.emit('spinnerStart')
 
-        const response = await this.$store.dispatch('admin/unSudo')
+        const response = await this.$store.dispatch('admin/unsudoUsersTimesheet')
 
         if (response.ok) {
           const months = await this.$store.dispatch('tracker/fetchMonths')

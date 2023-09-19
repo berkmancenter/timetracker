@@ -12,7 +12,7 @@ class Timesheet < ActiveRecord::Base
   validates :name, presence: true
   validates :uuid, presence: true
 
-  def is_admin?(user)
+  def admin?(user)
     return true if user.superadmin
 
     UsersTimesheet.where(
@@ -22,7 +22,7 @@ class Timesheet < ActiveRecord::Base
     ).any?
   end
 
-  def is_user?(user)
+  def user?(user)
     return true if user.superadmin
 
     UsersTimesheet.where(
@@ -30,6 +30,18 @@ class Timesheet < ActiveRecord::Base
       user: user,
       role: %w[user admin]
     ).any?
+  end
+
+  def all_users
+    users
+      .select('
+        users.id,
+        users.email,
+        users.username,
+        users_timesheets.created_at AS joined,
+        ARRAY_AGG(users_timesheets.role) AS roles
+      ')
+      .group('users.id, users_timesheets.created_at')
   end
 
   private
