@@ -135,6 +135,10 @@
       @media all and (max-width: 900px) {
         margin-left: calc(40% + 1rem);
       }
+
+      @media all and (max-width: 700px) {
+        margin-left: 100%;
+      }
     }
 
     .switmenu-section-header {
