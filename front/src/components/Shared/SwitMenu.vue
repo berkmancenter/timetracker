@@ -164,6 +164,7 @@
     border-radius: 1rem;
     padding-top: 0.5rem;
     box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+    overflow: hidden;
 
     @media all and (max-width: 700px) {
       margin-left: 0;
