@@ -17,8 +17,8 @@
         <thead>
           <tr>
             <th>Actions</th>
-            <th>Category</th>
             <th>Project</th>
+            <th>Category</th>
             <th>Hours</th>
             <th v-if="$store.state.shared.user.sudoMode">Username</th>
           </tr>
@@ -42,8 +42,8 @@
                     <Icon :src="editIcon" />
                   </a>
                 </td>
-                <td class="category">{{ entry.category }}</td>
                 <td class="project">{{ entry.project }}</td>
+                <td class="category">{{ entry.category }}</td>
                 <td class="decimal_time">{{ entry.decimal_time }}</td>
                 <td class="username" v-if="$store.state.shared.user.sudoMode">{{ entry.email }}</td>
               </tr>
