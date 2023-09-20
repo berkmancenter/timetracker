@@ -1,5 +1,5 @@
 <template>
-  <table class="table table-hovered" :class="tableClasses" :ref="tableRefName">
+  <table class="table table-hovered admin-table" :class="tableClasses" :ref="tableRefName">
     <slot></slot>
   </table>
 </template>
