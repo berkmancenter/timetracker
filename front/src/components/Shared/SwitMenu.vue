@@ -83,15 +83,14 @@
     position: fixed;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 100%;
     width: 25%;
-    top: 3.5rem;
+    top: 5.5rem;
+    bottom: 0;
     left: 0;
     z-index: 1;
     display: none;
     background-color: #ffffff;
-    padding-top: 1.5rem;
-    padding-bottom: 6rem;
+    padding-bottom: 1rem;
     padding-right: 0.5rem;
     border-right: 2px solid #F5F5F6;
     background-color: var(--super-light-color);
