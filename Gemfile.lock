@@ -112,7 +112,6 @@ GEM
       rexml
     crass (1.0.6)
     csv (3.2.5)
-    curb (1.0.5)
     database_cleaner (2.0.2)
       database_cleaner-active_record (>= 2, < 3)
     database_cleaner-active_record (2.1.0)
@@ -367,7 +366,6 @@ DEPENDENCIES
   carmen
   couchrest
   csv
-  curb
   database_cleaner
   devise
   devise_cas_authenticatable

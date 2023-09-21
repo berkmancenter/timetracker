@@ -50,7 +50,6 @@ end
 
 group :test do
   gem 'capybara-selenium'
-  gem 'curb'
   gem 'database_cleaner'
   gem 'factory_bot_rails'
   gem 'faker'
