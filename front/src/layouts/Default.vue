@@ -35,7 +35,7 @@
                 <div>{{ $store.state.shared.user.username }}</div>
               </div>
               <hr class="dropdown-divider">
-              <a class="dropdown-item" @click="logout">
+              <a class="dropdown-item" @click="logout" v-close-popper>
                 Logout
               </a>
             </template>
@@ -86,6 +86,7 @@
         this.redirectToSelectedMonth(this.$store)
       },
       async logout() {
+        this.mitt.emit('spinnerStart')
         await this.$store.dispatch('shared/logout')
       },
     },
