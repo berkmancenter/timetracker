@@ -13,13 +13,14 @@ RSpec.describe Period, type: :model do
   end
 
   describe 'get_stats' do
-    let(:period) { create(:period) }
-    let(:user) { create(:user) }
-    let(:time_entry) { create(:time_entry, user: user, timesheet: period.timesheet, entry_date: period.from + 1.day) }
-    let(:credit) { create(:credit, period: period, user: user) }
+    let!(:timesheet) { create(:timesheet) }
+    let!(:period) { create(:period, timesheet: timesheet) }
+    let!(:user) { create(:user) }
+    let!(:users_timesheet) { create(:users_timesheet, user: user, timesheet: timesheet, role: 'user') }
+    let!(:time_entry) { create(:time_entry, user: user, timesheet: timesheet, entry_date: period.from + 1.day) }
+    let!(:credit) { create(:credit, period: period, user: user) }
 
     it 'calculates statistics correctly' do
-      time_entry
       credit.update(amount: 10.0)
 
       stats = period.get_stats
@@ -36,10 +37,10 @@ RSpec.describe Period, type: :model do
   end
 
   describe 'user_periods' do
-    let(:admin_user) { create(:user, superadmin: false) }
-    let(:non_admin_user) { create(:user, superadmin: false) }
-    let(:admin_period) { create(:period) }
-    let(:non_admin_period) { create(:period) }
+    let!(:admin_user) { create(:user, superadmin: false) }
+    let!(:non_admin_user) { create(:user, superadmin: false) }
+    let!(:admin_period) { create(:period) }
+    let!(:non_admin_period) { create(:period) }
 
     before do
       admin_period.timesheet.users_timesheets.create(user: admin_user, role: 'admin')
