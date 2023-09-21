@@ -60,13 +60,21 @@ class PeriodsController < ApplicationController
   def credits
     generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
 
-    users = @period.timesheet.users.group(:id).order(:username)
+    users = @period.timesheet.users.select('
+      users.id,
+      users.email,
+      users.username,
+      users.superadmin,
+      ARRAY_AGG(users_timesheets.role) AS roles
+    ').group(:id).order(:username)
+
     credits = users.map do |user|
       {
         user_id: user.id,
         username: user.username,
         admin: @period.timesheet.admin?(user),
         email: user.email,
+        roles: user.roles,
         credit_amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
       }
     end

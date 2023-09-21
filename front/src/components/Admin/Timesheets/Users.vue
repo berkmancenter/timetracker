@@ -1,6 +1,6 @@
 <template>
   <div class="content admin-timesheet-users">
-    <h1 class="is-size-1">Users</h1>
+    <h4 class="is-size-4">Users</h4>
 
     <form class="form">
       <div class="mb-4">
@@ -22,15 +22,17 @@
         </thead>
         <tbody>
           <tr v-for="user in filteredItems" :key="user.id">
-            <td>
+            <td class="admin-table-selector">
               <input type="checkbox" v-model="user.selected">
             </td>
             <td>{{ user.email }}</td>
-            <td>{{ user.joined }}</td>
-            <td>
-              <a title="Remove user from timesheet" @click.prevent="removeFromTimesheet(user)">
-                <Icon :src="minusIcon" />
-              </a>
+            <td class="no-break">{{ user.joined }}</td>
+            <td class="admin-table-actions">
+              <div class="admin-table-actions">
+                <a title="Remove user from timesheet" @click.prevent="removeFromTimesheet(user)">
+                  <Icon :src="minusIcon" />
+                </a>
+              </div>
             </td>
           </tr>
         </tbody>

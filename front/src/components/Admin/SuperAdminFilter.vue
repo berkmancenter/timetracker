@@ -31,9 +31,9 @@ export default {
     filteredUsers() {
       switch (this.activeTab) {
         case 'users':
-          return this.users.filter((user) => user.roles.includes('user'))
+          return this.users.filter((user) => user?.roles?.includes('user'))
         case 'admins':
-          return this.users.filter((user) => user.roles.includes('admin'))
+          return this.users.filter((user) => user?.roles?.includes('admin'))
         case 'all':
           return this.users
         default:

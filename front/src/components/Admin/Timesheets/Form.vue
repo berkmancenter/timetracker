@@ -1,6 +1,6 @@
 <template>
   <div class="content admin-timesheets-form">
-    <h1 class="is-size-1">{{ title }}</h1>
+    <h4 class="is-size-4">{{ title }}</h4>
 
     <form class="form" @submit.prevent="save">
       <div class="field">

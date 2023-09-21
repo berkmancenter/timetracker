@@ -1,6 +1,6 @@
 <template>
   <div class="content admin-timesheets">
-    <h1 class="is-size-1">Timesheets</h1>
+    <h4 class="is-size-4">Timesheets</h4>
 
     <p>Create new timesheets for yourself, ensuring a seamless record of your activities. You can send invitations to other users, facilitating collaborative participation.</p>
 
@@ -20,21 +20,23 @@
           <tr v-for="timesheet in $store.state.admin.timesheets" :key="timesheet.id">
             <td>{{ timesheet.name }}</td>
             <td class="admin-table-actions">
-              <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`" v-if="adminInTimesheet(timesheet)">
-                <Icon :src="editIcon" />
-              </router-link>
-              <router-link title="Invite users to timesheet" :to="`/admin/timesheets/${timesheet.id}/invite`" v-if="adminInTimesheet(timesheet)">
-                <Icon :src="inviteIcon" />
-              </router-link>
-              <router-link title="List of timesheet users" :to="`/admin/timesheets/${timesheet.id}/users`" v-if="adminInTimesheet(timesheet)">
-                <Icon :src="usersIcon" />
-              </router-link>
-              <a title="Delete timesheet" @click.prevent="deleteTimesheet(timesheet)" v-if="adminInTimesheet(timesheet)">
-                <Icon :src="minusIcon" />
-              </a>
-              <a title="Leave timesheet" @click.prevent="leaveTimesheet(timesheet)">
-                <Icon :src="leaveIcon" />
-              </a>
+              <div class="admin-table-actions">
+                <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`" v-if="adminInTimesheet(timesheet)">
+                  <Icon :src="editIcon" />
+                </router-link>
+                <router-link title="Invite users to timesheet" :to="`/admin/timesheets/${timesheet.id}/invite`" v-if="adminInTimesheet(timesheet)">
+                  <Icon :src="inviteIcon" />
+                </router-link>
+                <router-link title="List of timesheet users" :to="`/admin/timesheets/${timesheet.id}/users`" v-if="adminInTimesheet(timesheet)">
+                  <Icon :src="usersIcon" />
+                </router-link>
+                <a title="Delete timesheet" @click.prevent="deleteTimesheet(timesheet)" v-if="adminInTimesheet(timesheet)">
+                  <Icon :src="minusIcon" />
+                </a>
+                <a title="Leave timesheet" @click.prevent="leaveTimesheet(timesheet)">
+                  <Icon :src="leaveIcon" />
+                </a>
+              </div>
             </td>
           </tr>
           <tr v-if="$store.state.admin.timesheets.length === 0">

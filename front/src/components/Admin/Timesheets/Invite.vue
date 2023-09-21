@@ -1,12 +1,12 @@
 <template>
   <div class="content admin-timesheets-invitations-form">
-    <h1 class="is-size-1">Invitations</h1>
+    <h4 class="is-size-4">Invitations</h4>
 
-    <h3 class="is-size-4">
+    <div class="mb-4">
       Send invitations for
       <span class="tag is-black is-large">{{ $store.state.admin.timesheet.name }}</span>
       timesheet
-    </h3>
+    </div>
 
     <p>When you send out invitations, users will receive emails containing unique invitation links. With these links, they can easily join the timesheet.</p>
 

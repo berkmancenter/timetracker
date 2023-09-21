@@ -1,15 +1,15 @@
 <template>
   <div class="content admin-periods-credits">
-    <h1 class="is-size-1">Hours</h1>
+    <h4 class="is-size-4">Hours</h4>
 
-    <h3 class="is-size-4">
+    <div class="admin-periods-credits-info mb-2">
       for
-      <span class="tag is-black is-large">{{ $store.state.admin.periodCredits?.period?.name }}</span>
+      <span class="tag is-black is-medium">{{ $store.state.admin.periodCredits?.period?.name }}</span>
       from
-      <span class="tag is-black is-large">{{ $store.state.admin.periodCredits?.period?.from }}</span>
+      <span class="tag is-black is-medium">{{ $store.state.admin.periodCredits?.period?.from }}</span>
       to
-      <span class="tag is-black is-large">{{ $store.state.admin.periodCredits?.period?.to }}</span>
-    </h3>
+      <span class="tag is-black is-medium">{{ $store.state.admin.periodCredits?.period?.to }}</span>
+    </div>
 
     <div class="mb-4">
       <a class="button is-info mr-2" @click="saveCreditsSelected()" ref="saveSelectedButton">Set hours selected</a>
@@ -30,11 +30,11 @@
       </thead>
       <tbody>
         <tr v-for="periodCredit in filteredItems">
-          <td>
+          <td class="admin-table-selector">
             <input type="checkbox" v-model="periodCredit.selected">
           </td>
-          <td>{{ periodCredit.email }}</td>
-          <td>
+          <td class="no-break">{{ periodCredit.email }}</td>
+          <td class="no-break admin-periods-credits-table-hours">
             <input class="input" type="number" v-model="periodCredit.credit_amount">
           </td>
         </tr>
@@ -165,4 +165,14 @@
 
 <style lang="scss">
   @import '@/assets/scss/admin-table.scss';
+
+  .admin-periods-credits-table-hours {
+    width: 8rem;
+  }
+
+  .admin-periods-credits-info {
+    span {
+      margin-bottom: 1rem;
+    }
+  }
 </style>

@@ -5,7 +5,7 @@
     <div class="switmenu-section-content">
       <ul>
         <li v-for="adminMenuItem in adminMenuItems">
-          <router-link :to="adminMenuItem" :class="adminMenuItem.class">{{ adminMenuItem.label }}</router-link>
+          <router-link :to="adminMenuItem" :class="adminMenuItem.class" @click="hideMenuMobile">{{ adminMenuItem.label }}</router-link>
         </li>
       </ul>
     </div>
@@ -13,6 +13,8 @@
 </template>
 
 <script>
+  import { isMobile } from '@/lib/mobile-helpers.js'
+
   export default {
     name: 'AdminMenu',
     data() {
@@ -33,6 +35,13 @@
           },
         ],
       }
+    },
+    methods: {
+      hideMenuMobile() {
+        if (isMobile()) {
+          this.mitt.emit('closeSideMenu')
+        }
+      },
     },
   }
 </script>

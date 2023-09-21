@@ -1,7 +1,9 @@
 <template>
-  <table class="table table-hovered admin-table" :class="tableClasses" :ref="tableRefName">
-    <slot></slot>
-  </table>
+  <div class="admin-table-wrapper">
+    <table class="table table-hovered admin-table" :class="tableClasses" :ref="tableRefName">
+      <slot></slot>
+    </table>
+  </div>
 </template>
 
 <script>

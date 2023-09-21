@@ -1,15 +1,15 @@
 <template>
   <div class="content admin-periods-stats">
-    <h1 class="is-size-1">Statistics</h1>
+    <h4 class="is-size-4">Statistics</h4>
 
-    <h3 class="is-size-4">
+    <div class="admin-periods-stats-info mb-2">
       for
-      <span class="tag is-black is-large">{{ $store.state.admin.periodStats?.period?.name }}</span>
+      <span class="tag is-black is-medium">{{ $store.state.admin.periodStats?.period?.name }}</span>
       from
-      <span class="tag is-black is-large">{{ $store.state.admin.periodStats?.period?.from }}</span>
+      <span class="tag is-black is-medium">{{ $store.state.admin.periodStats?.period?.from }}</span>
       to
-      <span class="tag is-black is-large">{{ $store.state.admin.periodStats?.period?.to }}</span>
-    </h3>
+      <span class="tag is-black is-medium">{{ $store.state.admin.periodStats?.period?.to }}</span>
+    </div>
 
     <div class="mb-4">
       <a class="button is-info" @click="getCsv()">Download CSV</a>
@@ -20,22 +20,22 @@
     <admin-table :tableClasses="['admin-periods-stats-table']">
       <thead>
         <tr class="no-select">
-          <th>Email</th>
-          <th>Hours</th>
-          <th>Total hours</th>
-          <th>Should have now</th>
-          <th>Balance</th>
-          <th>Balance percentage</th>
+          <th class="admin-periods-stats-table-email">Email</th>
+          <th class="admin-periods-stats-table-narrow-cell">Hours</th>
+          <th class="admin-periods-stats-table-narrow-cell">Total hours</th>
+          <th class="admin-periods-stats-table-narrow-cell">Should have now</th>
+          <th class="admin-periods-stats-table-narrow-cell">Balance</th>
+          <th class="admin-periods-stats-table-narrow-cell">Balance percentage</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="periodStat in filteredItems">
           <td>{{ periodStat.email }}</td>
-          <td>{{ periodStat.credits }}</td>
-          <td>{{ periodStat.total_hours }}</td>
-          <td>{{ periodStat.should_hours }}</td>
-          <td class="admin-periods-stats-period-balance" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance }}</td>
-          <td>{{ periodStat.balance_percent }}</td>
+          <td class="no-break">{{ periodStat.credits }}</td>
+          <td class="no-break">{{ periodStat.total_hours }}</td>
+          <td class="no-break">{{ periodStat.should_hours }}</td>
+          <td class="admin-periods-stats-period-balance no-break" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance }}</td>
+          <td class="no-break">{{ periodStat.balance_percent }}</td>
         </tr>
         <tr v-if="filteredItems.length === 0">
           <td colspan="7">No records found.</td>
@@ -101,6 +101,20 @@
       &.admin-periods-stats-period-negative-balance {
         color: #db0404;
       }
+    }
+
+    .admin-periods-stats-info {
+      span {
+        margin-bottom: 1rem;
+      }
+    }
+
+    .admin-periods-stats-table-narrow-cell {
+      max-width: 6rem;
+    }
+
+    .admin-periods-stats-table-email {
+      min-width: 10rem;
     }
   }
 </style>

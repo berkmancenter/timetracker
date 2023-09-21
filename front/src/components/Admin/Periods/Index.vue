@@ -1,6 +1,6 @@
 <template>
   <div class="content admin-periods">
-    <h1 class="is-size-1">Periods</h1>
+    <h4 class="is-size-4">Periods</h4>
 
     <p>Periods offer a comprehensive way to access statistical data regarding timesheet usage by users within a specified timeframe.</p>
 
@@ -23,24 +23,26 @@
           <tr v-for="period in $store.state.admin.periods" :key="period.id">
             <td>{{ period.name }}</td>
             <td>{{ period.timesheet.name }}</td>
-            <td>{{ period.from }}</td>
-            <td>{{ period.to }}</td>
+            <td class="no-break">{{ period.from }}</td>
+            <td class="no-break">{{ period.to }}</td>
             <td class="admin-table-actions">
-              <router-link title="Edit period" :to="`/admin/periods/${period.id}/edit`">
-                <Icon :src="editIcon" />
-              </router-link>
-              <a title="Clone period" @click.prevent="clonePeriod(period)">
-                <Icon :src="cloneIcon" />
-              </a>
-              <a title="Delete period" @click.prevent="deletePeriod(period)">
-                <Icon :src="minusIcon" />
-              </a>
-              <router-link title="Set period hours" :to="`/admin/periods/${period.id}/credits`">
-                <Icon :src="hoursIcon" />
-              </router-link>
-              <router-link title="Period statistics" :to="`/admin/periods/${period.id}/stats`">
-                <Icon :src="statsIcon" />
-              </router-link>
+              <div class="admin-table-actions">
+                <router-link title="Edit period" :to="`/admin/periods/${period.id}/edit`">
+                  <Icon :src="editIcon" />
+                </router-link>
+                <a title="Clone period" @click.prevent="clonePeriod(period)">
+                  <Icon :src="cloneIcon" />
+                </a>
+                <a title="Delete period" @click.prevent="deletePeriod(period)">
+                  <Icon :src="minusIcon" />
+                </a>
+                <router-link title="Set period hours" :to="`/admin/periods/${period.id}/credits`">
+                  <Icon :src="hoursIcon" />
+                </router-link>
+                <router-link title="Period statistics" :to="`/admin/periods/${period.id}/stats`">
+                  <Icon :src="statsIcon" />
+                </router-link>
+              </div>
             </td>
           </tr>
           <tr v-if="$store.state.admin.periods.length === 0">

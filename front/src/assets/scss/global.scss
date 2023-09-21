@@ -1,10 +1,10 @@
-body, button, input, optgroup, select, textarea {
-  color: #000000;
-  font-family: var(--main-font-family);
-}
-
 .no-select {
   user-select: none;
+}
+
+.no-break {
+  word-break: normal;
+  white-space: nowrap;
 }
 
 .swal2-shown {

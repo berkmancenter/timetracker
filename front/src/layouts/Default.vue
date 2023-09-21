@@ -86,6 +86,15 @@
 </script>
 
 <style lang="scss">
+  html {
+    overflow-y: auto;
+  }
+
+  body, button, input, optgroup, select, textarea {
+    color: #000000;
+    font-family: var(--main-font-family);
+  }
+
   .top-nav {
     height: 4.5rem;
     border-bottom: 5px solid var(--main-color);
@@ -205,6 +214,7 @@
     margin-top: 5.5rem;
     margin-left: 1rem;
     margin-right: 1rem;
+    margin-bottom: 2rem;
     border-radius: 1rem;
     padding-top: 0.5rem;
     box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
@@ -225,6 +235,6 @@
     text-align: center;
     color: #ffffff;
     font-weight: bold;
-    margin: 2rem 0;
+    margin-top: 2rem;
   }
 </style>
