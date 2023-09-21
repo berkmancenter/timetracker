@@ -39,16 +39,16 @@ const actions = {
     return data
   },
   async logout(context) {
-    await fetchIt(`${apiUrl}/users/sign_out`, {
-      method: 'DELETE',
-    })
-
     switch (authType) {
       case 'cas':
         window.location = `${apiUrl}/users/cas_logout`
 
         break
       default:
+        await fetchIt(`${apiUrl}/users/sign_out`, {
+          method: 'DELETE',
+        })
+
         window.location.reload()
     }
   },

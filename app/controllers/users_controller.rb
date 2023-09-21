@@ -45,6 +45,7 @@ class UsersController < ApplicationController
   end
 
   def cas_logout
+    sign_out(current_user)
     redirect_to "#{Timetracker::Application.config.rack_cas.server_url}/logout"
   end
 
