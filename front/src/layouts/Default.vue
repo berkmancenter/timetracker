@@ -34,6 +34,10 @@
                 You are logged in as
                 <div>{{ $store.state.shared.user.username }}</div>
               </div>
+              <hr class="dropdown-divider">
+              <a class="dropdown-item" @click="logout">
+                Logout
+              </a>
             </template>
           </VDropdown>
         </div>
@@ -80,6 +84,11 @@
       },
       reloadPath() {
         this.redirectToSelectedMonth(this.$store)
+      },
+      async logout() {
+        await this.$store.dispatch('shared/logout')
+
+        window.location.reload()
       },
     },
   }

@@ -37,6 +37,14 @@ const actions = {
 
     return data
   },
+  async logout(context) {
+    const response = await fetchIt(`${apiUrl}/users/sign_out`, {
+      method: 'DELETE',
+    })
+    const data = await response.json()
+
+    return data
+  },
   setUser(context, user) {
     context.commit('setUser', user)
     context.commit('setSudoMode', user.sudo_users.length > 0)
