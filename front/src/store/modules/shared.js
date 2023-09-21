@@ -2,6 +2,7 @@ import fetchIt from '@/lib/fetch-it'
 import store2 from 'store2'
 
 const apiUrl = import.meta.env.VITE_API_URL
+const authType = import.meta.env.VITE_AUTH_TYPE
 
 const state = {
   user: {
@@ -38,12 +39,18 @@ const actions = {
     return data
   },
   async logout(context) {
-    const response = await fetchIt(`${apiUrl}/users/sign_out`, {
+    await fetchIt(`${apiUrl}/users/sign_out`, {
       method: 'DELETE',
     })
-    const data = await response.json()
 
-    return data
+    switch (authType) {
+      case 'cas':
+        window.location = `${apiUrl}/users/cas_logout`
+
+        break
+      default:
+        window.location.reload()
+    }
   },
   setUser(context, user) {
     context.commit('setUser', user)

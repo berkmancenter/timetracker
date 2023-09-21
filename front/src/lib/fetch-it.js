@@ -1,17 +1,17 @@
-import { globals } from '@/main.js'
-
 const fetchIt = async (url, options = {}) => {
   options.credentials = 'include'
 
-  const response = await fetch(url, options)
+  try {
+    const response = await fetch(url, options)
 
-  const responsePromise = new Promise((resolve, reject) => {
-    if (response) {
-      resolve(response)
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
     }
-  })
 
-  return responsePromise
+    return response
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }
 
 export default fetchIt

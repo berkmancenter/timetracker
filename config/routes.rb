@@ -25,6 +25,7 @@ Rails.application.routes.draw do
       post :sudo
       post :unsudo
       post :toggle_admin
+      get :cas_logout
     end
   end
 

@@ -65,6 +65,7 @@ Time Tracker is a simple open-source time reporting application.
 | `VITE_API_URL` | URL of the Rails API, in `development` it will most likely be `http://127.0.0.1:6868` | `Yes` |
 | `VITE_SITE_URL` | URL of the Vue application, in `development` it will most likely be `http://127.0.0.1:6767` | `Yes` |
 | `VITE_ENVIRONMENT` | Vue application environment, default is `development` | `No` |
+| `VITE_AUTH_TYPE` | Authentication type, default is `db`, set to `cas` if you want to use CAS authentication | `No` |
 
 ## License
 

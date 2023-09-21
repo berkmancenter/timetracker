@@ -87,8 +87,6 @@
       },
       async logout() {
         await this.$store.dispatch('shared/logout')
-
-        window.location.reload()
       },
     },
   }

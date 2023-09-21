@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
-  before_action :superadmin?, except: %i[current_user_data sudo unsudo]
-  before_action :authenticate_user_json!
+  before_action :superadmin?, except: %i[current_user_data sudo unsudo cas_logout]
+  before_action :authenticate_user_json!, except: %i[cas_logout]
 
   def toggle_admin
     user_ids = params[:users]&.reject { |uid| uid.to_i == current_user.id }
@@ -42,6 +42,10 @@ class UsersController < ApplicationController
       is_superadmin: current_user.superadmin,
       sudo_users: get_sudo_users_emails
     }, status: :ok
+  end
+
+  def cas_logout
+    redirect_to "#{Timetracker::Application.config.rack_cas.server_url}/logout"
   end
 
   private
