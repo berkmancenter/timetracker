@@ -57,9 +57,16 @@ class TimesheetsController < ApplicationController
     email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
     emails = params[:emails].scan(email_regex)
 
+    role = params[:role]
+
+    unless Invitation::VALID_ROLES.include?(role)
+      render json: { message: 'Invalid role provided' }, status: :unprocessable_entity
+      return
+    end
+
     invitations = []
     emails.each do |e|
-      invitations << Invitation.new(email: e, sender: current_user, timesheet: @timesheet, role: params[:role])
+      invitations << Invitation.new(email: e, sender: current_user, timesheet: @timesheet, role: role)
     end
 
     Invitation.import!(invitations)

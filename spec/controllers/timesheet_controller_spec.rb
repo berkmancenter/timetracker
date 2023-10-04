@@ -92,18 +92,29 @@ RSpec.describe TimesheetsController, type: :controller do
   end
 
   describe 'POST #send_invitations' do
-    it 'sends invitations to specified emails' do
+    it 'sends invitations to specified emails with a valid role' do
       timesheet = create(:timesheet, name: 'Test Timesheet')
       create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
       emails = 'test1@example.com, test2@example.com'
       emails_arr = ['test1@example.com', 'test2@example.com']
+      valid_role = Invitation::VALID_ROLES.sample
 
       expect do
-        post :send_invitations, params: { id: timesheet.id, emails: emails, role: 'user' }, format: :json
+        post :send_invitations, params: { id: timesheet.id, emails: emails, role: valid_role }, format: :json
       end.to change(Invitation, :count).by(2)
 
       expect(response).to have_http_status(:ok)
       expect(Invitation.pluck(:email)).to match_array(emails_arr)
+    end
+
+    it 'returns unprocessable entity if no valid role is provided' do
+      timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+      emails = 'test1@example.com, test2@example.com'
+
+      post :send_invitations, params: { id: timesheet.id, emails: emails, role: 'invalid_role' }, format: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it 'returns unauthorized if the user is not an admin' do
@@ -205,6 +216,47 @@ RSpec.describe TimesheetsController, type: :controller do
       sign_in user1
 
       post :delete_users, params: { id: timesheet.id, users: [user.id] }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe 'POST #change_users_role' do
+    let(:user) { create(:user) }
+    let(:timesheet) { create(:timesheet) }
+    let(:user1) { create(:user) }
+    let(:user2) { create(:user) }
+
+    before do
+      sign_in user
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+      create(:users_timesheet, user: user1, timesheet: timesheet, role: 'admin')
+      create(:users_timesheet, user: user2, timesheet: timesheet, role: 'admin')
+    end
+
+    it 'changes users roles for the admin user' do
+      user_ids = [user2.id]
+
+      post :change_users_role, params: { id: timesheet.id, users: user_ids, role: 'user' }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(UsersTimesheet.where(user_id: user_ids, timesheet: timesheet).pluck(:role)).to eq(['user'])
+    end
+
+    it 'returns bad request if no users are selected' do
+      post :change_users_role, params: { id: timesheet.id, role: 'user' }, format: :json
+
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'returns unauthorized for non-admin user' do
+      regular_user = create(:user)
+      create(:users_timesheet, user: regular_user, timesheet: timesheet, role: 'user')
+
+      sign_out user
+      sign_in regular_user
+
+      post :change_users_role, params: { id: timesheet.id, users: [user2.id], role: 'user' }, format: :json
 
       expect(response).to have_http_status(:unauthorized)
     end
