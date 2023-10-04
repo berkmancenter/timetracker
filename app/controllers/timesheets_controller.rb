@@ -59,7 +59,7 @@ class TimesheetsController < ApplicationController
 
     invitations = []
     emails.each do |e|
-      invitations << Invitation.new(email: e, sender: current_user, timesheet: @timesheet)
+      invitations << Invitation.new(email: e, sender: current_user, timesheet: @timesheet, role: params[:role])
     end
 
     Invitation.import!(invitations)
@@ -80,7 +80,7 @@ class TimesheetsController < ApplicationController
 
     timesheet = invitation.timesheet
 
-    ut = UsersTimesheet.new(user: current_user, timesheet: timesheet, role: 'user')
+    ut = UsersTimesheet.new(user: current_user, timesheet: timesheet, role: invitation.role)
 
     if ut.save
       invitation.used_by = current_user

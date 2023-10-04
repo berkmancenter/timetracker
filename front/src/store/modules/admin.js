@@ -274,6 +274,7 @@ const actions = {
       },
       body: JSON.stringify({
         emails: data.emails,
+        role: data.role,
       }),
     })
 

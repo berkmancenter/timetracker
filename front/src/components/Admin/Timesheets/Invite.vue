@@ -21,6 +21,26 @@
         </div>
       </div>
 
+      <div class="field">
+        <label class="label">
+          Role
+          <div class="is-size-7 has-text-weight-normal">Invited users will get this role assigned when they join.</div>
+        </label>
+
+        <div class="control" v-for="(option, index) in roles" :key="index">
+          <label class="radio">
+            <input
+              type="radio"
+              name="role"
+              v-model="selectedRole"
+              :value="option"
+              class="mb-2"
+            >
+            {{ option }}
+          </label>
+        </div>
+      </div>
+
       <div class="field is-grouped">
         <div class="control">
           <button class="button" ref="submitButton">Send</button>
@@ -39,7 +59,13 @@
       Icon,
     },
     data() {
-      return {}
+      return {
+        roles: [
+          'user',
+          'admin',
+        ],
+        selectedRole: 'user',
+      }
     },
     created() {
       this.initialDataLoad()
@@ -68,6 +94,7 @@
         const response = await this.$store.dispatch('admin/sendTimesheetInvitations', {
           timesheetId: this.$store.state.admin.timesheet.id,
           emails: this.$store.state.admin.timesheetInvitations,
+          role: this.selectedRole,
         })
 
         if (response?.ok) {

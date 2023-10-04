@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_02_191510) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_04_171912) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -35,9 +35,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_02_191510) do
     t.string "itype", default: "single", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "role", default: "user", null: false
     t.index ["sender_id"], name: "index_invitations_on_sender_id"
     t.index ["timesheet_id"], name: "index_invitations_on_timesheet_id"
     t.index ["used_by_id"], name: "index_invitations_on_used_by_id"
+    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'user'::character varying]::text[])", name: "valid_role_check"
   end
 
   create_table "periods", force: :cascade do |t|
@@ -118,6 +120,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_02_191510) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["timesheet_id"], name: "index_users_timesheets_on_timesheet_id"
+    t.index ["user_id", "timesheet_id"], name: "unique_user_timesheet", unique: true
     t.index ["user_id"], name: "index_users_timesheets_on_user_id"
   end
 

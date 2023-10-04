@@ -99,7 +99,7 @@ RSpec.describe TimesheetsController, type: :controller do
       emails_arr = ['test1@example.com', 'test2@example.com']
 
       expect do
-        post :send_invitations, params: { id: timesheet.id, emails: emails }, format: :json
+        post :send_invitations, params: { id: timesheet.id, emails: emails, role: 'user' }, format: :json
       end.to change(Invitation, :count).by(2)
 
       expect(response).to have_http_status(:ok)
