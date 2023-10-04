@@ -40,7 +40,7 @@
             </td>
           </tr>
           <tr v-if="$store.state.admin.timesheets.length === 0">
-            <td colspan="7">No timesheets found.</td>
+            <td colspan="2">No timesheets found.</td>
           </tr>
         </tbody>
       </admin-table>

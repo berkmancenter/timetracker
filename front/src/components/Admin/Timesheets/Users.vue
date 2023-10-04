@@ -4,7 +4,7 @@
 
     <form class="form">
       <div class="mb-4">
-        <a class="button is-info" @click="sudoUsers()">View other users timesheets</a>
+        <a class="button is-info" @click="sudoUsers()">View selected users timesheets</a>
       </div>
 
       <super-admin-filter :users="users" @change="superAdminFilterChanged" />
@@ -32,13 +32,39 @@
                 <a title="Remove user from timesheet" @click.prevent="removeFromTimesheet(user)">
                   <Icon :src="minusIcon" />
                 </a>
+                <a title="Change role" @click.prevent="changeUsersRole(user)">
+                  <Icon :src="toggleAdminIcon" />
+                </a>
               </div>
             </td>
+          </tr>
+          <tr v-if="filteredItems.length === 0">
+            <td colspan="4">No users found.</td>
           </tr>
         </tbody>
       </admin-table>
     </form>
   </div>
+
+  <div ref="adminTimesheetUsersSetRoleTemplate" class="is-hidden">
+      <div class="content admin-timesheet-users-set-role">
+        <div class="is-size-5 mb-4">Choose role to set</div>
+
+        <div class="field">
+          <div class="control" v-for="(option, index) in roles" :key="index">
+            <label class="radio">
+              <input
+                type="radio"
+                name="adminTimesheetUsersSetRole"
+                :value="option"
+                class="mb-2"
+              >
+              {{ option }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script>
@@ -46,6 +72,7 @@
   import minusIcon from '@/images/minus.svg'
   import yesIcon from '@/images/yes.svg'
   import noIcon from '@/images/no.svg'
+  import toggleAdminIcon from '@/images/toggle_admin.svg'
   import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
@@ -62,9 +89,15 @@
         minusIcon,
         yesIcon,
         noIcon,
+        toggleAdminIcon,
         users: [],
         filteredItems: [],
         timesheetId: this.$route.params.id,
+        roles: [
+          'admin',
+          'user',
+        ],
+        setRoleSelectedRole: 'user',
       }
     },
     created() {
@@ -150,6 +183,39 @@
 
             return user
           })
+      },
+      changeUsersRole(user) {
+        const templateElementSelector = '.swal2-html-container .admin-timesheet-users-set-role'
+
+        Swal.fire({
+          icon: null,
+          showCancelButton: true,
+          confirmButtonText: 'Set',
+          confirmButtonColor: this.colors.main,
+          html: this.$refs.adminTimesheetUsersSetRoleTemplate.innerHTML,
+          didOpen: () => {
+            document.querySelector(templateElementSelector).querySelector('input').checked = true
+          },
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            this.mitt.emit('spinnerStart')
+
+            const response = await this.$store.dispatch('admin/changeTimesheetUsersRole', {
+              users: [user.id],
+              timesheetId: this.timesheetId,
+              role: document.querySelector(templateElementSelector).querySelector('input:checked').value,
+            })
+
+            if (response.ok) {
+              this.awn.success('User role have been updated.')
+              this.loadUsers()
+            } else {
+              this.awn.warning('Something went wrong, try again.')
+            }
+
+            this.mitt.emit('spinnerStop')
+          }
+        })
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users

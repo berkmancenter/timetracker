@@ -2,20 +2,6 @@ class UsersController < ApplicationController
   before_action :superadmin?, except: %i[current_user_data sudo unsudo cas_logout]
   before_action :authenticate_user_json!, except: %i[cas_logout]
 
-  def toggle_admin
-    user_ids = params[:users]&.reject { |uid| uid.to_i == current_user.id }
-
-    if user_ids&.any?
-      User.where(id: user_ids).each do |user|
-        user.toggle!(:superadmin)
-      end
-
-      render json: { message: 'ok' }, status: :ok
-    else
-      render json: { message: 'No users selected.' }, status: :bad_request
-    end
-  end
-
   def sudo
     timesheet = Timesheet.where(id: params[:timesheet_id]).first
 

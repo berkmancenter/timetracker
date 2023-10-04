@@ -1,5 +1,5 @@
 class TimesheetsController < ApplicationController
-  before_action :set_timesheet, only: %i[show send_invitations leave users delete_users]
+  before_action :set_timesheet, only: %i[show send_invitations leave users delete_users change_users_role]
   before_action :authenticate_user_json!
 
   def index
@@ -112,10 +112,25 @@ class TimesheetsController < ApplicationController
     generic_bad_request_response and return if @timesheet.nil?
     generic_unauthorized_response and return unless @timesheet.admin?(current_user)
 
-    user_ids = params[:users]&.reject { |uid| uid.to_i == current_user.id }
+    user_ids = params[:users]
 
     if user_ids&.any?
       UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).destroy_all
+
+      render json: { message: 'ok' }, status: :ok
+    else
+      render json: { message: 'No users selected.' }, status: :bad_request
+    end
+  end
+
+  def change_users_role
+    generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+
+    user_ids = params[:users]
+
+    if user_ids&.any?
+      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).update_all(role: params[:role])
 
       render json: { message: 'ok' }, status: :ok
     else

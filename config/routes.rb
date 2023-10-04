@@ -54,6 +54,7 @@ Rails.application.routes.draw do
       get :leave
       get :users
       post :delete_users
+      post :change_users_role
     end
   end
 

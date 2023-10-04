@@ -290,6 +290,22 @@ const actions = {
 
     return response
   },
+  async changeTimesheetUsersRole(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/change_users_role`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        users: data.users,
+        timesheet_id: data.timesheetId,
+        role: data.role,
+      }),
+    })
+
+    return response
+  },
 }
 
 const getters = {}
