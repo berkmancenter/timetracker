@@ -1,8 +1,8 @@
 [![Build Status](https://circleci.com/gh/berkmancenter/timetracker.svg?style=shield)](https://circleci.com/gh/berkmancenter/timetracker)
 
-# Time Tracker
+# TimeTracker
 
-Time Tracker is a simple open-source time reporting application.
+TimeTracker is a simple open-source time reporting application.
 
 ## Stack
 * Ruby
