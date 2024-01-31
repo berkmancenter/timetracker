@@ -92,8 +92,8 @@ RSpec.describe TimeEntry, type: :model do
 
       entry_list = TimeEntry.entry_list_by_month([user], timesheet)
 
-      expect(entry_list).to include("#{Time.current.year}-#{Time.current.strftime('%m')}")
-      expect(entry_list).to include("#{Time.current.year}-#{1.month.ago.strftime('%m')}")
+      expect(entry_list).to include("#{Time.current.strftime('%Y')}-#{Time.current.strftime('%m')}")
+      expect(entry_list).to include("#{1.month.ago.strftime('%Y')}-#{1.month.ago.strftime('%m')}")
     end
   end
 
