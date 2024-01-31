@@ -194,7 +194,7 @@ class PeriodsController < ApplicationController
     send_data(
       csv_string,
       type: 'application/octet-stream',
-      filename: "#{@period.name.parameterize}-statistics-#{Time.now.to_s(:number)}.csv"
+      filename: "#{@period.name.parameterize}-statistics-#{Time.now.to_formatted_s(:number)}.csv"
     )
   end
 end

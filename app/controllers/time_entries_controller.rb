@@ -123,7 +123,7 @@ class TimeEntriesController < ApplicationController
     send_data(
       csv_string,
       type: 'application/octet-stream',
-      filename: "#{param[:filebase]}-#{Time.now.to_s(:number)}.csv"
+      filename: "#{param[:filebase]}-#{Time.now.to_formatted_s(:number)}.csv"
     )
   end
 end
