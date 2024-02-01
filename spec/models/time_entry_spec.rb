@@ -65,10 +65,14 @@ RSpec.describe TimeEntry, type: :model do
     let(:timesheet) { create(:timesheet) }
     let(:month) { "#{Time.current.year}-#{Time.current.strftime('%m')}" }
 
+    date_1 = Date.today.beginning_of_month.days_since(9)
+    date_2 = Date.today.beginning_of_month.days_since(8)
+    date_3 = Date.today.beginning_of_month.days_since(7)
+
     it 'returns total hours by month and day for the user' do
-      create(:time_entry, user: user, timesheet: timesheet, entry_date: 2.days.ago, decimal_time: 3.5)
-      create(:time_entry, user: user, timesheet: timesheet, entry_date: 1.day.ago, decimal_time: 2.0)
-      create(:time_entry, user: user, timesheet: timesheet, entry_date: Date.current, decimal_time: 4.0)
+      create(:time_entry, user: user, timesheet: timesheet, entry_date: date_1, decimal_time: 3.5)
+      create(:time_entry, user: user, timesheet: timesheet, entry_date: date_2, decimal_time: 2.0)
+      create(:time_entry, user: user, timesheet: timesheet, entry_date: date_3, decimal_time: 4.0)
 
       entries = TimeEntry.total_hours_by_month_day([user], month, timesheet)
 
