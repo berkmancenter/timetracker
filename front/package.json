@@ -18,6 +18,7 @@
     "floating-vue": "^2.0.0-beta.24",
     "ldbutton": "^2.0.1",
     "mitt": "^3.0.0",
+    "postcss": "8.4.31",
     "store2": "^2.14.2",
     "sweetalert2": "^11.7.3",
     "tablesort": "^5.3.0",
