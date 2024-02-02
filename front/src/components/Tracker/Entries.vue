@@ -26,7 +26,7 @@
         <template v-for="(entries, date) in entriesByDate">
           <tbody>
             <tr class="entry-date">
-              <td colspan="5" class="entry_date is-size-4" v-if="isNewDay(date)">{{ date }}</td>
+              <td colspan="5" class="entry_date is-size-4" v-if="isNewDay(date)">{{ formatDate(date) }}</td>
             </tr>
 
             <template v-for="entry in entries" :key="entry.id">
@@ -187,6 +187,12 @@
 
         this.mitt.emit('spinnerStop')
       },
+      formatDate(date) {
+        const dateParsed = Date.parse(date)
+        const dateFormatted = dayjs(dateParsed).format('dddd, YYYY-MM-DD')
+
+        return dateFormatted
+      }
     }
   }
 </script>
