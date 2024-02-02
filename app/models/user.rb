@@ -16,14 +16,17 @@ class User < ActiveRecord::Base
   end
 
   def user_timesheets
-    self.timesheets
-        .select('
-          timesheets.id,
-          timesheets.name,
-          timesheets.uuid,
-          ARRAY_AGG(users_timesheets.role) AS roles
-        ')
-        .group('timesheets.id')
+    all_user_timesheets = self.timesheets
+    all_user_timesheets = UsersTimesheet.joins(:timesheet).group('timesheets.id').all if self.superadmin?
+
+    all_user_timesheets
+      .select('
+        timesheets.id,
+        timesheets.name,
+        timesheets.uuid,
+        ARRAY_AGG(users_timesheets.role) AS roles
+      ')
+      .group('timesheets.id')
   end
 
   def cas_extra_attributes=(extra_attributes)

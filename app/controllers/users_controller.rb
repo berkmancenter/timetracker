@@ -6,7 +6,7 @@ class UsersController < ApplicationController
     timesheet = Timesheet.where(id: params[:timesheet_id]).first
 
     generic_bad_request_response and return if timesheet.nil?
-    generic_unauthorized_response and return unless timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless timesheet.admin?(current_user) || superadmin?
 
     allowed_user_ids = params[:users].map(&:to_i) & timesheet.users.pluck(:id)
 

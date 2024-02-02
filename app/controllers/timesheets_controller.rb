@@ -7,7 +7,7 @@ class TimesheetsController < ApplicationController
   end
 
   def show
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 
     render json: @timesheet, status: :ok
   end
@@ -17,7 +17,7 @@ class TimesheetsController < ApplicationController
     if timesheet_params[:id]
       timesheet = Timesheet.find(timesheet_params['id'])
 
-      generic_unauthorized_response and return unless timesheet.admin?(current_user)
+      generic_unauthorized_response and return unless timesheet.admin?(current_user) || superadmin?
 
       timesheet.assign_attributes(timesheet_params)
     else
@@ -40,7 +40,7 @@ class TimesheetsController < ApplicationController
     Timesheet.where(id: timesheets_ids).each do |t|
       unauth = true unless t.admin?(current_user)
     end
-    generic_unauthorized_response and return if unauth
+    generic_unauthorized_response and return if unauth && !superadmin?
 
     if timesheets_ids&.any?
       Timesheet.where(id: timesheets_ids).destroy_all
@@ -52,7 +52,7 @@ class TimesheetsController < ApplicationController
   end
 
   def send_invitations
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 
     email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
     emails = params[:emails].scan(email_regex)
@@ -110,14 +110,14 @@ class TimesheetsController < ApplicationController
 
   def users
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 
     render json: @timesheet.all_users, status: :ok
   end
 
   def delete_users
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 
     user_ids = params[:users]
 
@@ -132,7 +132,7 @@ class TimesheetsController < ApplicationController
 
   def change_users_role
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 
     user_ids = params[:users]
 

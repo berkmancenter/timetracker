@@ -4,7 +4,7 @@ class TimeEntriesController < ApplicationController
 
   def entries
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user)
+    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
     render_entries_csv and return if params[:csv]
 
     month = params[:month]
@@ -16,9 +16,9 @@ class TimeEntriesController < ApplicationController
     time_entry = TimeEntry.find_by_id(params[:time_entry][:id]) || TimeEntry.new(entry_date: Time.now, decimal_time: 0)
 
     generic_bad_request_response and return unless request.post? || request.patch?
-    generic_unauthorized_response and return if time_entry.id && time_entry.user != current_user
+    generic_unauthorized_response and return if time_entry.id && time_entry.user != current_user && !superadmin?
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user)
+    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
 
     time_entry.attributes = time_entry_params
     time_entry.timesheet = @timesheet
@@ -36,7 +36,7 @@ class TimeEntriesController < ApplicationController
   def delete
     te = TimeEntry.find(params[:id])
 
-    generic_unauthorized_response and return if te.user != current_user
+    generic_unauthorized_response and return if te.user != current_user && !superadmin?
 
     te.destroy
 
@@ -52,14 +52,14 @@ class TimeEntriesController < ApplicationController
 
   def days
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user)
+    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
 
     render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet), status: :ok
   end
 
   def months
     generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user)
+    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
 
     render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
   end
@@ -78,7 +78,7 @@ class TimeEntriesController < ApplicationController
 
   def get_active_users
     unless session["#{current_user.id}_active_users"].blank?
-      generic_unauthorized_response and return unless @timesheet.admin?(current_user)
+      generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
       session["#{current_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
     else
       [current_user]

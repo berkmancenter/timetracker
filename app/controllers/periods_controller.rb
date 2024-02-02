@@ -16,7 +16,7 @@ class PeriodsController < ApplicationController
   end
 
   def show
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
 
     render json: @period.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
@@ -25,7 +25,7 @@ class PeriodsController < ApplicationController
     if period_params[:id]
       period = Period.find(period_params['id'])
 
-      generic_unauthorized_response and return unless period.timesheet.admin?(current_user)
+      generic_unauthorized_response and return unless period.timesheet.admin?(current_user) || superadmin?
 
       period.assign_attributes(period_params)
     else
@@ -46,7 +46,7 @@ class PeriodsController < ApplicationController
     Period.where(id: periods_ids).each do |p|
       unauth = true unless p.timesheet.admin?(current_user)
     end
-    generic_unauthorized_response and return if unauth
+    generic_unauthorized_response and return if unauth && !superadmin?
 
     if periods_ids&.any?
       Period.where(id: periods_ids).destroy_all
@@ -58,7 +58,7 @@ class PeriodsController < ApplicationController
   end
 
   def credits
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
 
     users = @period.timesheet.users.select('
       users.id,
@@ -86,7 +86,7 @@ class PeriodsController < ApplicationController
   end
 
   def set_credits
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
 
     unless params[:credits]&.any?
       render json: { message: 'No users or credits selected.' }, status: :bad_request
@@ -142,7 +142,7 @@ class PeriodsController < ApplicationController
   end
 
   def stats
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
 
     stats = @period.get_stats
 
@@ -155,7 +155,7 @@ class PeriodsController < ApplicationController
   end
 
   def clone
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user)
+    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
 
     cloned_period = @period.dup
     cloned_period.name << ' clone'
