@@ -4,8 +4,8 @@
 
     <div class="switmenu-section-content">
       <div class="select">
-        <select v-model="$store.state.tracker.selectedTimesheet" @change="changeTimesheet">
-          <option v-for="timesheet in $store.state.tracker.timesheets" :key="timesheet.id" :value="timesheet">
+        <select ref="timesheetsSelect" v-model="selectedMonth" @change="changeTimesheet($event)">
+          <option v-for="timesheet in $store.state.tracker.timesheets" :key="timesheet.id" :value="timesheet.id">
             {{ timesheet.name }}
           </option>
         </select>
@@ -22,12 +22,22 @@
     data() {
       return {
         apiUrl: import.meta.env.VITE_API_URL,
+        selectedMonth: null,
         redirectToSelectedMonth: redirectToSelectedMonth,
       }
     },
+    mounted() {
+      if (this.$store.state.tracker.selectedTimesheet?.id) {
+        this.selectedMonth = this.$store.state.tracker.selectedTimesheet.id
+      }
+    },
     methods: {
-      async changeTimesheet() {
+      async changeTimesheet(ev) {
         this.mitt.emit('spinnerStart')
+
+        const selectedTimesheet = this.$store.state.tracker.timesheets.find(timesheet => timesheet.id == ev.target.value)
+
+        this.$store.dispatch('tracker/setSelectedTimesheet', selectedTimesheet)
 
         this.$router.push(
           {
@@ -48,6 +58,11 @@
 
         this.mitt.emit('spinnerStop')
       },
+    },
+    watch: {
+      '$store.state.tracker.selectedTimesheet': function() {
+        this.selectedMonth = this.$store.state.tracker.selectedTimesheet.id
+      }
     },
   };
 </script>

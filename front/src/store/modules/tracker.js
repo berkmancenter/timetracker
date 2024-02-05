@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { router } from '@/router/index'
 import fetchIt from '@/lib/fetch-it'
+import store2 from 'store2'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -189,9 +190,16 @@ const actions = {
     context.commit('setTimesheets', timesheets)
 
     const currentTimesheetParam = router.currentRoute._value.params?.timesheet
-    const timesheetFromRoute = timesheets.find(timesheet => timesheet.uuid === currentTimesheetParam)
-    if (timesheetFromRoute) {
-      context.dispatch('setSelectedTimesheet', timesheetFromRoute)
+    let timesheetFromRouteLocalStorage = timesheets.find(timesheet => timesheet.uuid === currentTimesheetParam)
+
+    if (!timesheetFromRouteLocalStorage) {
+      if (store2('timetracker.active_timesheet') !== null) {
+        timesheetFromRouteLocalStorage = timesheets.find(timesheet => timesheet.uuid === store2('timetracker.active_timesheet'))
+      }
+    }
+
+    if (timesheetFromRouteLocalStorage) {
+      context.dispatch('setSelectedTimesheet', timesheetFromRouteLocalStorage)
     } else {
       if (timesheets.length > 0) {
         context.dispatch('setSelectedTimesheet', timesheets[0])
@@ -202,6 +210,7 @@ const actions = {
     context.commit('setSelectedMonth', month)
   },
   setSelectedTimesheet(context, timesheet) {
+    store2('timetracker.active_timesheet', timesheet.uuid)
     context.commit('setSelectedTimesheet', timesheet)
   },
   async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals']) {
@@ -216,7 +225,7 @@ const actions = {
 
       promises.push(promise)
     }
-  
+
     return await Promise.all(promises)
   },
   async joinTimesheet(context, code) {
