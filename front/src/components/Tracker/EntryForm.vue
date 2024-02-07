@@ -15,11 +15,11 @@
         <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" @input="changeFormValue('description', $event.target.value)" id="time_entry_description" accesskey="r"></textarea>
       </FormField>
 
-      <FormField label="Time spent" accessKey="t">
+      <FormField label="Time spent" accessKey="t" :required="true">
         <input class="input" type="number" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
       </FormField>
 
-      <FormField label="Date" accessKey="a">
+      <FormField label="Date" accessKey="a" :required="true">
         <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="time_entry[entry_date]"></date-picker>
       </FormField>
 
@@ -63,7 +63,7 @@
         if (this.$store.state.tracker.formMode === 'create') {
           return 'Add Entry'
         } else {
-          return 'Edit Entry'
+          return 'Save Changes'
         }
       },
     },

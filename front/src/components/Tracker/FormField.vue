@@ -1,7 +1,10 @@
 <template>
   <div class="tracker-entry-form-field field">
     <div class="field-label is-normal mb-2">
-      <label class="label no-select">{{ label }}</label>
+      <label class="label no-select">
+        {{ label }}
+        <span v-if="required" class="tracker-entry-form-field-required">*</span>
+      </label>
     </div>
     <div class="field-body">
       <div class="field">
@@ -26,6 +29,10 @@ export default {
       type: String,
       default: '',
     },
+    required: {
+      type: Boolean,
+      default: false,
+    },
   },
 };
 </script>
@@ -38,6 +45,10 @@ export default {
 
     .field-label {
       text-align: left;
+    }
+
+    .tracker-entry-form-field-required {
+      color: rgb(224, 81, 81);
     }
   }
 </style>
