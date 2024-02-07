@@ -31,7 +31,7 @@ release = '2.1.4'
 # -- General configuration ---------------------------------------------------
 
 # The master toctree document.
-master_doc = 'index'
+root_doc = 'user_manual/index'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

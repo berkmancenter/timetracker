@@ -38,7 +38,7 @@ Editing timesheet
 Removing timesheet
 ==================
 
-.. warning:: Removing timesheets will delete all associated time entries.
+.. warning:: Removing a timesheet will delete all associated time entries.
 
 .. image:: /_static/images/remove_timesheet.png
 
@@ -50,6 +50,13 @@ Inviting users
 -------------
 
 .. image:: /_static/images/invite_users_2.png
+
+Leaving timesheet
+=================
+
+.. image:: /_static/images/leave_timesheet.png
+
+.. warning:: Removing or leaving timesheets will delete all time entries from that associated timesheet.
 
 Listing timesheet users
 =======================

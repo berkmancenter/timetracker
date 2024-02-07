@@ -2,6 +2,8 @@
 Managing time entries
 #####################
 
+The central section of the UI is dedicated to the creation of time entries. In this document we show how to create a new entry, edit an entry and remove an entry.
+
 .. contents::
     :local:
     :depth: 2

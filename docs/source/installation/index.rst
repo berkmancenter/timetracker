@@ -2,6 +2,16 @@
 Installation
 ############
 
+Stack
+=====
+
+-  Ruby
+-  Ruby on Rails
+-  PostgreSQL
+-  Vue
+-  Vite
+-  Bundler
+
 You can pull the code from https://github.com/berkmancenter/timetracker.
 
 The first time
