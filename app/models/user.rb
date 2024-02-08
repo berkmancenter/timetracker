@@ -15,8 +15,9 @@ class User < ActiveRecord::Base
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   end
 
-  def user_timesheets
+  def user_timesheets(only_admin: false)
     all_user_timesheets = self.timesheets
+    all_user_timesheets = all_user_timesheets.where("users_timesheets.role = 'admin'") if only_admin
     all_user_timesheets = UsersTimesheet.joins(:timesheet).group('timesheets.id').all if self.superadmin?
 
     all_user_timesheets

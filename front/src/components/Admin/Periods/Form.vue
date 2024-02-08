@@ -77,7 +77,7 @@
         this.loadPeriod()
       },
       async loadPeriod() {
-        this.timesheets = await this.$store.dispatch('admin/fetchTimesheets')
+        this.timesheets = await this.$store.dispatch('admin/fetchAdminTimesheets')
 
         if (this.$route.params.id) {
           this.mitt.emit('spinnerStart')

@@ -79,6 +79,12 @@ const actions = {
 
     return data
   },
+  async fetchAdminTimesheets(context) {
+    const response = await fetchIt(`${apiUrl}/timesheets/where_admin`)
+    const data = await response.json()
+
+    return data
+  },
   async fetchTimesheet(context, id) {
     const response = await fetchIt(`${apiUrl}/timesheets/${id}`)
     const data = await response.json()

@@ -6,6 +6,10 @@ class TimesheetsController < ApplicationController
     render json: current_user.user_timesheets, status: :ok
   end
 
+  def index_where_admin
+    render json: current_user.user_timesheets(only_admin: true), status: :ok
+  end
+
   def show
     generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 

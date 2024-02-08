@@ -48,6 +48,7 @@ Rails.application.routes.draw do
       post :upsert
       post :delete
       get 'join/:code', action: :join
+      get :where_admin, action: :index_where_admin
     end
     member do
       post :send_invitations

@@ -61,9 +61,9 @@
       },
       submitButtonName() {
         if (this.$store.state.tracker.formMode === 'create') {
-          return 'Add Entry'
+          return 'Add entry'
         } else {
-          return 'Save Changes'
+          return 'Save changes'
         }
       },
     },
