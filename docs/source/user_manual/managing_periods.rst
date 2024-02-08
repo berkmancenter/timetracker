@@ -20,6 +20,8 @@ This will move you to the periods list view.
 Creating new period
 ===================
 
+.. note:: You can create periods only for the timesheets in which you are an admin.
+
 .. image:: /_static/images/create_period_1.png
 
 -------------

@@ -26,3 +26,12 @@ Removing entry
 ==============
 
 .. image:: /_static/images/remove_entry.png
+
+Cloning entry
+=============
+
+.. image:: /_static/images/clone_entry_1.png
+
+-------------
+
+.. image:: /_static/images/clone_entry_2.png

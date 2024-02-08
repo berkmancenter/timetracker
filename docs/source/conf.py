@@ -38,6 +38,7 @@ root_doc = 'user_manual/index'
 # ones.
 extensions = [
   'sphinx_rtd_theme',
+  'sphinx_reredirects',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -101,3 +102,7 @@ html_favicon = ''
 
 # If true, the reST sources are included in the HTML build as _sources/name.
 html_copy_source = False
+
+redirects = {
+    'index.html': 'user_manual/index.html'
+}

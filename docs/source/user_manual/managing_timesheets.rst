@@ -29,6 +29,8 @@ Creating new timesheet
 Editing timesheet
 =================
 
+.. note:: You can edit the timesheets only in which you are an admin.
+
 .. image:: /_static/images/edit_timesheet_1.png
 
 -------------
@@ -38,12 +40,16 @@ Editing timesheet
 Removing timesheet
 ==================
 
+.. note:: You can remove the timesheets only in which you are an admin.
+
 .. warning:: Removing a timesheet will delete all associated time entries.
 
 .. image:: /_static/images/remove_timesheet.png
 
 Inviting users
 ==============
+
+.. note:: You can invite new users to the timesheets only in which you are an admin.
 
 .. image:: /_static/images/invite_users_1.png
 
@@ -61,6 +67,8 @@ Leaving timesheet
 Listing timesheet users
 =======================
 
+.. note:: You can list users of the timesheets only in which you are an admin.
+
 .. image:: /_static/images/list_timesheet_users_1.png
 
 -------------
@@ -72,12 +80,16 @@ This will move you to the timesheet users list view.
 Removing user from timesheet
 ============================
 
+.. note:: You can remove users of the timesheets only in which you are an admin.
+
 .. warning:: Removing a user from a timesheet means that the user won't be able to use it any more and it will remove all their time entries.
 
 .. image:: /_static/images/remove_timesheet_users.png
 
 Changing user role in timesheet
 ===============================
+
+.. note:: You can change a role of users of the timesheets only in which you are an admin.
 
 .. note:: Modifying a user's role will apply only to the specific timesheet in question and will not impact their role in any other timesheets.
 
