@@ -44,7 +44,7 @@
         const months = await this.$store.dispatch('tracker/fetchMonths')
         this.$store.dispatch('tracker/setMonths', months)
 
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals', 'totals'])
         this.redirectToSelectedMonth(this.$store)
 
         this.mitt.emit('spinnerStop')

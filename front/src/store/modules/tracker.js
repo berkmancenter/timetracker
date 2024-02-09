@@ -27,6 +27,8 @@ const state = {
     projects: [],
   },
   dailyTotals: [],
+  totalCurrentTimesheet: 0,
+  totalCurrentMonth: 0,
 }
 
 const mutations = {
@@ -44,6 +46,10 @@ const mutations = {
   },
   setDailyTotals(state, dailyTotals) {
     state.dailyTotals = dailyTotals
+  },
+  setTotals(state, totals) {
+    state.totalCurrentTimesheet = totals.total_hours_current_timesheet
+    state.totalCurrentMonth = totals.total_hours_current_month
   },
   addEntry(state, entry) {
     state.entries.push(entry)
@@ -110,6 +116,12 @@ const actions = {
   },
   async fetchDailyTotals(context) {
     const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
+    const data = await response.json()
+
+    return data
+  },
+  async fetchTotals(context) {
+    const response = await fetchIt(`${apiUrl}/time_entries/totals?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
     const data = await response.json()
 
     return data
@@ -213,7 +225,7 @@ const actions = {
     store2('timetracker.active_timesheet', timesheet.uuid)
     context.commit('setSelectedTimesheet', timesheet)
   },
-  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals']) {
+  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals', 'totals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
     const promises = []
 

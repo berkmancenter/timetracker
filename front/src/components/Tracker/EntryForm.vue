@@ -84,7 +84,7 @@
         const months = await this.$store.dispatch('tracker/fetchMonths')
         this.$store.dispatch('tracker/setMonths', months)
 
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
 
         this.$store.dispatch('tracker/clearEntryForm')
         this.working = false

@@ -45,7 +45,7 @@
 <style lang="scss">
   .tracker-popular {
     background-color: #ffffff;
-    padding: 0 0.25rem;
+    padding: 0.25rem;
 
     li {
       word-break: break-word;

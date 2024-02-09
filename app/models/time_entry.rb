@@ -16,6 +16,10 @@ class TimeEntry < ActiveRecord::Base
   end
 
   def self.my_entries_by_month(users, month = Time.now.year.to_s + '-' + Time.now.month.to_s, alltime = false, timesheet)
+    return [] unless users.present?
+    return [] if month.nil?
+    return [] if timesheet.nil?
+
     user_ids = users.map(&:id)
     month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
 
@@ -35,7 +39,9 @@ class TimeEntry < ActiveRecord::Base
   end
 
   def self.total_hours_by_month_day(users, month, timesheet)
+    return [] unless users.present?
     return [] if month.nil?
+    return [] if timesheet.nil?
 
     user_ids = users.map(&:id)
     TimeEntry
@@ -49,6 +55,9 @@ class TimeEntry < ActiveRecord::Base
   end
 
   def self.entry_list_by_month(users, timesheet)
+    return [] unless users.present?
+    return [] if timesheet.nil?
+
     user_ids = users.map(&:id)
     TimeEntry
       .select(year_month_entry_sql_as)
@@ -63,9 +72,43 @@ class TimeEntry < ActiveRecord::Base
     "#{self.entry_date.to_date.year}-#{self.entry_date.strftime("%m")}"
   end
 
+  def self.total_hours_by_month(users, month, timesheet)
+    return [] unless users.present?
+    return [] if month.nil?
+    return [] if timesheet.nil?
+
+    user_ids = users.map(&:id)
+    TimeEntry
+      .select('SUM(decimal_time) AS total_hours')
+      .joins(:user)
+      .where("#{year_month_entry_sql} = ?", month)
+      .where(user_id: user_ids)
+      .where(timesheet: timesheet)
+      .to_a
+      .map(&:total_hours)
+      .first || []
+  end
+
+  def self.total_hours_by_timesheet(users, timesheet)
+    return [] unless users.present?
+    return [] if timesheet.nil?
+
+    user_ids = users.map(&:id)
+    TimeEntry
+      .select('SUM(decimal_time) AS total_hours')
+      .joins(:user)
+      .where(user_id: user_ids)
+      .where(timesheet: timesheet)
+      .to_a
+      .map(&:total_hours)
+      .first || []
+  end
+
   private
 
   def self.get_popular(type, user)
+    return [] unless user.present?
+
     where_clause = "#{type} IS NOT NULL AND LENGTH(#{type}) > 0"
     TimeEntry
       .select(type)

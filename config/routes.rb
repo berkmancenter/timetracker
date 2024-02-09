@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       get :days
       get :months
       get :auto_complete
+      get :totals
       post :edit
       patch :edit
     end

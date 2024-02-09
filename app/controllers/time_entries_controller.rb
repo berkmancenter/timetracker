@@ -1,5 +1,5 @@
 class TimeEntriesController < ApplicationController
-  before_action :set_timesheet, only: %i[entries edit popular days months]
+  before_action :set_timesheet, only: %i[entries edit popular days months totals]
   before_action :authenticate_user_json!
 
   def entries
@@ -62,6 +62,16 @@ class TimeEntriesController < ApplicationController
     generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
 
     render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
+  end
+
+  def totals
+    generic_bad_request_response and return if @timesheet.nil?
+    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
+
+    render json: {
+      total_hours_current_month: TimeEntry.total_hours_by_month(get_active_users, params[:month], @timesheet),
+      total_hours_current_timesheet: TimeEntry.total_hours_by_timesheet(get_active_users, @timesheet)
+    }, status: :ok
   end
 
   def auto_complete

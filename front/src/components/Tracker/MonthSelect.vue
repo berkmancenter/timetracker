@@ -39,7 +39,7 @@
           }
         )
 
-        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals', 'totals'])
 
         this.mitt.emit('spinnerStop')
       },
