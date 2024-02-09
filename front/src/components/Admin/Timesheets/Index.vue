@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="timesheet in $store.state.admin.timesheets" :key="timesheet.id">
+          <tr v-for="timesheet in orderedTimesheets" :key="timesheet.id">
             <td>{{ timesheet.name }}</td>
             <td class="admin-table-actions">
               <div class="admin-table-actions">
@@ -67,6 +67,7 @@
   import usersIcon from '@/images/users.svg'
   import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
+  import orderBy from 'lodash/orderBy'
 
   export default {
     name: 'AdminTimesheets',
@@ -88,6 +89,11 @@
     },
     created() {
       this.initialDataLoad()
+    },
+    computed: {
+      orderedTimesheets() {
+        return orderBy(this.$store.state.admin.timesheets, 'name')
+      }
     },
     methods: {
       initialDataLoad() {

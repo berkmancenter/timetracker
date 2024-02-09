@@ -20,7 +20,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="period in $store.state.admin.periods" :key="period.id">
+          <tr v-for="period in orderedPeriods" :key="period.id">
             <td>{{ period.name }}</td>
             <td>{{ period.timesheet.name }}</td>
             <td class="no-break">{{ period.from }}</td>
@@ -63,6 +63,7 @@
   import cloneIcon from '@/images/clone.svg'
   import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
+  import orderBy from 'lodash/orderBy'
 
   export default {
     name: 'AdminPeriods',
@@ -81,6 +82,11 @@
     },
     created() {
       this.initialDataLoad()
+    },
+    computed: {
+      orderedPeriods() {
+        return orderBy(this.$store.state.admin.periods, 'name')
+      }
     },
     methods: {
       initialDataLoad() {
