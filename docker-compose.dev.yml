@@ -6,8 +6,6 @@ services:
     volumes:
       - 'postgres:/var/lib/postgresql/data'
       - '.:/app'
-    tmpfs:
-      - '/var/lib/postgresql/data'
     env_file:
       - '.env.dev'
     environment:
