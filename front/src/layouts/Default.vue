@@ -16,7 +16,7 @@
         </a>
 
         <router-link :to="'/'" @click="reloadPath" class="top-nav-name-link ml-4">
-          <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACK</h3>
+          <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACKer</h3>
         </router-link>
       </div>
 
