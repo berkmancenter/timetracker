@@ -4,15 +4,18 @@
 
     <div class="switmenu-section-content">
       <div class="tracker-totals">
-        <div class="mb-1">
-          <div class="has-text-weight-bold">Total hours this timesheet</div>
-          <span class="tag is-light">{{ $store.state.tracker.totalCurrentTimesheet }}</span>
-        </div>
-
-        <div class="mb-1">
-          <div class="has-text-weight-bold">Total hours this month</div>
-          <span class="tag is-light">{{ $store.state.tracker.totalCurrentMonth }}</span>
-        </div>
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>Total hours this timesheet</td>
+              <td>{{ $store.state.tracker.totalCurrentTimesheet }}</td>
+            </tr>
+            <tr>
+              <td>Total hours this month</td>
+              <td>{{ $store.state.tracker.totalCurrentMonth }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

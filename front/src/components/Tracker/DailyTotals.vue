@@ -4,12 +4,6 @@
 
     <div class="switmenu-section-content">
       <table class="table">
-        <thead>
-          <tr>
-            <th>Day</th>
-            <th>Hours</th>
-          </tr>
-        </thead>
         <tbody>
           <template v-for="(item, index) in $store.state.tracker.dailyTotals" :key="index">
             <tr>
