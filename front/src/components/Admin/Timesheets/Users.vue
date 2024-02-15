@@ -29,10 +29,10 @@
             <td class="no-break">{{ user.joined }}</td>
             <td class="admin-table-actions">
               <div class="admin-table-actions">
-                <a title="Remove user from timesheet" @click.prevent="removeFromTimesheet(user)">
+                <a title="Remove user from timesheet" @click.prevent="removeFromTimesheetConfirm(user)">
                   <Icon :src="minusIcon" />
                 </a>
-                <a title="Change role" @click.prevent="changeUsersRole(user)">
+                <a title="Change role" @click.prevent="changeUsersRoleModalOpen(user)">
                   <Icon :src="toggleAdminIcon" />
                 </a>
               </div>
@@ -65,6 +65,41 @@
         </div>
       </div>
     </div>
+
+  <Modal
+    v-model="removeUserFromTimesheetModalStatus"
+    title="Remove user from timesheet"
+    @confirm="removeUserFromTimesheet()"
+    @cancel="removeUserFromTimesheetModalStatus = false"
+  >
+    <p>Are you sure you remove <span class="has-text-weight-bold">{{ removeUserFromTimesheetCurrent.email }}</span> from the timesheet?</p>
+    <div class="notification is-danger is-light mt-2">They won't be able to use it any more.</div>
+  </Modal>
+
+  <Modal
+    v-model="changeUsersRoleModalStatus"
+    title="Change user role"
+    @confirm="changeUsersRole()"
+    @cancel="changeUsersRoleModalStatus = false"
+  >
+    <p>Changing the user role for <span class="has-text-weight-bold">{{ changeUsersRoleCurrent.email }}</span>.</p>
+    <p class="mt-2">Choose role to set:</p>
+
+    <div class="field">
+      <div class="control" v-for="(option, index) in roles" :key="index">
+        <label class="radio">
+          <input
+            type="radio"
+            name="adminTimesheetUsersSetRole"
+            v-model="changeUsersRoleSelected"
+            :value="option"
+            class="mb-2"
+          >
+          {{ option }}
+        </label>
+      </div>
+    </div>
+  </Modal>
 </template>
 
 <script>
@@ -73,9 +108,9 @@
   import yesIcon from '@/images/yes.svg'
   import noIcon from '@/images/no.svg'
   import toggleAdminIcon from '@/images/toggle_admin.svg'
-  import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'AdminTimesheetUsers',
@@ -83,6 +118,7 @@
       Icon,
       AdminTable,
       SuperAdminFilter,
+      Modal,
     },
     data() {
       return {
@@ -98,6 +134,11 @@
           'user',
         ],
         setRoleSelectedRole: 'user',
+        removeUserFromTimesheetModalStatus: false,
+        removeUserFromTimesheetCurrent: null,
+        changeUsersRoleModalStatus: false,
+        changeUsersRoleCurrent: null,
+        changeUsersRoleSelected: 'admin',
       }
     },
     created() {
@@ -116,34 +157,28 @@
 
         this.mitt.emit('spinnerStop')
       },
-      removeFromTimesheet(user) {
-        const that = this
+      removeFromTimesheetConfirm(user) {
+        this.removeUserFromTimesheetCurrent = user
+        this.removeUserFromTimesheetModalStatus = true
+      },
+      async removeUserFromTimesheet() {
+        this.mitt.emit('spinnerStart')
 
-        Swal.fire({
-          title: 'Removing user',
-          html: `Are you sure to remove ${user.email} from this timesheet?<br><strong>They won't be able to use it any more.</strong>`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: this.colors.main,
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
-
-            const response = await this.$store.dispatch('admin/deleteUsersFromTimesheet', {
-              users: [user.id],
-              timesheetId: this.timesheetId,
-            })
-
-            if (response.ok) {
-              this.awn.success('Users have been removed.')
-              that.loadUsers()
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
-
-            this.mitt.emit('spinnerStop')
-          }
+        const response = await this.$store.dispatch('admin/deleteUsersFromTimesheet', {
+          users: [this.removeUserFromTimesheetCurrent.id],
+          timesheetId: this.timesheetId,
         })
+
+        if (response.ok) {
+          this.awn.success('Users have been removed.')
+          this.loadUsers()
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+
+        this.mitt.emit('spinnerStop')
+
+        this.removeUserFromTimesheetModalStatus = false
       },
       async sudoUsers() {
         const usersIds = this.filteredItems
@@ -184,38 +219,29 @@
             return user
           })
       },
-      changeUsersRole(user) {
-        const templateElementSelector = '.swal2-html-container .admin-timesheet-users-set-role'
+      changeUsersRoleModalOpen(user) {
+        this.changeUsersRoleCurrent = user
+        this.changeUsersRoleModalStatus = true
+      },
+      async changeUsersRole() {
+        this.mitt.emit('spinnerStart')
 
-        Swal.fire({
-          icon: null,
-          showCancelButton: true,
-          confirmButtonText: 'Set',
-          confirmButtonColor: this.colors.main,
-          html: this.$refs.adminTimesheetUsersSetRoleTemplate.innerHTML,
-          didOpen: () => {
-            document.querySelector(templateElementSelector).querySelector('input').checked = true
-          },
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
-
-            const response = await this.$store.dispatch('admin/changeTimesheetUsersRole', {
-              users: [user.id],
-              timesheetId: this.timesheetId,
-              role: document.querySelector(templateElementSelector).querySelector('input:checked').value,
-            })
-
-            if (response.ok) {
-              this.awn.success('User role have been updated.')
-              this.loadUsers()
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
-
-            this.mitt.emit('spinnerStop')
-          }
+        const response = await this.$store.dispatch('admin/changeTimesheetUsersRole', {
+          users: [this.changeUsersRoleCurrent.id],
+          timesheetId: this.timesheetId,
+          role: this.changeUsersRoleSelected,
         })
+
+        if (response.ok) {
+          this.awn.success('User role have been updated.')
+          this.loadUsers()
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+
+        this.mitt.emit('spinnerStop')
+
+        this.changeUsersRoleModalStatus = false
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users

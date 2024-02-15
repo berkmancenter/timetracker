@@ -30,10 +30,10 @@
                 <router-link title="List of timesheet users" :to="`/admin/timesheets/${timesheet.id}/users`" v-if="adminInTimesheet(timesheet)">
                   <Icon :src="usersIcon" />
                 </router-link>
-                <a title="Delete timesheet" @click.prevent="deleteTimesheet(timesheet)" v-if="adminInTimesheet(timesheet)">
+                <a title="Delete timesheet" @click.prevent="removeTimesheetConfirm(timesheet)" v-if="adminInTimesheet(timesheet)">
                   <Icon :src="minusIcon" />
                 </a>
-                <a title="Leave timesheet" @click.prevent="leaveTimesheet(timesheet)">
+                <a title="Leave timesheet" @click.prevent="leaveTimesheetConfirm(timesheet)">
                   <Icon :src="leaveIcon" />
                 </a>
               </div>
@@ -45,14 +45,27 @@
         </tbody>
       </admin-table>
     </form>
-
-    <div ref="leaveTimesheetTemplate" class="is-hidden">
-      <div class="content">
-        <p>Input how many hours you want to set to selected users.</p>
-        <input type="number" step="1" class="input periods-credits-selected-set-input" value="0.0">
-      </div>
-    </div>
   </div>
+
+  <Modal
+    v-model="removeTimesheetModalStatus"
+    title="Remove user from timesheet"
+    @confirm="removeTimesheet()"
+    @cancel="removeTimesheetModalStatus = false"
+  >
+    <p>Are you sure you remove the <span class="has-text-weight-bold">{{ removeTimesheetModalCurrent.name }}</span> timesheet?</p>
+    <div class="notification is-danger is-light mt-2">This will remove all the existing time entries reported in the timesheet.</div>
+  </Modal>
+
+  <Modal
+    v-model="leaveTimesheetModalStatus"
+    title="Leave timesheet"
+    @confirm="leaveTimesheet()"
+    @cancel="leaveTimesheetModalStatus = false"
+  >
+    <p>Are you sure to leave <span class="has-text-weight-bold">{{ leaveTimesheetModalCurrent.name }}</span>?</p>
+    <div class="notification is-danger is-light mt-2">After leaving the timesheet you won't be able to use it any more.</div>
+  </Modal>
 </template>
 
 <script>
@@ -65,15 +78,16 @@
   import inviteIcon from '@/images/invite.svg'
   import leaveIcon from '@/images/leave.svg'
   import usersIcon from '@/images/users.svg'
-  import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import orderBy from 'lodash/orderBy'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'AdminTimesheets',
     components: {
       Icon,
       AdminTable,
+      Modal,
     },
     data() {
       return {
@@ -85,6 +99,10 @@
         inviteIcon,
         leaveIcon,
         usersIcon,
+        removeTimesheetModalStatus: false,
+        removeTimesheetModalCurrent: null,
+        leaveTimesheetModalStatus: false,
+        leaveTimesheetModalCurrent: null,
       }
     },
     created() {
@@ -108,57 +126,45 @@
 
         this.mitt.emit('spinnerStop')
       },
-      deleteTimesheet(timesheet) {
-        const that = this
-
-        Swal.fire({
-          title: 'Removing timesheet',
-          text: `Are you sure to remove ${timesheet.name}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: this.colors.main,
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
-
-            const response = await this.$store.dispatch('admin/deleteTimesheets', [timesheet.id])
-
-            if (response.ok) {
-              this.awn.success('Timesheet has been removed.')
-              that.loadTimesheets()
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
-
-            this.mitt.emit('spinnerStop')
-          }
-        })
+      removeTimesheetConfirm(timesheet) {
+        this.removeTimesheetModalCurrent = timesheet
+        this.removeTimesheetModalStatus = true
       },
-      leaveTimesheet(timesheet) {
-        const that = this
+      async removeTimesheet() {
+        this.mitt.emit('spinnerStart')
 
-        Swal.fire({
-          title: 'Leaving timesheet',
-          html: `Are you sure to leave ${timesheet.name}?<br>After leaving the timesheet you won't be able to use it any more.`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: this.colors.main,
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
+        const response = await this.$store.dispatch('admin/deleteTimesheets', [this.removeTimesheetModalCurrent.id])
 
-            const response = await this.$store.dispatch('admin/leaveTimesheet', timesheet)
+        if (response.ok) {
+          this.awn.success('Timesheet has been removed.')
+          this.loadTimesheets()
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
 
-            if (response.ok) {
-              this.awn.success('You have left the timesheet successfully.')
-              that.loadTimesheets()
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
+        this.mitt.emit('spinnerStop')
 
-            this.mitt.emit('spinnerStop')
-          }
-        })
+        this.removeTimesheetModalStatus = false
+      },
+      leaveTimesheetConfirm(timesheet) {
+        this.leaveTimesheetModalCurrent = timesheet
+        this.leaveTimesheetModalStatus = true
+      },
+      async leaveTimesheet(timesheet) {
+        this.mitt.emit('spinnerStart')
+
+        const response = await this.$store.dispatch('admin/leaveTimesheet', this.leaveTimesheetModalCurrent)
+
+        if (response.ok) {
+          this.awn.success('You have left the timesheet successfully.')
+          this.loadTimesheets()
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+
+        this.mitt.emit('spinnerStop')
+
+        this.leaveTimesheetModalStatus = false
       },
       async cloneTimesheet(timesheet) {
         this.mitt.emit('spinnerStart')

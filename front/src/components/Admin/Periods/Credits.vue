@@ -12,7 +12,7 @@
     </div>
 
     <div class="mb-4">
-      <a class="button is-info mr-2" @click="saveCreditsSelected()" ref="saveSelectedButton">Set hours selected</a>
+      <a class="button is-info mr-2" @click="saveCreditsSelectedModalOpen()" ref="saveSelectedButton">Set hours selected</a>
       <a class="button is-info mr-2" @click="saveCreditsAll()" ref="saveAllButton">Save all visible</a>
     </div>
 
@@ -43,30 +43,37 @@
         </tr>
       </tbody>
     </admin-table>
-
-    <div ref="periodCreditsSelectedSetTemplate" class="is-hidden">
-      <div class="content">
-        <p>Input how many hours you want to set to selected users.</p>
-        <input type="number" step="1" class="input periods-credits-selected-set-input" value="0.0">
-      </div>
-    </div>
   </div>
+
+  <Modal
+    v-model="periodCreditsSelectedSetModalStatus"
+    title="Set period hours"
+    confirmButtonTitle="Save"
+    @confirm="saveCreditsSelected()"
+    @cancel="periodCreditsSelectedSetModalStatus = false"
+  >
+    Input how many hours you want to set to selected users.
+    <input type="number" step="1" class="input mt-2" v-model="creditHours">
+  </Modal>
 </template>
 
 <script>
   import AdminTable from '@/components/Admin/AdminTable.vue'
-  import Swal from 'sweetalert2'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'AdminPeriodsCredits',
     components: {
       AdminTable,
       SuperAdminFilter,
+      Modal,
     },
     data() {
       return {
         filteredItems: [],
+        periodCreditsSelectedSetModalStatus: false,
+        creditHours: 0.0,
       }
     },
     created() {
@@ -113,8 +120,7 @@
         this.mitt.emit('spinnerStop')
         this.$refs.saveAllButton.disabled = false
       },
-      async saveCreditsSelected() {
-        const inputSelector = '.swal2-html-container .periods-credits-selected-set-input'
+      saveCreditsSelectedModalOpen() {
         const selected = this.filteredItems.filter(credit => credit.selected)
 
         if (selected.length === 0) {
@@ -123,38 +129,31 @@
           return
         }
 
-        Swal.fire({
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Set',
-          confirmButtonColor: this.colors.main,
-          html: this.$refs.periodCreditsSelectedSetTemplate.innerHTML,
-          didOpen: () => document.querySelector(inputSelector).focus(),
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
-            this.$refs.saveSelectedButton.disabled = true
+        this.periodCreditsSelectedSetModalStatus = true
+      },
+      async saveCreditsSelected() {
+        const selected = this.filteredItems.filter(credit => credit.selected)
 
-            const newCreditValue = document.querySelector(inputSelector).value
+        this.mitt.emit('spinnerStart')
+        this.$refs.saveSelectedButton.disabled = true
 
-            selected
-              .map(credit => credit.credit_amount = newCreditValue)
+        selected
+          .map(credit => credit.credit_amount = this.creditHours)
 
-            const response = await this.$store.dispatch('admin/savePeriodCredits', {
-              id: this.$store.state.admin.periodCredits.period.id,
-              credits: selected,
-            })
-
-            if (response?.ok) {
-              this.awn.success('Hours have been saved.')
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
-
-            this.mitt.emit('spinnerStop')
-            this.$refs.saveSelectedButton.disabled = false
-          }
+        const response = await this.$store.dispatch('admin/savePeriodCredits', {
+          id: this.$store.state.admin.periodCredits.period.id,
+          credits: selected,
         })
+
+        if (response?.ok) {
+          this.awn.success('Hours have been saved.')
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+
+        this.mitt.emit('spinnerStop')
+        this.$refs.saveSelectedButton.disabled = false
+        this.periodCreditsSelectedSetModalStatus = false
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users

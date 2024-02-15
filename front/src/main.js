@@ -7,6 +7,7 @@ import awn from './plugins/awesome-notifications'
 import datepicker from './plugins/datepicker'
 import floating from './plugins/floating-vue'
 import './plugins/auth-ping'
+import vfm from './plugins/vfm'
 
 import { createApp } from 'vue'
 import { router } from './router/index'
@@ -26,6 +27,7 @@ app.use(router)
 app.use(store)
 app.use(datepicker)
 app.use(floating)
+app.use(vfm)
 app.mount('#app')
 
 const globals = app.config.globalProperties

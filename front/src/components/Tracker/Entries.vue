@@ -32,7 +32,7 @@
             <template v-for="entry in entries" :key="entry.id">
               <tr class="entry">
                 <td>
-                  <a title="Delete this entry" class="entry-delete" @click="deleteEntry(entry)">
+                  <a title="Delete this entry" class="entry-delete" @click="deleteEntryConfirm(entry)">
                     <Icon :src="minusIcon" />
                   </a>
                   <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
@@ -61,21 +61,31 @@
       </table>
     </div>
   </div>
+
+  <Modal
+    v-model="deleteEntryModalStatus"
+    title="Remove entry"
+    @confirm="deleteEntry()"
+    @cancel="deleteEntryModalStatus = false"
+  >
+    Are you sure you remove the entry?
+  </Modal>
 </template>
 
 <script>
   import Icon from '@/components/Shared/Icon.vue'
-  import Swal from 'sweetalert2'
   import dayjs from 'dayjs'
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
   import { redirectToSelectedMonth } from '@/router/index'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'Entries',
     components: {
       Icon,
+      Modal,
     },
     data() {
       return {
@@ -83,6 +93,8 @@
         cloneIcon,
         editIcon,
         redirectToSelectedMonth,
+        deleteEntryModalStatus: false,
+        deleteEntryCurrent: null,
       }
     },
     computed: {
@@ -115,10 +127,10 @@
     },
     methods: {
       isNewDay(date) {
-        const dates = Object.keys(this.entriesByDate);
-        const index = dates.indexOf(date);
+        const dates = Object.keys(this.entriesByDate)
+        const index = dates.indexOf(date)
 
-        return index === 0 || this.entriesByDate[dates[index - 1]][0].entry_date !== date;
+        return index === 0 || this.entriesByDate[dates[index - 1]][0].entry_date !== date
       },
       cloneEntry(entry) {
         const cloneEntry = JSON.parse(JSON.stringify(entry))
@@ -135,33 +147,28 @@
         this.$store.dispatch('tracker/setFormEntry', cloneEntry)
         this.mitt.emit('editEntry')
       },
-      deleteEntry(entry) {
-        Swal.fire({
-          title: 'Removing Entry',
-          text: `Are you sure want to remove?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: this.colors.main,
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
+      deleteEntryConfirm(entry) {
+        this.deleteEntryModalStatus = true
+        this.deleteEntryCurrent = entry
+      },
+      async deleteEntry() {
+        this.mitt.emit('spinnerStart')
 
-            const response = await this.$store.dispatch('tracker/deleteEntry', entry)
+        const response = await this.$store.dispatch('tracker/deleteEntry', this.deleteEntryCurrent)
 
-            if (response.ok) {
-              const months = await this.$store.dispatch('tracker/fetchMonths')
+        if (response.ok) {
+          const months = await this.$store.dispatch('tracker/fetchMonths')
 
-              this.$store.dispatch('tracker/setMonths', months)
-              this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
+          this.$store.dispatch('tracker/setMonths', months)
+          this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
 
-              this.redirectToSelectedMonth(this.$store)
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
+          this.redirectToSelectedMonth(this.$store)
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
 
-            this.mitt.emit('spinnerStop')
-          }
-        })
+        this.mitt.emit('spinnerStop')
+        this.deleteEntryModalStatus = false
       },
       async unSudo() {
         this.mitt.emit('spinnerStart')

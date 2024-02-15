@@ -52,6 +52,8 @@
       <footer id="footer">© 2013 - {{ new Date().getFullYear() }} Timetracker</footer>
     </div>
   </div>
+
+  <ModalsContainer />
 </template>
 
 <script>
@@ -59,12 +61,14 @@
   import SwitMenu from '@/components/Shared/SwitMenu.vue'
   import Spinner from '@/components/Shared/Spinner.vue'
   import { redirectToSelectedMonth } from '@/router/index'
+  import { ModalsContainer } from 'vue-final-modal'
 
   export default {
     name: 'DefaultLayout',
     components: {
       SwitMenu,
       Spinner,
+      ModalsContainer,
     },
     data() {
       return {

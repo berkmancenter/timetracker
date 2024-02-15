@@ -33,7 +33,7 @@
                 <a title="Clone period" @click.prevent="clonePeriod(period)">
                   <Icon :src="cloneIcon" />
                 </a>
-                <a title="Delete period" @click.prevent="deletePeriod(period)">
+                <a title="Delete period" @click.prevent="deletePeriodConfirm(period)">
                   <Icon :src="minusIcon" />
                 </a>
                 <router-link title="Set period hours" :to="`/admin/periods/${period.id}/credits`">
@@ -52,6 +52,15 @@
       </admin-table>
     </form>
   </div>
+
+  <Modal
+    v-model="deletePeriodModalStatus"
+    title="Remove period"
+    @confirm="deletePeriod()"
+    @cancel="deletePeriodModalStatus = false"
+  >
+    Are you sure you remove the period?
+  </Modal>
 </template>
 
 <script>
@@ -61,15 +70,16 @@
   import hoursIcon from '@/images/hours.svg'
   import editIcon from '@/images/edit.svg'
   import cloneIcon from '@/images/clone.svg'
-  import Swal from 'sweetalert2'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import orderBy from 'lodash/orderBy'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'AdminPeriods',
     components: {
       Icon,
       AdminTable,
+      Modal,
     },
     data() {
       return {
@@ -78,6 +88,8 @@
         hoursIcon,
         editIcon,
         cloneIcon,
+        deletePeriodModalStatus: false,
+        deletePeriodCurrent: null,
       }
     },
     created() {
@@ -101,31 +113,25 @@
 
         this.mitt.emit('spinnerStop')
       },
-      deletePeriod(period) {
-        const that = this
+      deletePeriodConfirm(period) {
+        this.deletePeriodModalStatus = true
+        this.deletePeriodCurrent = period
+      },
+      async deletePeriod() {
+        this.mitt.emit('spinnerStart')
 
-        Swal.fire({
-          title: 'Removing period',
-          text: `Are you sure to remove ${period.name}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: this.colors.main,
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            this.mitt.emit('spinnerStart')
+        const response = await this.$store.dispatch('admin/deletePeriods', [this.deletePeriodCurrent.id])
 
-            const response = await this.$store.dispatch('admin/deletePeriods', [period.id])
+        if (response.ok) {
+          this.awn.success('Period has been removed.')
+          this.loadPeriods()
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
 
-            if (response.ok) {
-              this.awn.success('Period has been removed.')
-              that.loadPeriods()
-            } else {
-              this.awn.warning('Something went wrong, try again.')
-            }
+        this.mitt.emit('spinnerStop')
 
-            this.mitt.emit('spinnerStop')
-          }
-        })
+        this.deletePeriodModalStatus = false
       },
       async clonePeriod(period) {
         this.mitt.emit('spinnerStart')
