@@ -1,36 +1,40 @@
 <template>
-  <div id="tracker-entry-form" class="mb-6">
-    <form @submit.prevent="submitForm" ref="entryForm">
-      <h4 class="is-size-4 no-select">Time entry data</h4>
+  <Modal
+    v-model="visible"
+    title="Time entry data"
+    :confirmButtonTitle="submitButtonName"
+    :focusOnConfirm="false"
+    @confirm="submitForm()"
+    @cancel="visible = false"
+  >
+    <div id="tracker-entry-form">
+      <form @submit.prevent="submitForm()" ref="entryForm">
+        <FormField label="Project" accessKey="p">
+          <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" @input="changeFormValue('project', $event.target.value)" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
+        </FormField>
 
-      <FormField label="Project" accessKey="p">
-        <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" @input="changeFormValue('project', $event.target.value)" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
-      </FormField>
+        <FormField label="Category" accessKey="c">
+          <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" @input="changeFormValue('category', $event.target.value)" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
+        </FormField>
 
-      <FormField label="Category" accessKey="c">
-        <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" @input="changeFormValue('category', $event.target.value)" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
-      </FormField>
+        <FormField label="Description" accessKey="r">
+          <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" @input="changeFormValue('description', $event.target.value)" id="time_entry_description" accesskey="r"></textarea>
+        </FormField>
 
-      <FormField label="Description" accessKey="r">
-        <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" @input="changeFormValue('description', $event.target.value)" id="time_entry_description" accesskey="r"></textarea>
-      </FormField>
+        <FormField label="Time spent" accessKey="t" :required="true">
+          <input class="input" type="number" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
+        </FormField>
 
-      <FormField label="Time spent" accessKey="t" :required="true">
-        <input class="input" type="number" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
-      </FormField>
+        <FormField label="Date" accessKey="a" :required="true">
+          <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="time_entry[entry_date]"></date-picker>
+        </FormField>
 
-      <FormField label="Date" accessKey="a" :required="true">
-        <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="time_entry[entry_date]"></date-picker>
-      </FormField>
+        <input class="tracker-entry-form-submit-button" type="submit">
+      </form>
+    </div>
+  </Modal>
 
-      <FormField label="" accessKey="s">
-        <button type="submit" name="commit" class="button is-success entry-form-submit ld-ext-right" :class="{ running: working }" accesskey="s" ref="submitButton">
-          {{ submitButtonName }}
-          <div class="ld ld-ring ld-spin"></div>
-        </button>
-      </FormField>
-    </form>
-  </div>
+  <button class="button is-success mb-2" @click="openForm(true)">Add time entry</button>
 </template>
 
 <script>
@@ -38,21 +42,23 @@
   import FormField from './FormField.vue'
   import Icon from '@/components/Shared/Icon.vue'
   import autocomplete from 'autocompleter'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'EntryForm',
     components: {
       FormField,
       Icon,
+      Modal,
     },
     data() {
       return {
         calImg: calImg,
-        working: false
+        working: false,
+        visible: false,
       }
     },
     mounted() {
-      this.initAutoComplete()
       this.initEvents()
     },
     computed: {
@@ -69,8 +75,11 @@
     },
     methods: {
       async submitForm(ev) {
+        if (this.$refs.entryForm.reportValidity() === false) {
+          return
+        }
+
         this.mitt.emit('spinnerStart')
-        this.$refs.submitButton.disabled = true
         this.working = true
 
         const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
@@ -89,7 +98,8 @@
         this.$store.dispatch('tracker/clearEntryForm')
         this.working = false
         this.mitt.emit('spinnerStop')
-        this.$refs.submitButton.disabled = false
+
+        this.visible = false
       },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {
@@ -128,22 +138,43 @@
       },
       initEvents() {
         const that = this
-        this.mitt.on('editEntry', () => that.focusOnForm())
-        this.mitt.on('cloneEntry', () => that.focusOnForm())
-        this.mitt.on('popularSelected', () => that.focusOnForm())
+        this.mitt.on('editEntry', () => that.openForm())
+        this.mitt.on('cloneEntry', () => that.openForm())
+        this.mitt.on('popularSelected', () => that.openForm())
       },
-      focusOnForm() {
-        window.scrollTo(0, 0)
+      async openForm(clearForm = false) {
+        if (clearForm) {
+          this.$store.dispatch('tracker/clearEntryForm')
+        }
+
+        this.visible = true
+
+        await this.waitUntil(() => {
+          return this.$refs.categoryInput
+        })
+
+        this.initAutoComplete()
+        this.$refs.projectInput.focus()
       },
+      async waitUntil(condition) {
+        return await new Promise(resolve => {
+          const interval = setInterval(() => {
+            if (condition()) {
+              resolve()
+              clearInterval(interval)
+            }
+          }, 10)
+        })
+      }
     },
   }
 </script>
 
 <style lang="scss">
   #tracker-entry-form {
-    button.entry-form-submit {
-      vertical-align: middle;
-      margin-right: 0.5rem;
+    .tracker-entry-form-submit-button {
+      position: absolute;
+      left: -9999px;
     }
   }
 

@@ -31,6 +31,8 @@
     },
     methods: {
       selectItem(item) {
+        this.$store.dispatch('tracker/clearEntryForm')
+
         this.$store.dispatch('tracker/setFormField', {
           field: this.type,
           value: item,

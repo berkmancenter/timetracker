@@ -1,5 +1,5 @@
 <template>
-  <VueFinalModal class="tracker-modal" content-class="tracker-modal-content" overlay-transition="vfm-fade" content-transition="vfm-fade">
+  <VueFinalModal class="tracker-modal" content-class="tracker-modal-content" overlay-transition="vfm-fade" content-transition="vfm-fade" @opened="opened()">
     <div class="tracker-modal-title is-size-4">
       {{ title }}
     </div>
@@ -8,8 +8,8 @@
       <slot />
     </div>
 
-    <div class="tracker-modal-buttons mt-5">
-      <button class="button is-success" @click="$emit('confirm')">
+    <div class="tracker-modal-buttons pt-5 mt-5">
+      <button class="tracker-modal-buttons-confirm button is-success" @click="$emit('confirm')" ref="confirmButton">
         {{ confirmButtonTitle }}
       </button>
 
@@ -35,9 +35,21 @@
         required: false,
         default: 'Confirm',
       },
+      focusOnConfirm: {
+        type: Boolean,
+        required: false,
+        default: true,
+      },
     },
     components: {
       VueFinalModal,
+    },
+    methods: {
+      opened() {
+        if (this.focusOnConfirm && this.$refs.confirmButton) {
+          this.$refs.confirmButton.focus()
+        }
+      },
     },
   }
 </script>
@@ -69,5 +81,16 @@
 
   .dark .tracker-modal-content {
     background: #000000;
+  }
+
+  .tracker-modal-buttons {
+    border-top: 1px solid #dbdbdb;
+
+    .tracker-modal-buttons-confirm {
+      &.button.is-success:focus:not(:active),
+      &.button.is-success.is-focused:not(:active) {
+        box-shadow: 0 0 0 0.4rem #48c78e40;
+      }
+    }
   }
 </style>
