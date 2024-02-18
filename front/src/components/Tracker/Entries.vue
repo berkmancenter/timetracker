@@ -16,7 +16,6 @@
       <table class="tracker-entries table">
         <thead>
           <tr>
-            <th>Actions</th>
             <th>Project</th>
             <th>Category</th>
             <th>Hours</th>
@@ -25,35 +24,46 @@
         </thead>
         <template v-for="(entries, date) in entriesByDate">
           <tbody>
-            <tr class="entry-date">
-              <td colspan="5" class="entry_date is-size-4" v-if="isNewDay(date)">{{ formatDate(date) }}</td>
+            <tr class="tracker-entries-date-row">
+              <td colspan="5" class="tracker-entries-date-cell is-size-4" v-if="isNewDay(date)">{{ formatDate(date) }}</td>
             </tr>
 
             <template v-for="entry in entries" :key="entry.id">
-              <tr class="entry">
-                <td>
-                  <a title="Delete this entry" class="entry-delete" @click="deleteEntryConfirm(entry)">
-                    <Icon :src="minusIcon" />
-                  </a>
-                  <a title="Clone this entry" class="entry-clone" @click="cloneEntry(entry)">
-                    <Icon :src="cloneIcon" />
-                  </a>
-                  <a v-if="entry.user_id === $store.state.shared.user.user_id" title="Edit this entry" class="entry-edit" @click="editEntry(entry)">
-                    <Icon :src="editIcon" />
-                  </a>
+              <tr class="tracker-entries-entry" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
+                <td class="tracker-entries-entry-project">
+                  <div class="tracker-entries-entry-project-inner">
+                    <VDropdown @apply-show="showedActionsDropdown(entry)" @apply-hide="hidActionsDropdown(entry)">
+                      <Transition name="tracker-entries-entry-actions-fade">
+                        <Icon :src="dropdownIcon" class="tracker-entries-entry-actions-dropdown" v-show="entry.actionsShow || entry.actionsDropdownShow" />
+                      </Transition>
+
+                      <template #popper>
+                        <a v-if="entry.user_id === $store.state.shared.user.user_id" class="dropdown-item" title="Edit entry" @click="editEntry(entry)" v-close-popper>
+                          <Icon :src="editIcon" /> Edit entry
+                        </a>
+                        <a class="dropdown-item" title="Delete entry" @click="deleteEntryConfirm(entry)" v-close-popper>
+                          <Icon :src="minusIcon" /> Remove entry
+                        </a>
+                        <a class="dropdown-item" title="Clone entry" @click="cloneEntry(entry)" v-close-popper>
+                          <Icon :src="cloneIcon" /> Clone entry
+                        </a>
+                      </template>
+                    </VDropdown>
+
+                    {{ entry.project }}
+                  </div>
                 </td>
-                <td class="project">{{ entry.project }}</td>
-                <td class="category">{{ entry.category }}</td>
-                <td class="decimal_time">{{ entry.decimal_time }}</td>
-                <td class="username" v-if="$store.state.shared.user.sudoMode">{{ entry.email }}</td>
+                <td class="tracker-entries-entry-category">{{ entry.category }}</td>
+                <td class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</td>
+                <td class="tracker-entries-entry-username" v-if="$store.state.shared.user.sudoMode">{{ entry.email }}</td>
               </tr>
 
-              <tr v-if="entry.description">
-                <td colspan="5" class="description">{{ entry.description }}</td>
+              <tr class="tracker-entries-entry-description" v-if="entry.description">
+                <td colspan="5">{{ entry.description }}</td>
               </tr>
             </template>
 
-            <tr class="separator">
+            <tr class="tracker-entries-entry-separator">
               <td colspan="5"></td>
             </tr>
           </tbody>
@@ -78,6 +88,7 @@
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
+  import dropdownIcon from '@/images/dropdown.svg'
   import { redirectToSelectedMonth } from '@/router/index'
   import Modal from '@/components/Shared/Modal.vue'
 
@@ -92,9 +103,11 @@
         minusIcon,
         cloneIcon,
         editIcon,
+        dropdownIcon,
         redirectToSelectedMonth,
         deleteEntryModalStatus: false,
         deleteEntryCurrent: null,
+        actionsShow: false,
       }
     },
     computed: {
@@ -199,7 +212,21 @@
         const dateFormatted = dayjs(dateParsed).format('dddd, YYYY-MM-DD')
 
         return dateFormatted
-      }
+      },
+      enterEntry(entry) {
+        this.actionsShow = true
+        entry.actionsShow = true
+      },
+      leaveEntry(entry) {
+        this.actionsShow = false
+        entry.actionsShow = false
+      },
+      showedActionsDropdown(entry) {
+        entry.actionsDropdownShow = true
+      },
+      hidActionsDropdown(entry) {
+        entry.actionsDropdownShow = false
+      },
     }
   }
 </script>
@@ -209,36 +236,51 @@
     width: 100%;
     background-color: #f2eeed;
 
-    .entry_date {
+    .tracker-entries-date-cell {
       text-align: center;
     }
 
-    .entry {
-      td:first-child {
-        text-align: center;
-        min-width: 12rem;
-
-        img {
-          width: 3rem;
-        }
-      }
-    }
-
-    .entry-date + .entry {
+    .tracker-entries-date-row + .entry {
       td {
         border-top-width: 0.1rem;
       }
     }
 
-    .description {
+    .tracker-entries-entry-description {
       white-space: pre-wrap;
       word-break: break-word;
       background-color: #f5f5f5;
     }
 
-    .entry-date,
-    th {
+    .tracker-entries-date-row,
+    th,
+    .tracker-entries-entry:hover,
+    .tracker-entries-entry:hover + tr.tracker-entries-entry-description {
       background-color: #fff;
+    }
+
+    .tracker-entries-entry-actions-dropdown {
+      width: 3rem;
+      height: 3rem;
+      padding: 0.3rem;
+      margin-left: -0.5rem;
+    }
+
+    .tracker-entries-entry-actions-fade-enter-active {
+      transition: opacity 0.5s ease;
+      opacity: 1;
+    }
+
+    .tracker-entries-entry-actions-fade-enter-from {
+      opacity: 0;
+    }
+
+    td.tracker-entries-entry-project {
+      line-height: 3.5rem;
+
+      .tracker-entries-entry-project-inner {
+        display: flex;
+      }
     }
 
     td,
@@ -247,32 +289,44 @@
       vertical-align: middle !important;
     }
 
-    td.category,
-    td.project {
+    td.tracker-entries-entry-category,
+    td.tracker-entries-entry-project {
       width: 32%;
     }
 
     @media screen and (min-width: 1400px) {
-      td.category,
-      td.project {
+      td.tracker-entries-entry-category,
+      td.tracker-entries-entry-project {
         width: 35%;
+      }
+
+      td.tracker-entries-entry-actions {
+        width: 10%;
       }
     }
 
     @media screen and (min-width: 2100px) {
-      td.category,
-      td.project {
+      td.tracker-entries-entry-category,
+      td.tracker-entries-entry-project {
         width: 38%;
+      }
+
+      td.tracker-entries-entry-actions {
+        width: 5%;
       }
     }
 
-    td.decimal_time,
-    td.username {
+    td.tracker-entries-entry-project {
+      border-left: none;
+    }
+
+    td.tracker-entries-entry-decimal-time,
+    td.tracker-entries-entry-username {
       width: 15%;
     }
 
     tbody {
-      .separator {
+      .tracker-entries-entry-separator {
         background-color: #fff;
 
         &:last-child {
