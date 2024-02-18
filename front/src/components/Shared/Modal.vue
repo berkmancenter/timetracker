@@ -59,6 +59,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
   }
 
   .tracker-modal-title {

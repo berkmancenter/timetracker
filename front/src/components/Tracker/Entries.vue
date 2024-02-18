@@ -34,7 +34,7 @@
                   <div class="tracker-entries-entry-project-inner">
                     <VDropdown @apply-show="showedActionsDropdown(entry)" @apply-hide="hidActionsDropdown(entry)">
                       <Transition name="tracker-entries-entry-actions-fade">
-                        <Icon :src="dropdownIcon" class="tracker-entries-entry-actions-dropdown" v-show="entry.actionsShow || entry.actionsDropdownShow" />
+                        <Icon :src="dropdownIcon" class="tracker-entries-entry-actions-dropdown" v-show="entry.actionsShow || entry.actionsDropdownShow || isTouchDevice" />
                       </Transition>
 
                       <template #popper>
@@ -91,6 +91,7 @@
   import dropdownIcon from '@/images/dropdown.svg'
   import { redirectToSelectedMonth } from '@/router/index'
   import Modal from '@/components/Shared/Modal.vue'
+  import { hideAllPoppers } from 'floating-vue'
 
   export default {
     name: 'Entries',
@@ -146,6 +147,8 @@
         return index === 0 || this.entriesByDate[dates[index - 1]][0].entry_date !== date
       },
       cloneEntry(entry) {
+        this.makeSureToCloseDropdown()
+
         const cloneEntry = JSON.parse(JSON.stringify(entry))
         cloneEntry.id = null
         cloneEntry.entry_date = dayjs().format('MMMM D, YYYY')
@@ -154,6 +157,8 @@
         this.mitt.emit('cloneEntry')
       },
       editEntry(entry) {
+        this.makeSureToCloseDropdown()
+
         const cloneEntry = JSON.parse(JSON.stringify(entry))
         cloneEntry.entry_date = dayjs(cloneEntry.entry_date).format('MMMM D, YYYY')
         this.$store.dispatch('tracker/setFormMode', 'edit')
@@ -161,8 +166,15 @@
         this.mitt.emit('editEntry')
       },
       deleteEntryConfirm(entry) {
+        this.makeSureToCloseDropdown()
+
         this.deleteEntryModalStatus = true
         this.deleteEntryCurrent = entry
+      },
+      makeSureToCloseDropdown() {
+        // FIXME: Quick fix to make sure the dropdown is always closed on mobile devices due to
+        // https://github.com/Akryum/floating-vue/issues/927
+        hideAllPoppers()
       },
       async deleteEntry() {
         this.mitt.emit('spinnerStart')

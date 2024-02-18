@@ -8,6 +8,7 @@ import datepicker from './plugins/datepicker'
 import floating from './plugins/floating-vue'
 import './plugins/auth-ping'
 import vfm from './plugins/vfm'
+import { isTouchDevice } from '@/lib/mobile-helpers.js'
 
 import { createApp } from 'vue'
 import { router } from './router/index'
@@ -22,6 +23,7 @@ app.config.globalProperties = {
   environment: import.meta.env.VITE_ENVIRONMENT || 'development',
   mitt: mitt,
   awn: awn,
+  isTouchDevice: isTouchDevice(),
 }
 app.use(router)
 app.use(store)

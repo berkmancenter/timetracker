@@ -154,7 +154,10 @@
         })
 
         this.initAutoComplete()
-        this.$refs.projectInput.focus()
+
+        if (!this.isTouchDevice) {
+          this.$refs.projectInput.focus()
+        }
       },
       async waitUntil(condition) {
         return await new Promise(resolve => {

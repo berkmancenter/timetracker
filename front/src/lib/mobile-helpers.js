@@ -1,3 +1,5 @@
-export function isMobile() {
-  return ('ontouchstart' in window || navigator.maxTouchPoints) && (window.innerWidth <= 700)
+export function isTouchDevice() {
+  return (('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    (navigator.msMaxTouchPoints > 0))
 }

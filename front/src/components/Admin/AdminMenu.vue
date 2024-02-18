@@ -13,8 +13,6 @@
 </template>
 
 <script>
-  import { isMobile } from '@/lib/mobile-helpers.js'
-
   export default {
     name: 'AdminMenu',
     data() {
@@ -38,7 +36,7 @@
     },
     methods: {
       hideMenuMobile() {
-        if (isMobile()) {
+        if (this.isTouchDevice) {
           this.mitt.emit('closeSideMenu')
         }
       },
