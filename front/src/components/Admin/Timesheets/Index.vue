@@ -6,7 +6,10 @@
 
     <form class="form">
       <div class="mb-4">
-        <router-link :to="'/admin/timesheets/new'" class="button is-success">Add timesheet</router-link>
+        <router-link :to="'/admin/timesheets/new'" class="button is-success">
+          <Icon :src="addIcon" :interactive="false" />
+          Add timesheet
+        </router-link>
       </div>
 
       <admin-table :tableClasses="['admin-timesheets-table']">
@@ -78,6 +81,7 @@
   import inviteIcon from '@/images/invite.svg'
   import leaveIcon from '@/images/leave.svg'
   import usersIcon from '@/images/users.svg'
+  import addIcon from '@/images/add_white.svg'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import orderBy from 'lodash/orderBy'
   import Modal from '@/components/Shared/Modal.vue'
@@ -99,6 +103,7 @@
         inviteIcon,
         leaveIcon,
         usersIcon,
+        addIcon,
         removeTimesheetModalStatus: false,
         removeTimesheetModalCurrent: null,
         leaveTimesheetModalStatus: false,

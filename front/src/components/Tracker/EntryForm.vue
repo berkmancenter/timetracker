@@ -34,11 +34,14 @@
     </div>
   </Modal>
 
-  <button class="button is-success mb-2" @click="openForm(true)">Add time entry</button>
+  <button class="button is-success mb-2" @click="openForm(true)">
+    <Icon :src="addIcon" :interactive="false" />
+    Add time entry
+  </button>
 </template>
 
 <script>
-  import calImg from '@/images/cal.svg'
+  import addIcon from '@/images/add_white.svg'
   import FormField from './FormField.vue'
   import Icon from '@/components/Shared/Icon.vue'
   import autocomplete from 'autocompleter'
@@ -53,9 +56,9 @@
     },
     data() {
       return {
-        calImg: calImg,
         working: false,
         visible: false,
+        addIcon,
       }
     },
     mounted() {

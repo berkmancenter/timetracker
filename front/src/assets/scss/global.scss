@@ -6,3 +6,15 @@
   word-break: normal;
   white-space: nowrap;
 }
+
+button,
+a.button {
+  img.tracker-icon {
+    padding: 0;
+    margin-right: 0.2rem;
+  }
+
+  > * {
+    height: 100%;
+  }
+}

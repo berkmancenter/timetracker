@@ -6,7 +6,10 @@
 
     <form class="form">
       <div class="mb-4">
-        <router-link :to="'/admin/periods/new'" class="button is-success">Add period</router-link>
+        <router-link :to="'/admin/periods/new'" class="button is-success">
+          <Icon :src="addIcon" :interactive="false" />
+          Add period
+        </router-link>
       </div>
 
       <admin-table :tableClasses="['admin-periods-table']">
@@ -70,6 +73,7 @@
   import hoursIcon from '@/images/hours.svg'
   import editIcon from '@/images/edit.svg'
   import cloneIcon from '@/images/clone.svg'
+  import addIcon from '@/images/add_white.svg'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import orderBy from 'lodash/orderBy'
   import Modal from '@/components/Shared/Modal.vue'
@@ -88,6 +92,7 @@
         hoursIcon,
         editIcon,
         cloneIcon,
+        addIcon,
         deletePeriodModalStatus: false,
         deletePeriodCurrent: null,
       }
