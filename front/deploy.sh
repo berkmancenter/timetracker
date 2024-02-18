@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : ${VITE_ENV:=development}
-env_filename=".env.$VITE_ENV"
+env_filename=".env.$VITE_ENV.local"
 
 set -o allexport
 source $env_filename
