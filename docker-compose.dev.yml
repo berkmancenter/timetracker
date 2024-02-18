@@ -6,8 +6,6 @@ services:
     volumes:
       - 'postgres:/var/lib/postgresql/data'
       - '.:/app'
-    env_file:
-      - '.env.dev'
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -22,8 +20,6 @@ services:
       - '6767:5173'
     volumes:
       - '.:/app'
-    env_file:
-      - '.env.dev'
 
 volumes:
   postgres:
