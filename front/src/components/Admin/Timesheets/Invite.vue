@@ -43,7 +43,7 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button" ref="submitButton">Send</button>
+          <button class="button is-success" ref="submitButton">Send</button>
         </div>
       </div>
     </form>
