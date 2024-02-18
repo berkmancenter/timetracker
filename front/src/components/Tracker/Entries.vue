@@ -4,10 +4,10 @@
 
     <article v-if="$store.state.shared.user.sudoMode" class="message is-warning">
       <div class="message-body">
-        <div><strong>You are viewing the timesheets of</strong></div>
+        <div><strong>You are viewing time entries of</strong></div>
         {{ activeUsersString }}
         <div>
-          <a class="button is-info mt-2" @click="unSudo()">Show only my timesheets</a>
+          <a class="button is-info mt-2" @click="unSudo()">Show only my time entries</a>
         </div>
       </div>
     </article>
