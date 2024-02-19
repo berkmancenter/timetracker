@@ -9,8 +9,9 @@
     </div>
 
     <div class="tracker-modal-buttons pt-5 mt-5">
-      <button class="tracker-modal-buttons-confirm button is-success" @click="$emit('confirm')" ref="confirmButton">
+      <button class="tracker-modal-buttons-confirm button is-success ld-ext-right" :class="{ running: working }" accesskey="s" @click="$emit('confirm')" ref="confirmButton">
         {{ confirmButtonTitle }}
+        <div class="ld ld-ring ld-spin"></div>
       </button>
 
       <button class="button ml-2" @click="$emit('cancel')">
@@ -25,6 +26,11 @@
 
   export default {
     name: 'Modal',
+    data() {
+      return {
+        working: false,
+      }
+    },
     props: {
       title: {
         type: String,
@@ -43,6 +49,10 @@
     },
     components: {
       VueFinalModal,
+    },
+    created() {
+      this.mitt.on('modalIsWorking', () => { this.working = true })
+      this.mitt.on('modalIsNotWorking', () => { this.working = false })
     },
     methods: {
       opened() {

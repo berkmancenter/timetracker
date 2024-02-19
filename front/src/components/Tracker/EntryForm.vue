@@ -59,6 +59,7 @@
         working: false,
         visible: false,
         addIcon,
+        submittingInProcess: false,
       }
     },
     mounted() {
@@ -82,6 +83,7 @@
           return
         }
 
+        this.mitt.emit('modalIsWorking')
         this.mitt.emit('spinnerStart')
         this.working = true
 
@@ -101,6 +103,7 @@
         this.$store.dispatch('tracker/clearEntryForm')
         this.working = false
         this.mitt.emit('spinnerStop')
+        this.mitt.emit('modalIsNotWorking')
 
         this.visible = false
       },
