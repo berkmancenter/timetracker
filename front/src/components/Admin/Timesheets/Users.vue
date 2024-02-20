@@ -4,7 +4,10 @@
 
     <form class="form">
       <div class="mb-4">
-        <a class="button is-info" @click="sudoUsers()">View selected users timesheets</a>
+        <a class="button is-info" @click="sudoUsers()">
+          <Icon :src="listIcon" />
+          View selected users timesheets
+        </a>
       </div>
 
       <super-admin-filter :users="users" @change="superAdminFilterChanged" />
@@ -107,6 +110,7 @@
   import minusIcon from '@/images/minus.svg'
   import yesIcon from '@/images/yes.svg'
   import noIcon from '@/images/no.svg'
+  import listIcon from '@/images/list_white.svg'
   import toggleAdminIcon from '@/images/toggle_admin.svg'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
@@ -125,6 +129,7 @@
         minusIcon,
         yesIcon,
         noIcon,
+        listIcon,
         toggleAdminIcon,
         users: [],
         filteredItems: [],
@@ -145,15 +150,11 @@
       this.initialDataLoad()
     },
     methods: {
-      initialDataLoad() {
-        this.loadUsers()
-      },
-      async loadUsers() {
+      async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
-        const users = await this.$store.dispatch('admin/fetchTimesheetUsers', this.timesheetId)
-
-        this.users = users
+        this.users = await this.$store.dispatch('admin/fetchTimesheetUsers', this.timesheetId)
+        this.timesheet = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.id)
 
         this.mitt.emit('spinnerStop')
       },
@@ -203,6 +204,16 @@
 
           this.$store.dispatch('shared/setUser', user)
           this.awn.success('You can now see timesheets of selected users.')
+
+          this.$router.push(
+            {
+              name: 'tracker.index',
+              params: {
+                timesheet: this.timesheet.uuid,
+                month: null,
+              }
+            }
+          )
         } else {
           this.awn.warning('Something went wrong, try again.')
         }
