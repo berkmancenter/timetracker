@@ -22,7 +22,7 @@
         </FormField>
 
         <FormField label="Time spent" accessKey="t" :required="true">
-          <input class="input" type="number" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
+          <input class="input" type="number" min="0.25" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
         </FormField>
 
         <FormField label="Date" accessKey="a" :required="true">
@@ -96,6 +96,7 @@
         }
 
         const months = await this.$store.dispatch('tracker/fetchMonths')
+
         this.$store.dispatch('tracker/setMonths', months)
 
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
@@ -108,6 +109,11 @@
         this.visible = false
       },
       changeFormValue(field, value) {
+        // To allow decimal values
+        if (field === 'decimal_time') {
+          value = parseFloat(value)
+        }
+
         this.$store.commit('tracker/setFormField', {
           field: field,
           value: value,
@@ -174,7 +180,7 @@
             }
           }, 10)
         })
-      }
+      },
     },
   }
 </script>
