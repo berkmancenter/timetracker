@@ -4,7 +4,7 @@
 
     <div class="switmenu-section-content">
       <div class="select">
-        <select ref="timesheetsSelect" v-model="selectedMonth" @change="changeTimesheet($event)">
+        <select ref="timesheetsSelect" v-model="selectedTimesheet" @change="changeTimesheet($event)">
           <option v-for="timesheet in $store.state.tracker.timesheets" :key="timesheet.id" :value="timesheet.id">
             {{ timesheet.name }}
           </option>
@@ -22,13 +22,13 @@
     data() {
       return {
         apiUrl: import.meta.env.VITE_API_URL,
-        selectedMonth: null,
+        selectedTimesheet: null,
         redirectToSelectedMonth: redirectToSelectedMonth,
       }
     },
     mounted() {
       if (this.$store.state.tracker.selectedTimesheet?.id) {
-        this.selectedMonth = this.$store.state.tracker.selectedTimesheet.id
+        this.selectedTimesheet = this.$store.state.tracker.selectedTimesheet.id
       }
     },
     methods: {
@@ -50,7 +50,9 @@
         )
 
         const months = await this.$store.dispatch('tracker/fetchMonths')
+
         this.$store.dispatch('tracker/setMonths', months)
+        this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
         this.redirectToSelectedMonth(this.$store)
 
@@ -61,7 +63,7 @@
     },
     watch: {
       '$store.state.tracker.selectedTimesheet': function() {
-        this.selectedMonth = this.$store.state.tracker.selectedTimesheet.id
+        this.selectedTimesheet = this.$store.state.tracker.selectedTimesheet.id
       }
     },
   };

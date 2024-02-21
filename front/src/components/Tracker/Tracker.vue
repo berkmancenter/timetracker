@@ -14,7 +14,7 @@
   import { redirectToSelectedMonth } from '@/router/index'
 
   export default {
-    name: 'TrackerLayout',
+    name: 'Tracker',
     components: {
       EntryForm,
       Entries,
@@ -41,8 +41,12 @@
           return
         }
 
+        this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
+
         const months = await this.$store.dispatch('tracker/fetchMonths')
         this.$store.dispatch('tracker/setMonths', months)
+
+        this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals', 'totals'])
         this.redirectToSelectedMonth(this.$store)
@@ -50,5 +54,17 @@
         this.mitt.emit('spinnerStop')
       },
     },
+    watch: { 
+    '$route.params': {
+      handler: async function (to, from) {
+        if (Object.keys(from).length > 0) {
+          this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
+          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals', 'totals'])
+        }
+      },
+      deep: true,
+    }
+  }
   }
 </script>

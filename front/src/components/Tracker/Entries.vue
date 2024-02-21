@@ -185,6 +185,7 @@
           const months = await this.$store.dispatch('tracker/fetchMonths')
 
           this.$store.dispatch('tracker/setMonths', months)
+          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
           this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
 
           this.redirectToSelectedMonth(this.$store)
@@ -204,6 +205,7 @@
           const months = await this.$store.dispatch('tracker/fetchMonths')
 
           this.$store.dispatch('tracker/setMonths', months)
+          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
           this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals', 'entries'])
 
           const user = await this.$store.dispatch('shared/fetchUser')

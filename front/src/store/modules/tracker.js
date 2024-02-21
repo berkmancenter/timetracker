@@ -184,37 +184,37 @@ const actions = {
   },
   setMonths(context, months) {
     context.commit('setMonths', months)
-
+  },
+  setSelectedMonthFromRoute(context) {
     const currentMonthParam = router.currentRoute._value.params?.month
-    if ((currentMonthParam && months.includes(currentMonthParam)) || currentMonthParam === 'all') {
+    if ((currentMonthParam && context.state.months.includes(currentMonthParam)) || currentMonthParam === 'all') {
       context.dispatch('setSelectedMonth', currentMonthParam)
     } else {
-      if (months.length > 0) {
-        context.dispatch('setSelectedMonth', months[0])
+      if (context.state.months.length > 0) {
+        context.dispatch('setSelectedMonth', context.state.months[0])
       } else {
         context.dispatch('setSelectedMonth', 'all')
       }
-
-      context.dispatch('reloadViewData', ['entries', 'dailyTotals'])
     }
   },
   setTimesheets(context, timesheets) {
     context.commit('setTimesheets', timesheets)
-
+  },
+  setSelectedTimesheetFromRoute(context) {
     const currentTimesheetParam = router.currentRoute._value.params?.timesheet
-    let timesheetFromRouteLocalStorage = timesheets.find(timesheet => timesheet.uuid === currentTimesheetParam)
+    let timesheetFromRouteLocalStorage = context.state.timesheets.find(timesheet => timesheet.uuid === currentTimesheetParam)
 
     if (!timesheetFromRouteLocalStorage) {
       if (store2('timetracker.active_timesheet') !== null) {
-        timesheetFromRouteLocalStorage = timesheets.find(timesheet => timesheet.uuid === store2('timetracker.active_timesheet'))
+        timesheetFromRouteLocalStorage = context.state.timesheets.find(timesheet => timesheet.uuid === store2('timetracker.active_timesheet'))
       }
     }
 
     if (timesheetFromRouteLocalStorage) {
       context.dispatch('setSelectedTimesheet', timesheetFromRouteLocalStorage)
     } else {
-      if (timesheets.length > 0) {
-        context.dispatch('setSelectedTimesheet', timesheets[0])
+      if (context.state.timesheets.length > 0) {
+        context.dispatch('setSelectedTimesheet', context.state.timesheets[0])
       }
     }
   },

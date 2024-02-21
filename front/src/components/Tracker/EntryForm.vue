@@ -98,6 +98,7 @@
         const months = await this.$store.dispatch('tracker/fetchMonths')
 
         this.$store.dispatch('tracker/setMonths', months)
+        this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
         await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
 

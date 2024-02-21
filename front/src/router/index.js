@@ -116,7 +116,7 @@ const router = createRouter({
 })
 
 const redirectToSelectedMonth = function(store) {
-  router.push(
+  router.replace(
     {
       name: 'tracker.index',
       params: {
