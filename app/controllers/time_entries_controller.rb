@@ -107,7 +107,7 @@ class TimeEntriesController < ApplicationController
     end
 
     @entries.each do |te|
-      te.username = te.user.username
+      te.username = te.user.email
       objects << te
     end
 
