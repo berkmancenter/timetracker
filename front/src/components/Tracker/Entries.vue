@@ -85,6 +85,7 @@
 <script>
   import Icon from '@/components/Shared/Icon.vue'
   import dayjs from 'dayjs'
+  import utc from 'dayjs/plugin/utc'
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
@@ -222,8 +223,10 @@
         this.mitt.emit('spinnerStop')
       },
       formatDate(date) {
+        dayjs.extend(utc)
+
         const dateParsed = Date.parse(date)
-        const dateFormatted = dayjs(dateParsed).format('dddd, YYYY-MM-DD')
+        const dateFormatted = dayjs(dateParsed).utc().format('dddd, YYYY-MM-DD')
 
         return dateFormatted
       },
