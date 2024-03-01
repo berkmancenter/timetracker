@@ -10,19 +10,19 @@
     <div id="tracker-entry-form">
       <form @submit.prevent="submitForm()" ref="entryForm">
         <FormField label="Project" accessKey="p">
-          <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" @input="changeFormValue('project', $event.target.value)" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
+          <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
         </FormField>
 
         <FormField label="Category" accessKey="c">
-          <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" @input="changeFormValue('category', $event.target.value)" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
+          <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
         </FormField>
 
         <FormField label="Description" accessKey="r">
-          <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" @input="changeFormValue('description', $event.target.value)" id="time_entry_description" accesskey="r"></textarea>
+          <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" id="time_entry_description" accesskey="r"></textarea>
         </FormField>
 
         <FormField label="Time spent" accessKey="t" :required="true">
-          <input class="input" type="number" min="0.25" step="0.25" v-model="formValue['decimal_time']" @input="changeFormValue('decimal_time', $event.target.value)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
+          <input class="input" type="number" min="0.25" step="0.25" max="99" v-model="formValue['decimal_time']" @keypress="isNumberKey($event)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
         </FormField>
 
         <FormField label="Date" accessKey="a" :required="true">
@@ -109,16 +109,26 @@
 
         this.visible = false
       },
-      changeFormValue(field, value) {
-        // To allow decimal values
-        if (field === 'decimal_time') {
-          value = parseFloat(value)
+      isNumberKey(event) {
+        const charCode = event.which ? event.which : event.keyCode
+
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && !(charCode == 46 || charCode == 8)) {
+          return event.preventDefault()
+        } else {
+          const len = event.target.value.length
+          const index = event.target.value.indexOf('.')
+          if (index > 0 && charCode == 46) {
+            return event.preventDefault()
+          }
+          if (index > 0) {
+            const charAfterdot = (len + 1) - index
+            if (charAfterdot > 3) {
+              return event.preventDefault()
+            }
+          }
         }
 
-        this.$store.commit('tracker/setFormField', {
-          field: field,
-          value: value,
-        })
+        return true
       },
       initAutoComplete() {
         this.initAutoCompleteSingle('category')
