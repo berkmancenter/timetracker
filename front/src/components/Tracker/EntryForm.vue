@@ -60,7 +60,7 @@
         visible: false,
         addIcon,
         submittingInProcess: false,
-        autocompleters: [],
+        autocompleters: {},
       }
     },
     mounted() {
@@ -109,8 +109,6 @@
         this.mitt.emit('modalIsNotWorking')
 
         this.visible = false
-
-        this.autocompleters.forEach(autocompleter => console.log(autocompleter))
       },
       isNumberKey(event) {
         const charCode = event.which ? event.which : event.keyCode
@@ -141,9 +139,9 @@
         const that = this
         const fieldRefName = `${type}Input`
 
-        const autocompleter = autocomplete({
+        this.autocompleters[type] = autocomplete({
           input: this.$refs[fieldRefName],
-          preventSubmit: true,
+          preventSubmit: 2, // OnSelect
           fetch: async (text, update) => {
             let items = await that.$store.dispatch('tracker/fetchAutoComplete', {
               term: text.toLowerCase(),
@@ -160,8 +158,6 @@
             that.$refs[fieldRefName].value = item.label
           }
         })
-
-        this.autocompleters.push(autocompleter)
       },
       initEvents() {
         const that = this
