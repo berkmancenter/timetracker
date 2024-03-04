@@ -60,7 +60,6 @@
         visible: false,
         addIcon,
         submittingInProcess: false,
-        autocompleters: {},
       }
     },
     mounted() {
@@ -139,7 +138,7 @@
         const that = this
         const fieldRefName = `${type}Input`
 
-        this.autocompleters[type] = autocomplete({
+        autocomplete({
           input: this.$refs[fieldRefName],
           preventSubmit: 2, // OnSelect
           fetch: async (text, update) => {
@@ -156,6 +155,7 @@
           },
           onSelect: function(item) {
             that.$refs[fieldRefName].value = item.label
+            that.changeFormValue(type, item.label)
           }
         })
       },
@@ -190,6 +190,12 @@
               clearInterval(interval)
             }
           }, 10)
+        })
+      },
+      changeFormValue(field, value) {
+        this.$store.commit('tracker/setFormField', {
+          field: field,
+          value: value,
         })
       },
     },
