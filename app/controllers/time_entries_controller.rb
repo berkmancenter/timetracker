@@ -77,7 +77,14 @@ class TimeEntriesController < ApplicationController
   def auto_complete
     generic_bad_request_response and return if params[:field].nil? || params[:term].nil? || !['category', 'project'].include?(params[:field])
 
-    render json: TimeEntry.where(user: current_user).where("#{params[:field]} ilike ?", "%#{params[:term]}%").group(params[:field]).pluck(params[:field])
+    render json: TimeEntry
+      .where(user: current_user)
+      .where("#{params[:field]} ilike ?", "%#{params[:term]}%")
+      .group(params[:field])
+      .order('COUNT(time_entries.id) DESC')
+      .limit(5)
+      .pluck(params[:field])
+      .reject { |r| r.empty? }
   end
 
   private

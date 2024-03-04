@@ -141,6 +141,8 @@
         autocomplete({
           input: this.$refs[fieldRefName],
           preventSubmit: 2, // OnSelect
+          showOnFocus: true,
+          minLength: 0,
           fetch: async (text, update) => {
             let items = await that.$store.dispatch('tracker/fetchAutoComplete', {
               term: text.toLowerCase(),
