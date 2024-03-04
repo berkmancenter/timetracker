@@ -60,6 +60,7 @@
         visible: false,
         addIcon,
         submittingInProcess: false,
+        autocompleters: [],
       }
     },
     mounted() {
@@ -108,6 +109,8 @@
         this.mitt.emit('modalIsNotWorking')
 
         this.visible = false
+
+        this.autocompleters.forEach(autocompleter => console.log(autocompleter))
       },
       isNumberKey(event) {
         const charCode = event.which ? event.which : event.keyCode
@@ -138,7 +141,7 @@
         const that = this
         const fieldRefName = `${type}Input`
 
-        autocomplete({
+        const autocompleter = autocomplete({
           input: this.$refs[fieldRefName],
           preventSubmit: true,
           fetch: async (text, update) => {
@@ -155,9 +158,10 @@
           },
           onSelect: function(item) {
             that.$refs[fieldRefName].value = item.label
-            that.changeFormValue(type, item.label)
           }
         })
+
+        this.autocompleters.push(autocompleter)
       },
       initEvents() {
         const that = this
