@@ -158,7 +158,15 @@
           onSelect: function(item) {
             that.$refs[fieldRefName].value = item.label
             that.changeFormValue(type, item.label)
-          }
+          },
+          render: function(item) {
+            if (that.$refs[fieldRefName].value !== item.label) {
+              const div = document.createElement('div')
+              div.innerHTML = item.label
+
+              return div
+            }
+          },
         })
       },
       initEvents() {
