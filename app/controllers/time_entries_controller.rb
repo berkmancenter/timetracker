@@ -80,11 +80,11 @@ class TimeEntriesController < ApplicationController
     render json: TimeEntry
       .where(user: current_user)
       .where("#{params[:field]} ilike ?", "%#{params[:term]}%")
+      .where("#{params[:field]} IS NOT NULL AND LENGTH(#{params[:field]}) > 0")
       .group(params[:field])
-      .order('COUNT(time_entries.id) DESC')
+      .order(Arel.sql('COUNT(*) DESC'))
       .limit(5)
       .pluck(params[:field])
-      .reject { |r| r.empty? }
   end
 
   private
