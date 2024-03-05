@@ -29,7 +29,7 @@
             </tr>
 
             <template v-for="entry in entries" :key="entry.id">
-              <tr class="tracker-entries-entry" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
+              <tr class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
                 <td class="tracker-entries-entry-project">
                   <div class="tracker-entries-entry-project-inner">
                     <VDropdown @apply-show="showedActionsDropdown(entry)" @apply-hide="hidActionsDropdown(entry)">
@@ -58,7 +58,7 @@
                 <td class="tracker-entries-entry-username" v-if="$store.state.shared.user.sudoMode">{{ entry.email }}</td>
               </tr>
 
-              <tr class="tracker-entries-entry-description" v-if="entry.description">
+              <tr class="tracker-entries-entry-description" :class="{ 'time-entries-entry-active': entry.actionsShow }" v-if="entry.description" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
                 <td colspan="5">{{ entry.description }}</td>
               </tr>
             </template>
@@ -271,8 +271,7 @@
 
     .tracker-entries-date-row,
     th,
-    .tracker-entries-entry:hover,
-    .tracker-entries-entry:hover + tr.tracker-entries-entry-description {
+    .time-entries-entry-active {
       background-color: #fff;
     }
 
