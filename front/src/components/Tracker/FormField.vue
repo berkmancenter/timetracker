@@ -4,6 +4,7 @@
       <label class="label no-select">
         {{ label }}
         <span v-if="required" class="tracker-entry-form-field-required">*</span>
+        <span v-if="fieldTagColorVariable" class="tracker-entry-form-field-tag" :style="{ 'background-color': `var(${fieldTagColorVariable})` }">{{ label[0] }}</span>
       </label>
     </div>
     <div class="field-body">
@@ -33,6 +34,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    fieldTagColorVariable: {
+      type: String,
+      required: false,
+    },
   },
 };
 </script>
@@ -43,12 +48,28 @@ export default {
       color: #cccccc;
     }
 
-    .field-label {
-      text-align: left;
+    label {
+      display: flex;
+      align-items: center;
     }
 
     .tracker-entry-form-field-required {
       color: rgb(224, 81, 81);
+    }
+
+    .tracker-entry-form-field-tag {
+      color: #fff;
+      border-radius: 0.5rem;
+      margin-right: 1rem;
+      margin-left: 0.5rem;
+      height: 1.5rem;
+      width: 1.5rem;
+      min-width: 2rem;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: normal;
     }
   }
 </style>

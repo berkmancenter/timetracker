@@ -9,15 +9,15 @@
   >
     <div id="tracker-entry-form">
       <form @submit.prevent="submitForm()" ref="entryForm">
-        <FormField label="Project" accessKey="p">
+        <FormField label="Project" accessKey="p" fieldTagColorVariable="--project-color">
           <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
         </FormField>
 
-        <FormField label="Category" accessKey="c">
+        <FormField label="Category" accessKey="c" fieldTagColorVariable="--category-color">
           <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
         </FormField>
 
-        <FormField label="Description" accessKey="r">
+        <FormField label="Description" accessKey="r" fieldTagColorVariable="--description-color">
           <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" id="time_entry_description" accesskey="r"></textarea>
         </FormField>
 

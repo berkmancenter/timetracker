@@ -129,7 +129,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 2;
+    z-index: 777;
     background-color: #ffffff;
     box-sizing: content-box;
 

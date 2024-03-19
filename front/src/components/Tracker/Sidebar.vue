@@ -1,10 +1,10 @@
 <template>
   <div>
     <timesheet-select></timesheet-select>
+    <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <month-select></month-select>
     <totals v-if="$store.state.tracker.selectedMonth !== 'all'"></totals>
     <daily-totals v-if="$store.state.tracker.selectedMonth !== 'all'"></daily-totals>
-    <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <admin-menu />
   </div>
 </template>
