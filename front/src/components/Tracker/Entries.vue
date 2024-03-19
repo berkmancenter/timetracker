@@ -335,6 +335,7 @@
     background-color: var(--main-color);
     color: #fff;
     z-index: 2;
+    font-weight: bold;
   }
 
   .tracker-entries-entry-top-bar {
