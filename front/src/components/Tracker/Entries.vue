@@ -326,6 +326,7 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
+    word-break: break-word;
   }
 
   .tracker-entries-entry-decimal-time {
