@@ -1,3 +1,11 @@
 .autocomplete > div {
   padding: 0.5rem 1rem;
 }
+
+.autocomplete {
+  border-color: hsl(0, 0%, 86%);
+  border-radius: 4px;
+  color: hsl(0, 0%, 21%);
+  border-width: 1px;
+  border-top: none;
+}
