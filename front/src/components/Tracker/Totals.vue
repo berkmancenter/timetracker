@@ -10,7 +10,7 @@
               <td>Total hours this timesheet</td>
               <td>{{ $store.state.tracker.totalCurrentTimesheet }}</td>
             </tr>
-            <tr>
+            <tr v-if="$store.state.tracker.selectedMonth !== 'all'">
               <td>Total hours this month</td>
               <td>{{ $store.state.tracker.totalCurrentMonth }}</td>
             </tr>

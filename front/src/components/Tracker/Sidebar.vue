@@ -3,8 +3,8 @@
     <timesheet-select></timesheet-select>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <month-select></month-select>
-    <totals v-if="$store.state.tracker.selectedMonth !== 'all'"></totals>
-    <daily-totals v-if="$store.state.tracker.selectedMonth !== 'all'"></daily-totals>
+    <totals></totals>
+    <daily-totals></daily-totals>
     <admin-menu />
   </div>
 </template>

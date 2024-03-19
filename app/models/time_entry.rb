@@ -44,12 +44,16 @@ class TimeEntry < ActiveRecord::Base
     return [] if timesheet.nil?
 
     user_ids = users.map(&:id)
-    TimeEntry
+    total_hours = TimeEntry
       .select("users.email, entry_date, SUM(decimal_time) AS total_hours")
       .joins(:user)
-      .where("#{year_month_entry_sql} = ?", month)
       .where(user_id: user_ids)
       .where(timesheet: timesheet)
+      .where("entry_date > CURRENT_DATE - INTERVAL '6 months'")
+
+    total_hours = total_hours.where("#{year_month_entry_sql} = ?", month) unless month == 'all'
+
+    total_hours
       .group(:email, :entry_date)
       .order(entry_date: :desc)
   end
