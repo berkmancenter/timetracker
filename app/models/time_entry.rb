@@ -45,17 +45,103 @@ class TimeEntry < ActiveRecord::Base
 
     user_ids = users.map(&:id)
     total_hours = TimeEntry
-      .select("users.email, entry_date, SUM(decimal_time) AS total_hours")
+      .select("users.email, entry_date AS date, SUM(decimal_time) AS total_hours")
       .joins(:user)
       .where(user_id: user_ids)
       .where(timesheet: timesheet)
-      .where("entry_date > CURRENT_DATE - INTERVAL '6 months'")
 
-    total_hours = total_hours.where("#{year_month_entry_sql} = ?", month) unless month == 'all'
+    if (month == 'all')
+      total_hours = total_hours
+        .where("entry_date > CURRENT_DATE - INTERVAL '26 days'")
+    else
+      total_hours = total_hours.where("#{year_month_entry_sql} = ?", month)
+    end
 
-    total_hours
+    total_hours = total_hours
       .group(:email, :entry_date)
-      .order(entry_date: :desc)
+      .order(date: :desc)
+
+    # Initialize a hash to store daily hours
+    daily_hours = {}
+
+    # Aggregate hours for each user for each day
+    total_hours.each do |entry|
+      formatted_date = entry.date.strftime('%Y-%m-%d')
+
+      daily_hours[formatted_date] ||= {}
+      daily_hours[formatted_date]['users'] ||= {}
+      daily_hours[formatted_date]['users'][entry.email] ||= 0
+      daily_hours[formatted_date]['users'][entry.email] += entry.total_hours.to_f
+    end
+
+    # Return nicer keyed structure
+    final_daily_hours = []
+    daily_hours.each do |date, daily_hours_record|
+      daily_hours_record['users'].each do |email, daily_hours_user_record|
+        final_daily_hours << {
+          date: date,
+          total_hours: daily_hours_user_record,
+          email: email
+        }
+      end
+    end
+
+    final_daily_hours
+  end
+
+  def self.total_hours_by_month_week(users, month, timesheet)
+    return [] unless users.present?
+    return [] if month.nil?
+    return [] if timesheet.nil?
+
+    user_ids = users.map(&:id)
+    total_hours = TimeEntry
+      .select("users.email, DATE_TRUNC('week', entry_date) AS date, SUM(decimal_time) AS total_hours")
+      .joins(:user)
+      .where(user_id: user_ids)
+      .where(timesheet: timesheet)
+
+    if (month == 'all')
+      total_hours = total_hours
+        .where("entry_date > CURRENT_DATE - INTERVAL '26 weeks'")
+    else
+      total_hours = total_hours.where("#{year_month_entry_sql} = ?", month)
+    end
+
+    total_hours = total_hours
+      .group(:email, :date)
+
+    # Initialize a hash to store weekly hours
+    weekly_hours = {}
+
+    # Aggregate hours for each user for each week
+    total_hours.each do |entry|
+      week_start_object = entry.date.beginning_of_week(start_day = :sunday)
+      week_start = week_start_object.strftime('%Y-%m-%d')
+
+      if month != 'all'
+        week_start = "#{month}-01" if week_start_object.strftime('%Y-%m') != month
+      end
+
+      weekly_hours[week_start] ||= {}
+      weekly_hours[week_start]['users'] ||= {}
+      weekly_hours[week_start]['users'][entry.email] ||= 0
+      weekly_hours[week_start]['users'][entry.email] += entry.total_hours.to_f
+    end
+
+    # Return nicer keyed structure
+    final_weekly_hours = []
+    weekly_hours.each do |date, weekly_hours_record|
+      weekly_hours_record['users'].each do |email, weekly_hours_user_record|
+        final_weekly_hours << {
+          date: date,
+          total_hours: weekly_hours_user_record,
+          email: email
+        }
+      end
+    end
+
+    final_weekly_hours.reverse
   end
 
   def self.entry_list_by_month(users, timesheet)

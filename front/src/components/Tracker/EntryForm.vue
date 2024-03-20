@@ -100,7 +100,7 @@
         this.$store.dispatch('tracker/setMonths', months)
         this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
 
         this.$store.dispatch('tracker/clearEntryForm')
         this.working = false

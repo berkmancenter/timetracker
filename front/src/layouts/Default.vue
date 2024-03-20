@@ -248,6 +248,10 @@
       border-radius: 0;
       margin-top: 4rem;
     }
+
+    @media all and (min-width: 1300px) {
+      max-width: 1000px;
+    }
   }
 
   footer#footer {

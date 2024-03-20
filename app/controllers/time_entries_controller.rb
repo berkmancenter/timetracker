@@ -54,7 +54,13 @@ class TimeEntriesController < ApplicationController
     generic_bad_request_response and return if @timesheet.nil?
     generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
 
-    render json: TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet), status: :ok
+    if params[:mode] == 'weeks'
+      entries = TimeEntry.total_hours_by_month_week(get_active_users, params[:month], @timesheet)
+    else
+      entries = TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet)
+    end
+
+    render json: entries, status: :ok
   end
 
   def months

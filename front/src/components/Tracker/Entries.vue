@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h4 class="is-size-4 mt-2">Existing entries</h4>
-
     <article v-if="$store.state.shared.user.sudoMode" class="message is-warning">
       <div class="message-body">
         <div><strong>You are viewing time entries of</strong></div>
@@ -185,7 +183,7 @@
 
           this.$store.dispatch('tracker/setMonths', months)
           this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-          this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals'])
+          this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
 
           this.redirectToSelectedMonth(this.$store)
         } else {
@@ -205,7 +203,7 @@
 
           this.$store.dispatch('tracker/setMonths', months)
           this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-          this.$store.dispatch('tracker/reloadViewData', ['popular', 'dailyTotals', 'totals', 'entries'])
+          this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals', 'entries'])
 
           const user = await this.$store.dispatch('shared/fetchUser')
 
@@ -295,6 +293,21 @@
       width: 100%;
     }
 
+    @media all and (max-width: 1300px) {
+      .tracker-entries-entry-meta {
+        display: block;
+        width: 100%;
+
+        > * {
+          margin-bottom: 1rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
     .tracker-entries-entry-actions-dropdown {
       width: 2.5rem;
       height: 2.5rem;
@@ -322,11 +335,16 @@
 
   .tracker-entries-entry-project,
   .tracker-entries-entry-category,
-  .tracker-entries-entry-description {
+  .tracker-entries-entry-description,
+  .tracker-entries-entry-email {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
     word-break: break-word;
+  }
+
+  .tracker-entries-entry-email {
+    margin-left: auto;
   }
 
   .tracker-entries-entry-decimal-time {

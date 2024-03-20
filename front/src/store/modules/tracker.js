@@ -26,7 +26,8 @@ const state = {
     categories: [],
     projects: [],
   },
-  dailyTotals: [],
+  periodTotals: [],
+  periodTotalsMode: 'days',
   totalCurrentTimesheet: 0,
   totalCurrentMonth: 0,
 }
@@ -44,8 +45,8 @@ const mutations = {
   setPopular(state, popular) {
     state.popular = popular
   },
-  setDailyTotals(state, dailyTotals) {
-    state.dailyTotals = dailyTotals
+  setPeriodTotals(state, periodTotals) {
+    state.periodTotals = periodTotals
   },
   setTotals(state, totals) {
     state.totalCurrentTimesheet = totals.total_hours_current_timesheet
@@ -87,6 +88,9 @@ const mutations = {
   setSelectedTimesheet(state, timesheet) {
     state.selectedTimesheet = timesheet
   },
+  setPeriodTotalsMode(state, mode) {
+    state.periodTotalsMode = mode
+  },
 }
 
 const actions = {
@@ -114,8 +118,8 @@ const actions = {
 
     return data
   },
-  async fetchDailyTotals(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
+  async fetchPeriodTotals(context) {
+    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}&mode=${context.state.periodTotalsMode}`)
     const data = await response.json()
 
     return data
@@ -225,7 +229,7 @@ const actions = {
     store2('timetracker.active_timesheet', timesheet.uuid)
     context.commit('setSelectedTimesheet', timesheet)
   },
-  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'dailyTotals', 'totals']) {
+  async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'periodTotals', 'totals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
     const promises = []
 
@@ -244,6 +248,10 @@ const actions = {
     const response = await fetchIt(`${apiUrl}/timesheets/join/${code}`)
 
     return response
+  },
+  setPeriodTotalsMode(context, mode) {
+    context.commit('setPeriodTotalsMode', mode)
+    context.dispatch('reloadViewData', ['periodTotals'])
   },
 }
 

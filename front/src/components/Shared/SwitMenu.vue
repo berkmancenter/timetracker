@@ -148,6 +148,7 @@
       border-radius: 0 0.8rem 0.8rem 0;
       box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
       user-select: none;
+      display: flex;
     }
 
     .switmenu-section-content {

@@ -4,13 +4,13 @@
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <month-select></month-select>
     <totals></totals>
-    <daily-totals></daily-totals>
+    <period-totals></period-totals>
     <admin-menu />
   </div>
 </template>
 
 <script>
-  import DailyTotals from '@/components/Tracker/DailyTotals.vue'
+  import periodTotals from '@/components/Tracker/PeriodTotals.vue'
   import Totals from '@/components/Tracker/Totals.vue'
   import MonthSelect from '@/components/Tracker/MonthSelect.vue'
   import TimesheetSelect from '@/components/Tracker/TimesheetSelect.vue'
@@ -20,7 +20,7 @@
   export default {
     name: 'Sidebar',
     components: {
-      DailyTotals,
+      periodTotals,
       Totals,
       MonthSelect,
       TimesheetSelect,

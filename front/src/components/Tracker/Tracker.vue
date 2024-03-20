@@ -48,7 +48,7 @@
 
         this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'dailyTotals', 'totals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'periodTotals', 'totals'])
         this.redirectToSelectedMonth(this.$store)
 
         this.mitt.emit('spinnerStop')
@@ -60,7 +60,7 @@
         if (Object.keys(from).length > 0) {
           this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
           this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals', 'totals'])
+          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
         }
       },
       deep: true,

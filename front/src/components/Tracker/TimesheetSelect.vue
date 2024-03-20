@@ -56,7 +56,7 @@
 
         this.redirectToSelectedMonth(this.$store)
 
-        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'dailyTotals', 'totals'])
+        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
 
         this.mitt.emit('spinnerStop')
       },
