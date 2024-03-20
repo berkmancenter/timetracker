@@ -10,7 +10,13 @@
       </div>
     </article>
 
-    <div class="tracker-entries-wrapper">
+    <div class="tracker-entries-wrapper" :class="{ 'tracker-entries-sudo': $store.state.shared.user.sudoMode }">
+      <div class="tracker-entries-header">
+        <div>Project</div>
+        <div>Category</div>
+        <div v-if="$store.state.shared.user.sudoMode">Email</div>
+      </div>
+
       <div class="tracker-entries">
         <template v-for="(entries, date) in entriesByDate">
           <div>
@@ -22,19 +28,19 @@
               <template v-for="entry in entries" :key="entry.id">
                 <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
                   <div class="tracker-entries-entry-meta">
-                    <div class="tracker-entries-entry-project" v-if="entry.project">
-                        <span class="tracker-entries-entry-tag" title="Project">P</span>{{ entry.project }}
+                    <div class="tracker-entries-entry-project">
+                      {{ entry.project }}
                     </div>
-                    <div class="tracker-entries-entry-category" v-if="entry.category">
-                      <span class="tracker-entries-entry-tag" title="Category">C</span>{{ entry.category }}
+                    <div class="tracker-entries-entry-category">
+                      {{ entry.category }}
                     </div>
-                    <div class="tracker-entries-entry-email" title="Email" v-if="$store.state.shared.user.sudoMode">
-                      <span class="tracker-entries-entry-tag">E</span>{{ entry.email }}
+                    <div class="tracker-entries-entry-email" v-if="$store.state.shared.user.sudoMode">
+                      {{ entry.email }}
                     </div>
                   </div>
 
                   <div class="tracker-entries-entry-description" title="Description" :class="{ 'time-entries-entry-active': entry.actionsShow }" v-if="entry.description">
-                    <span class="tracker-entries-entry-tag">D</span>{{ entry.description }}
+                    {{ entry.description }}
                   </div>
 
                   <div class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</div>
@@ -256,11 +262,6 @@
       }
     }
 
-    .tracker-entries-entry-description {
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
     .tracker-entries-date-row,
     th,
     .time-entries-entry-active {
@@ -272,7 +273,7 @@
     }
 
     .tracker-entries-entry {
-      padding: 3.5rem 1rem 1rem 1rem;
+      padding: 2.5rem 0 0 0;
       box-shadow: 0 1px 6px 0 rgba(32,33,36,.28);
       margin-left: 16px;
       margin-right: 16px;
@@ -286,25 +287,34 @@
           padding: 0;
         }
       }
-    }
 
-    .tracker-entries-entry-meta {
-      display: flex;
-      width: 100%;
+      .tracker-entries-entry-description {
+        white-space: pre-wrap;
+        word-break: break-word;
+        padding: 1rem;
+      }
+
+      .tracker-entries-entry-meta {
+        display: flex;
+        width: 100%;
+        border-bottom: 1px solid #dbdbdb;
+
+        > * {
+          width: 50%;
+          padding: 0.5rem;
+          border-right: 1px solid #dbdbdb;
+
+          &:last-child {
+            border-right: none;
+          }
+        }
+      }
     }
 
     @media all and (max-width: 1300px) {
       .tracker-entries-entry-meta {
         display: block;
         width: 100%;
-
-        > * {
-          margin-bottom: 1rem;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
       }
     }
 
@@ -410,5 +420,40 @@
 
   .tracker-entries-wrapper {
     overflow-x: auto;
+  }
+
+  .tracker-entries-header {
+    display: flex;
+    font-weight: bold;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #dbdbdb;
+
+    > * {
+      width: 50%;
+      border-right: 1px solid #dbdbdb;
+      padding: 0.5rem;
+    }
+  }
+
+  .tracker-entries-sudo {
+    .tracker-entries-header {
+      > * {
+        width: 33%;
+        flex-grow: 1;
+      }
+    }
+
+    .tracker-entries-entry-meta {
+      > * {
+        width: 33%;
+        flex-grow: 1;
+      }
+
+      &:last-child {
+        border-right: 1px solid #dbdbdb;
+      }
+    }
   }
 </style>
