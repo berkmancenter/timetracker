@@ -3,7 +3,9 @@
     <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">
       {{ periodName }} Totals
       <VDropdown>
-        <Icon :src="arrowDownIcon" />
+        <span>
+          <span></span>
+        </span>
 
         <template #popper>
           <a class="dropdown-item" @click="setMode('weeks')" v-close-popper v-show="$store.state.tracker.periodTotalsMode == 'days'">
@@ -70,6 +72,39 @@
     td {
       word-break: break-word;
       vertical-align: middle;
+    }
+
+    h5 {
+      position: relative;
+    }
+
+    span {
+      width: 1.5rem;
+      height: 1.5rem;
+      display: block;
+      cursor: pointer;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      height: 100%;
+
+      span::after {
+        border: 3px solid transparent;
+        border-radius: 2px;
+        border-right: 0;
+        border-top: 0;
+        content: " ";
+        display: block;
+        height: 0.55em;
+        margin-top: -0.4375em;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform: rotate(-45deg);
+        transform-origin: center;
+        width: 0.55em;
+        border-color: hsl(229, 53%, 53%);
+        z-index: 4;
+      }
     }
   }
 </style>
