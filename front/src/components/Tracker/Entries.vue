@@ -26,7 +26,7 @@
 
             <div class="tracker-entries-day">
               <template v-for="entry in entries" :key="entry.id">
-                <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
+                <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow, 'time-entries-entry-has-description': entry.description }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
                   <div class="tracker-entries-entry-meta">
                     <div class="tracker-entries-entry-project">
                       {{ entry.project }}
@@ -273,16 +273,14 @@
     }
 
     .tracker-entries-entry {
-      padding: 2.5rem 0 0 0;
+      padding: 1.75rem 0 0 0;
       box-shadow: 0 1px 6px 0 rgba(32,33,36,.28);
-      margin-left: 16px;
-      margin-right: 16px;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+      margin-left: 1rem;
+      margin-right: 1rem;
       position: relative;
 
       > * {
-        padding: 0.5rem;
-
         &:last-child {
           padding: 0;
         }
@@ -291,13 +289,12 @@
       .tracker-entries-entry-description {
         white-space: pre-wrap;
         word-break: break-word;
-        padding: 1rem;
+        padding: 0.5rem;
       }
 
       .tracker-entries-entry-meta {
         display: flex;
         width: 100%;
-        border-bottom: 1px solid #dbdbdb;
 
         > * {
           width: 50%;
@@ -311,6 +308,12 @@
       }
     }
 
+    .time-entries-entry-has-description {
+      .tracker-entries-entry-meta {
+        border-bottom: 1px solid #dbdbdb;
+      }
+    }
+
     @media all and (max-width: 1300px) {
       .tracker-entries-entry-meta {
         display: block;
@@ -318,11 +321,18 @@
       }
     }
 
+    @media all and (max-width: 1300px) {
+      .tracker-entries-entry {
+        margin-left: 0;
+        margin-right: 0;
+      }
+    }
+
     .tracker-entries-entry-actions-dropdown {
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 1.75rem;
+      height: 1.75rem;
       top: 0;
-      left: 0.5rem;
+      left: 0;
       position: absolute;
       cursor: pointer;
       z-index: 2;
@@ -365,6 +375,10 @@
     color: #fff;
     z-index: 2;
     font-weight: bold;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem;
   }
 
   .tracker-entries-entry-top-bar {
@@ -372,7 +386,7 @@
     top: 0;
     left: 0;
     margin: 0 auto;
-    height: 2.5rem;
+    height: 1.75rem;
     width: 100%;
     background-color: var(--super-light-color);
     z-index: 1;
