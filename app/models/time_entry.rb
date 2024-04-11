@@ -176,7 +176,7 @@ class TimeEntry < ActiveRecord::Base
       .where(timesheet: timesheet)
       .to_a
       .map(&:total_hours)
-      .first || []
+      .first || 0
   end
 
   def self.total_hours_by_timesheet(users, timesheet)
@@ -191,7 +191,7 @@ class TimeEntry < ActiveRecord::Base
       .where(timesheet: timesheet)
       .to_a
       .map(&:total_hours)
-      .first || []
+      .first || 0
   end
 
   private

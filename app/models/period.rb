@@ -14,11 +14,12 @@ class Period < ActiveRecord::Base
     current_passed = 1 if current_passed > 1
 
     query = User
-            .select('users.id AS user_id, users.username, users.email, COALESCE(SUM(time_entries.decimal_time), 0) AS total_hours, credits.amount AS credits, ARRAY_AGG(users_timesheets.role) AS roles')
+            .select('users.id AS user_id, users.username, users.email, COALESCE(SUM(time_entries.decimal_time), 0) AS total_hours, credits.amount AS credits, ARRAY_AGG(DISTINCT(users_timesheets.role)) AS roles')
             .joins("LEFT JOIN time_entries ON time_entries.user_id = users.id AND (time_entries.created_at >= '#{self.from.to_time}' AND time_entries.created_at <= '#{self.to.to_time.end_of_day}')")
             .joins(:credits)
             .joins(:users_timesheets)
             .where('time_entries.timesheet_id = ?', self.timesheet_id)
+            .where('users_timesheets.timesheet_id = ?', self.timesheet_id)
             .where('credits.period_id = ?', self.id)
             .group('users.username, users.email, users.id, credits.amount')
             .order('users.username')
