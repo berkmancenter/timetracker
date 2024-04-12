@@ -30,6 +30,7 @@ const state = {
   periodTotalsMode: 'days',
   totalCurrentTimesheet: 0,
   totalCurrentMonth: 0,
+  abortControllers: {},
 }
 
 const mutations = {
@@ -94,47 +95,62 @@ const mutations = {
 }
 
 const actions = {
-  async fetchMonths(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/months?timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
+  async fetchGet(context, options) {
+    if (context.state.abortControllers[options.methodName]) {
+      context.state.abortControllers[options.methodName].abort()
+    }
+
+    context.state.abortControllers[options.methodName] = new AbortController()
+
+    const response = await fetchIt(options.url, {
+      method: 'GET',
+      signal: context.state.abortControllers[options.methodName].signal,
+    })
     const data = await response.json()
 
     return data
+  },
+  async fetchMonths(context) {
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/time_entries/months?timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
+      methodName: 'fetchMonths',
+    })
   },
   async fetchTimesheets(context) {
-    const response = await fetchIt(`${apiUrl}/timesheets`)
-    const data = await response.json()
-
-    return data
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/timesheets`,
+      methodName: 'fetchTimesheets',
+    })
   },
   async fetchEntries(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
-    const data = await response.json()
-
-    return data
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
+      methodName: 'fetchEntries',
+    })
   },
   async fetchPopular(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/popular`)
-    const data = await response.json()
-
-    return data
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/time_entries/popular`,
+      methodName: 'fetchPopular',
+    })
   },
   async fetchPeriodTotals(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}&mode=${context.state.periodTotalsMode}`)
-    const data = await response.json()
-
-    return data
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}&mode=${context.state.periodTotalsMode}`,
+      methodName: 'fetchPeriodTotals',
+    })
   },
   async fetchTotals(context) {
-    const response = await fetchIt(`${apiUrl}/time_entries/totals?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`)
-    const data = await response.json()
-
-    return data
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/time_entries/totals?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
+      methodName: 'fetchTotals',
+    })
   },
   async fetchAutoComplete(context, options) {
-    const response = await fetchIt(`${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}`)
-    const data = await response.json()
-
-    return data
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}`,
+      methodName: 'fetchAutoComplete',
+    })
   },
   async submitEntryForm(context) {
     const response = await fetchIt(`${apiUrl}/time_entries/edit`, {
@@ -235,8 +251,14 @@ const actions = {
 
     for (const item of itemsToReload) {
       const promise = (async () => {
-        const data = await context.dispatch(`fetch${capitalize(item)}`)
-        context.commit(`set${capitalize(item)}`, data)
+        const fetchMethodName = `fetch${capitalize(item)}`
+
+        try {
+          const data = await context.dispatch(fetchMethodName)
+          context.commit(`set${capitalize(item)}`, data)
+        } catch (error) {
+          console.info(`Aborted ${fetchMethodName} request`)
+        }
       })()
 
       promises.push(promise)
