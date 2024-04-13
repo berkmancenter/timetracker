@@ -9,23 +9,22 @@ const fetchIt = async (url, options = {}) => {
 
   options.headers = {
     'Accept': 'application/json',
+    'Content-Type': 'application/json',
   }
 
   let response
+  let errorMessage
   try {
     response = await fetch(url, options)
   } catch (error) {
-    // Aborted requests are ok, we don't need to notify the client
-    if (error.message.includes('aborted') === false) {
-      globals.awn.warning('Something went wrong, try again.')
-    }
+    errorMessage = errorMessage = error.message
   }
 
   const responsePromise = new Promise((resolve, reject) => {
     if (response) {
       resolve(response)
     } else {
-      reject()
+      reject(errorMessage)
     }
   })
 

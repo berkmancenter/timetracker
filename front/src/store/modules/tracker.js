@@ -102,10 +102,20 @@ const actions = {
 
     context.state.abortControllers[options.methodName] = new AbortController()
 
-    const response = await fetchIt(options.url, {
-      method: 'GET',
-      signal: context.state.abortControllers[options.methodName].signal,
-    })
+    let response
+    try {
+      response = await fetchIt(options.url, {
+        method: 'GET',
+        signal: context.state.abortControllers[options.methodName].signal,
+      })
+    } catch (error) {
+      if (error.includes('aborted') === false) {
+        console.error(`${error} ${options.url}`)
+      }
+
+      return []
+    }
+
     const data = await response.json()
 
     return data
@@ -155,10 +165,6 @@ const actions = {
   async submitEntryForm(context) {
     const response = await fetchIt(`${apiUrl}/time_entries/edit`, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         time_entry: context.state.formEntry,
         timesheet_uuid: context.state.selectedTimesheet.uuid,
@@ -253,12 +259,8 @@ const actions = {
       const promise = (async () => {
         const fetchMethodName = `fetch${capitalize(item)}`
 
-        try {
-          const data = await context.dispatch(fetchMethodName)
-          context.commit(`set${capitalize(item)}`, data)
-        } catch (error) {
-          console.info(`Aborted ${fetchMethodName} request`)
-        }
+        const data = await context.dispatch(fetchMethodName)
+        context.commit(`set${capitalize(item)}`, data)
       })()
 
       promises.push(promise)
