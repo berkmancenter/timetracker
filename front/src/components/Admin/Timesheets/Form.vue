@@ -4,15 +4,15 @@
 
     <form class="form" @submit.prevent="save">
       <div class="field">
-        <label class="label">Name</label>
+        <label class="label" for="name">Name</label>
         <div class="control">
-          <input class="input" type="text" v-model="$store.state.admin.timesheet.name" required="true" ref="name">
+          <input class="input" type="text" v-model="$store.state.admin.timesheet.name" required="true" ref="name" name="name" id="name">
         </div>
       </div>
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button is-success" ref="submitButton">Save</button>
+          <button class="button is-success" ref="submitButton" id="submit" name="submit" title="Submit">Save</button>
         </div>
       </div>
     </form>

@@ -14,8 +14,9 @@ end
 
 require 'rubygems'
 require 'rspec/rails'
-require 'webmock/rspec'
 require 'rspec/mocks'
+require 'webdrivers'
+require 'webmock/rspec'
 
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 

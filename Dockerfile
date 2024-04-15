@@ -15,7 +15,12 @@ ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN apt-get update \
-    && apt-get -y install tzdata git build-essential patch ruby-dev zlib1g-dev liblzma-dev default-jre sudo vim nano tmux
+    && apt-get -y install \
+    tzdata git build-essential patch ruby-dev zlib1g-dev liblzma-dev default-jre sudo vim nano tmux wget
+
+# Install Chrome
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
 
 RUN npm install --global yarn
 
