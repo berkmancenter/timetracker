@@ -4,7 +4,6 @@ require 'capybara/rspec'
 Capybara.default_max_wait_time = 15
 
 default_chrome_options = %w(
-  --blink-settings=imagesEnabled=false
   --disable-extensions
   --disable-gpu
   --disable-infobars
