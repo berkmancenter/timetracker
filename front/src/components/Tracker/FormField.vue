@@ -1,7 +1,7 @@
 <template>
   <div class="tracker-entry-form-field field">
     <div class="field-label is-normal mb-2">
-      <label class="label no-select">
+      <label class="label no-select" :for="id">
         {{ label }}
         <span v-if="required" class="tracker-entry-form-field-required">*</span>
         <span v-if="fieldTagColorVariable" class="tracker-entry-form-field-tag" :style="{ 'background-color': `var(${fieldTagColorVariable})` }">{{ label[0] }}</span>
@@ -35,6 +35,10 @@ export default {
       default: false,
     },
     fieldTagColorVariable: {
+      type: String,
+      required: false,
+    },
+    id: {
       type: String,
       required: false,
     },

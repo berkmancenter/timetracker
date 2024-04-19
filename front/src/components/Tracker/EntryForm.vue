@@ -9,24 +9,24 @@
   >
     <div id="tracker-entry-form">
       <form @submit.prevent="submitForm()" ref="entryForm">
-        <FormField label="Project" accessKey="p">
+        <FormField label="Project" accessKey="p" id="time_entry_project">
           <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
         </FormField>
 
-        <FormField label="Category" accessKey="c">
+        <FormField label="Category" accessKey="c" id="time_entry_category">
           <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
         </FormField>
 
-        <FormField label="Description" accessKey="r">
+        <FormField label="Description" accessKey="r" id="time_entry_description">
           <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" id="time_entry_description" accesskey="r"></textarea>
         </FormField>
 
-        <FormField label="Time spent" accessKey="t" :required="true">
+        <FormField label="Time spent" accessKey="t" :required="true" id="time_entry_decimal_time">
           <input class="input" type="number" min="0.25" step="0.25" max="99" v-model="formValue['decimal_time']" @keypress="isNumberKey($event)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
         </FormField>
 
-        <FormField label="Date" accessKey="a" :required="true">
-          <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="time_entry[entry_date]"></date-picker>
+        <FormField label="Date" accessKey="a" :required="true" id="time_entry_entry_date">
+          <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="time_entry[entry_date]" id="time_entry_entry_date"></date-picker>
         </FormField>
 
         <input class="tracker-entry-form-submit-button" type="submit">
