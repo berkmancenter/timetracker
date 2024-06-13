@@ -87,9 +87,6 @@ module Timetracker
     # Set host allowed by the application
     config.hosts << ENV['ALLOWED_HOST'] if ENV['ALLOWED_HOST'].present?
 
-    # Set the default value for bypassing the authentication
-    config.use_fakeauth = false
-
     # Mailer settings
     config.default_sender = ENV['DEFAULT_SENDER'] || 'no-reply@example.com'
     config.return_path = ENV['RETURN_PATH'] || 'user@example.com'

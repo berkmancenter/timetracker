@@ -64,7 +64,4 @@ Rails.application.configure do
   config.active_storage.service = :test
 
   config.maintain_test_schema = false
-
-  # In the test mode, you may want to avoid using the CAS server.
-  config.use_fakeauth = (ENV['USE_FAKEAUTH'] == 'true') || false
 end
