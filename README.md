@@ -14,4 +14,4 @@ This application is released under a GPLv3 license.
 
 ## Copyright
 
-2012-2023 President and Fellows of Harvard College
+© 2012 President and Fellows of Harvard College
