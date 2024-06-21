@@ -125,6 +125,14 @@ GEM
       rexml
     crass (1.0.6)
     csv (3.3.0)
+    dartsass-ruby (3.0.2)
+      sass-embedded (~> 1.54, < 1.67)
+    dartsass-sprockets (3.0.0)
+      dartsass-ruby (~> 3.0)
+      railties (>= 4.0.0)
+      sprockets (> 3.0)
+      sprockets-rails
+      tilt
     database_cleaner (2.0.2)
       database_cleaner-active_record (>= 2, < 3)
     database_cleaner-active_record (2.1.0)
@@ -158,9 +166,9 @@ GEM
       railties (>= 5.0.0)
     faker (3.4.1)
       i18n (>= 1.8.11, < 2)
-    ffi (1.17.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    google-protobuf (3.25.3)
     hashdiff (1.1.0)
     http-accept (1.7.0)
     http-cookie (1.0.6)
@@ -322,14 +330,9 @@ GEM
     ruby-net-ldap (0.0.4)
     ruby-prof (1.7.0)
     rubyzip (2.3.2)
-    sassc (2.4.0)
-      ffi (~> 1.9)
-    sassc-rails (2.1.2)
-      railties (>= 4.0.0)
-      sassc (>= 2.0)
-      sprockets (> 3.0)
-      sprockets-rails
-      tilt
+    sass-embedded (1.66.1)
+      google-protobuf (~> 3.23)
+      rake (>= 13.0.0)
     selenium-webdriver (4.10.0)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
@@ -399,6 +402,7 @@ DEPENDENCIES
   carmen
   couchrest
   csv
+  dartsass-sprockets
   database_cleaner
   devise
   devise_cas_authenticatable
@@ -433,7 +437,6 @@ DEPENDENCIES
   ruby-net-ldap
   ruby-prof
   rubyzip
-  sassc-rails
   sham_rack
   shoulda-matchers
   simplecov

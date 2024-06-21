@@ -1,0 +1,42 @@
+body.sessions,
+body.registrations,
+body.passwords {
+  width: 100vw;
+  height: 100vh;
+  background-color: #F7F9FB;
+
+  .main.app {
+    display: flex;
+    justify-content: center;
+
+    .main-inner {
+      margin-top: 100px;
+      width: 350px;
+      padding: 2rem;
+      border-radius: 4px;
+      background-color: #fff;
+
+      input[type="email"], input[type="password"] {
+        width: 100%;
+      }
+    }
+
+    form {
+      margin-bottom: 1rem;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+    }
+
+    a {
+      color: #000;
+    }
+
+    .session-logo {
+      img {
+        border-radius: 4px;
+      }
+    }
+  }
+}

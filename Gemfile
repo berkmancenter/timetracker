@@ -32,7 +32,7 @@ gem 'unf_ext'
 group :development, :test, :assets do
   gem 'mini_racer'
   gem 'puma'
-  gem 'sassc-rails'
+  gem 'dartsass-sprockets'
   gem 'terser'
 end
 

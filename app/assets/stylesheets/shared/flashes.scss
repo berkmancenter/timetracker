@@ -1,0 +1,42 @@
+#flash {
+  > div {
+    padding:10px 20px;
+  }
+}
+
+div#flash_alert {
+  padding: .75rem;
+  padding: .75rem;
+}
+
+div#flash_alert {
+  background: #FBE3E4;
+  color: #97161b;
+}
+
+div.error a,
+#flash_failure a {
+  color: #97161b;
+}
+
+div.notice,
+#flash_notice {
+  background: #FFF6BF;
+  color: #8c7800;
+}
+
+div.notice a,
+#flash_notice a {
+  color: #8c7800;
+}
+
+div.success,
+#flash_success {
+  background: #E6EFC2;
+  color: #788d25;
+}
+
+div.success a,
+#flash_success a {
+  color: #788d25;
+}

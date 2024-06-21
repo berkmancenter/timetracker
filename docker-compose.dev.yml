@@ -20,6 +20,8 @@ services:
       - '6767:5173'
     volumes:
       - '.:/app'
+    env_file:
+      - '.env.development'
 
 volumes:
   postgres:
