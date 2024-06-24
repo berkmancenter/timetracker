@@ -1,6 +1,7 @@
 body.sessions,
 body.registrations,
-body.passwords {
+body.passwords,
+body.confirmations {
   width: 100vw;
   height: 100vh;
   background-color: #F7F9FB;
@@ -32,12 +33,23 @@ body.passwords {
 
     a {
       color: #000;
+      border-top: 1px solid #e5e5e5;
+      display: block;
+      padding: 0.2rem 0;
+
+      &:first-of-type {
+        border-top: none;
+      }
     }
 
     .session-logo {
       img {
         border-radius: 4px;
       }
+    }
+
+    br {
+      display: none;
     }
   }
 }

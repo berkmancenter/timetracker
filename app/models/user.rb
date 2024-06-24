@@ -12,7 +12,9 @@ class User < ActiveRecord::Base
   end
 
   if Rails.application.config.devise_auth_type == 'db'
-    devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
+    devise_modules = [:database_authenticatable, :registerable, :recoverable, :rememberable, :validatable]
+    devise_modules << :confirmable if ENV['DEVISE_CONFIRMABLE'] == 'true'
+    devise(*devise_modules)
   end
 
   def user_timesheets(only_admin: false)
@@ -54,5 +56,9 @@ class User < ActiveRecord::Base
     end
 
     self.password = SecureRandom.base64(15) unless self.password.present?
+  end
+
+  def root_path
+    new_user_session_path
   end
 end
