@@ -4,12 +4,14 @@
   }
 }
 
-div#flash_alert {
+div#flash_alert,
+#error_explanation {
   padding: .75rem;
-  padding: .75rem;
+  margin-bottom: 0.5rem;
 }
 
-div#flash_alert {
+div#flash_alert,
+#error_explanation {
   background: #FBE3E4;
   color: #97161b;
 }
