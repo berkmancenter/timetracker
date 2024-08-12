@@ -1,14 +1,23 @@
 <template>
   <div class="tracker-popular">
-    <h3 class="has-text-weight-bold">{{ title }}</h3>
 
-    <ul class="tracker-popular-items" v-if="items.length > 0">
-      <li v-for="item in items" :key="item" @click="selectItem(item)">
-        {{ item }}
-      </li>
-    </ul>
-
-    <p v-if="items.length === 0">Your most used {{ title.toLowerCase() }} will show up here.</p>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>{{ title }}</th>
+        </tr>
+        <tr>
+          <td>
+            <ul class="tracker-popular-items" v-if="items.length > 0">
+              <li v-for="item in items" :key="item" @click="selectItem(item)">
+                {{ item }}
+              </li>
+            </ul>
+            <p v-if="items.length === 0">Your most used {{ title.toLowerCase() }} will show up here.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -48,7 +57,6 @@
   .tracker-popular {
     background-color: #ffffff;
     padding: 0.5rem;
-    border-bottom: 1px solid var(--grey-from-bulma);
 
     li {
       word-break: break-word;

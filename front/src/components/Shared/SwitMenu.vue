@@ -152,7 +152,7 @@
     }
 
     .switmenu-section-content {
-      padding: 0 0.5rem;
+      padding: 0 1rem;
 
       table {
         width: 100%;
