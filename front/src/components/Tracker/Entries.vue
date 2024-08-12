@@ -299,7 +299,7 @@
         > * {
           width: 50%;
           padding: 0.5rem;
-          border-right: 1px solid #dbdbdb;
+          border-right: 1px solid var(--grey-from-bulma);
 
           &:last-child {
             border-right: none;
@@ -310,7 +310,7 @@
 
     .time-entries-entry-has-description {
       .tracker-entries-entry-meta {
-        border-bottom: 1px solid #dbdbdb;
+        border-bottom: 1px solid var(--grey-from-bulma);
       }
     }
 
@@ -442,11 +442,11 @@
     margin-left: 1rem;
     margin-right: 1rem;
     margin-bottom: 0.5rem;
-    border-bottom: 1px solid #dbdbdb;
+    border-bottom: 1px solid var(--grey-from-bulma);
 
     > * {
       width: 50%;
-      border-right: 1px solid #dbdbdb;
+      border-right: 1px solid var(--grey-from-bulma);
       padding: 0.5rem;
     }
   }
@@ -466,7 +466,7 @@
       }
 
       &:last-child {
-        border-right: 1px solid #dbdbdb;
+        border-right: 1px solid var(--grey-from-bulma);
       }
     }
   }

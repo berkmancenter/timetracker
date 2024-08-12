@@ -48,6 +48,7 @@
   .tracker-popular {
     background-color: #ffffff;
     padding: 0.5rem;
+    border-bottom: 1px solid var(--grey-from-bulma);
 
     li {
       word-break: break-word;

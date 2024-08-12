@@ -95,7 +95,7 @@
   }
 
   .tracker-modal-buttons {
-    border-top: 1px solid #dbdbdb;
+    border-top: 1px solid var(--grey-from-bulma);
 
     .tracker-modal-buttons-confirm {
       &.button.is-success:focus:not(:active),
