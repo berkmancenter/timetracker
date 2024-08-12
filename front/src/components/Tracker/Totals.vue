@@ -38,6 +38,5 @@
 <style lang="scss">
   .tracker-totals {
     background-color: #ffffff;
-    padding: 0.25rem;
   }
 </style>
