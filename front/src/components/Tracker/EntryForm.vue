@@ -34,7 +34,7 @@
     </div>
   </Modal>
 
-  <button class="button is-success mb-2" @click="openForm(true)">
+  <button class="button is-success mb-2 ml-4" @click="openForm(true)">
     <Icon :src="addIcon" :interactive="false" />
     Add time entry
   </button>
