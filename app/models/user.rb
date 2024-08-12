@@ -27,6 +27,7 @@ class User < ActiveRecord::Base
         timesheets.id,
         timesheets.name,
         timesheets.uuid,
+        timesheets.created_at,
         ARRAY_AGG(users_timesheets.role) AS roles
       ')
       .group('timesheets.id')

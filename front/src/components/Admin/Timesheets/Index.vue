@@ -16,12 +16,14 @@
         <thead>
           <tr class="no-select">
             <th>Name</th>
+            <th>Created</th>
             <th data-sort-method="none" class="no-sort">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="timesheet in orderedTimesheets" :key="timesheet.id">
             <td>{{ timesheet.name }}</td>
+            <td>{{ formatIsoDateTimeToLocaleString(timesheet.created_at) }}</td>
             <td class="admin-table-actions">
               <div class="admin-table-actions">
                 <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`" v-if="adminInTimesheet(timesheet)">
@@ -85,6 +87,7 @@
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import orderBy from 'lodash/orderBy'
   import Modal from '@/components/Shared/Modal.vue'
+  import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
 
   export default {
     name: 'AdminTimesheets',
@@ -108,6 +111,7 @@
         removeTimesheetModalCurrent: null,
         leaveTimesheetModalStatus: false,
         leaveTimesheetModalCurrent: null,
+        formatIsoDateTimeToLocaleString,
       }
     },
     created() {
