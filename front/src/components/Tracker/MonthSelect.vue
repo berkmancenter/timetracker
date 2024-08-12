@@ -57,7 +57,7 @@
   };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
   .tracker-months-select {
     select {
       width: 100%;
