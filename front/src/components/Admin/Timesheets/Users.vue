@@ -29,7 +29,7 @@
               <input type="checkbox" v-model="user.selected">
             </td>
             <td>{{ user.email }}</td>
-            <td class="no-break">{{ user.joined }}</td>
+            <td class="no-break">{{ formatIsoDateTimeToLocaleString(user.joined) }}</td>
             <td class="admin-table-actions">
               <div class="admin-table-actions">
                 <a title="Remove user from timesheet" @click.prevent="removeFromTimesheetConfirm(user)">
@@ -115,6 +115,7 @@
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
   import Modal from '@/components/Shared/Modal.vue'
+  import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
 
   export default {
     name: 'AdminTimesheetUsers',
@@ -144,6 +145,7 @@
         changeUsersRoleModalStatus: false,
         changeUsersRoleCurrent: null,
         changeUsersRoleSelected: 'admin',
+        formatIsoDateTimeToLocaleString,
       }
     },
     created() {
