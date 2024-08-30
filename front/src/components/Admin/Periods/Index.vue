@@ -29,7 +29,7 @@
             <td class="no-break">{{ period.from }}</td>
             <td class="no-break">{{ period.to }}</td>
             <td class="admin-table-actions">
-              <div class="admin-table-actions">
+              <div>
                 <router-link title="Edit period" :to="`/admin/periods/${period.id}/edit`">
                   <Icon :src="editIcon" />
                 </router-link>

@@ -12,7 +12,9 @@ class TimeEntriesController < ApplicationController
   end
 
   def edit
-    time_entry_params = params.require(:time_entry).permit(:id, :category, :project, :description, :decimal_time, :entry_date)
+    time_entry_params = params.require(:time_entry).permit(:id, :decimal_time, :entry_date)
+    custom_fields = params[:time_entry][:fields] || {}
+
     time_entry = TimeEntry.find_by_id(params[:time_entry][:id]) || TimeEntry.new(entry_date: Time.now, decimal_time: 0)
 
     generic_bad_request_response and return unless request.post? || request.patch?
@@ -22,12 +24,24 @@ class TimeEntriesController < ApplicationController
 
     time_entry.attributes = time_entry_params
     time_entry.timesheet = @timesheet
-    time_entry.category = time_entry&.category&.downcase&.strip || ''
-    time_entry.project = time_entry&.project&.downcase&.strip || ''
     time_entry.user = current_user
 
     if time_entry.save
-      render json: { entry: time_entry }, status: :ok
+      custom_fields.each do |machine_name, value|
+        timesheet_field = TimesheetField.find_by(machine_name: machine_name, timesheet: @timesheet)
+        next unless timesheet_field
+
+        field_data_item = TimesheetFieldDataItem.find_or_initialize_by(
+          field_id: timesheet_field.id,
+          time_entry_id: time_entry.id
+        )
+
+        field_data_item.value = value
+
+        field_data_item.save
+      end
+
+      render json: TimeEntry.single(time_entry.id), status: :ok
     else
       generic_bad_request_response
     end
@@ -44,10 +58,7 @@ class TimeEntriesController < ApplicationController
   end
 
   def popular
-    render json: {
-      categories: TimeEntry.my_popular_categories(current_user),
-      projects: TimeEntry.my_popular_projects(current_user)
-    }, status: :ok
+    render json: TimeEntry.popular(current_user), status: :ok
   end
 
   def days
@@ -81,16 +92,32 @@ class TimeEntriesController < ApplicationController
   end
 
   def auto_complete
-    generic_bad_request_response and return if params[:field].nil? || params[:term].nil? || !['category', 'project'].include?(params[:field])
+    if params[:field].nil? || params[:term].nil?
+      generic_bad_request_response
+      return
+    end
 
-    render json: TimeEntry
+    field = params[:field]
+    term = params[:term]
+    field_obj = TimesheetField.joins(:timesheet).where(machine_name: field, timesheets: { uuid: params[:timesheet_uuid] }).first
+
+    unless field_obj.present?
+      generic_bad_request_response
+      return
+    end
+
+    values = TimeEntry
       .where(user: current_user)
-      .where("#{params[:field]} ilike ?", "%#{params[:term]}%")
-      .where("#{params[:field]} IS NOT NULL AND LENGTH(#{params[:field]}) > 0")
-      .group(params[:field])
+      .joins(:timesheet_field_data_items)
+      .where('timesheet_field_data_items.field_id IN (?)', field_obj.id)
+      .where('timesheet_field_data_items.value ILIKE ?', "%#{term}%")
+      .where('timesheet_field_data_items.value IS NOT NULL AND LENGTH(timesheet_field_data_items.value) > 0')
+      .group('timesheet_field_data_items.value')
       .order(Arel.sql('COUNT(*) DESC'))
       .limit(5)
-      .pluck(params[:field])
+      .pluck('timesheet_field_data_items.value')
+
+    render json: values
   end
 
   private
@@ -109,10 +136,15 @@ class TimeEntriesController < ApplicationController
   end
 
   def render_entries_csv
-    columns = ['username', 'category', 'project', 'entry_date', 'decimal_time', 'description']
+    columns = ['username', 'entry_date', 'decimal_time']
+
+    custom_fields = @timesheet.timesheet_fields.map(&:machine_name)
+    columns += custom_fields
+
     objects = []
     @entries = []
 
+    # Fetch time entries based on the current month
     if current_month == 'all'
       @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true, @timesheet)
     else
@@ -121,7 +153,15 @@ class TimeEntriesController < ApplicationController
 
     @entries.each do |te|
       te.username = te.user.email
-      objects << te
+
+      te_obj = te.attributes
+
+      # Custom fields
+      te.fields.each do |key, value|
+        te_obj[key] = value
+      end
+
+      objects << te_obj
     end
 
     render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns)

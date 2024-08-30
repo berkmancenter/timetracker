@@ -9,24 +9,44 @@
   >
     <div id="tracker-entry-form">
       <form @submit.prevent="submitForm()" ref="entryForm">
-        <FormField label="Project" accessKey="p" id="time_entry_project">
-          <input class="input ui-autocomplete-input" ref="projectInput" type="text" v-model="formValue['project']" name="time_entry[project]" id="time_entry_project" autocomplete="off" accesskey="p" />
-        </FormField>
+        <template v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields" :key="field.id">
+          <FormField
+            :label="field.title"
+            :accessKey="field.access_key"
+            :id="field.machine_name"
+            v-if="field.input_type === 'text'"
+          >
+            <input
+              class="input ui-autocomplete-input"
+              type="text"
+              v-model="formValue['fields'][field.machine_name]"
+              autocomplete="off"
+              :ref="`${field.machine_name}Input`"
+              :id="field.machine_name"
+            />
+          </FormField>
 
-        <FormField label="Category" accessKey="c" id="time_entry_category">
-          <input class="input ui-autocomplete-input" ref="categoryInput" type="text" v-model="formValue['category']" name="time_entry[category]" id="time_entry_category" autocomplete="off" accesskey="c" />
-        </FormField>
-
-        <FormField label="Description" accessKey="r" id="time_entry_description">
-          <textarea class="textarea" v-model="formValue['description']" name="time_entry[description]" id="time_entry_description" accesskey="r"></textarea>
-        </FormField>
+          <FormField
+            :label="field.title"
+            :accessKey="field.access_key"
+            v-if="field.input_type === 'long_text'"
+            :id="field.machine_name"
+            :machineName="field.machine_name"
+          >
+            <textarea
+              class="textarea"
+              v-model="formValue['fields'][field.machine_name]"
+              :id="field.machine_name"
+            ></textarea>
+          </FormField>
+        </template>
 
         <FormField label="Time spent" accessKey="t" :required="true" id="time_entry_decimal_time">
-          <input class="input" type="number" min="0.25" step="0.25" max="99" v-model="formValue['decimal_time']" @keypress="isNumberKey($event)" name="time_entry[decimal_time]" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
+          <input class="input" type="number" min="0.25" step="0.25" max="99" v-model="formValue['decimal_time']" @keypress="isNumberKey($event)" name="decimal_time" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
         </FormField>
 
         <FormField label="Date" accessKey="a" :required="true" id="time_entry_entry_date">
-          <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="time_entry[entry_date]" id="time_entry_entry_date"></date-picker>
+          <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="entry_date" id="time_entry_entry_date"></date-picker>
         </FormField>
 
         <input class="tracker-entry-form-submit-button" type="submit">
@@ -90,9 +110,9 @@
         const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
 
         if (this.$store.state.tracker.formMode === 'create') {
-          this.$store.dispatch('tracker/addEntry', submitResponse.entry)
+          this.$store.dispatch('tracker/addEntry', submitResponse)
         } else {
-          this.$store.dispatch('tracker/replaceEntry', submitResponse.entry)
+          this.$store.dispatch('tracker/replaceEntry', submitResponse)
         }
 
         const months = await this.$store.dispatch('tracker/fetchMonths')
@@ -131,43 +151,48 @@
         return true
       },
       initAutoComplete() {
-        this.initAutoCompleteSingle('category')
-        this.initAutoCompleteSingle('project')
-      },
-      initAutoCompleteSingle(type) {
         const that = this
-        const fieldRefName = `${type}Input`
 
-        autocomplete({
-          input: this.$refs[fieldRefName],
-          preventSubmit: 2, // OnSelect
-          showOnFocus: true,
-          minLength: 0,
-          fetch: async (text, update) => {
-            let items = await that.$store.dispatch('tracker/fetchAutoComplete', {
-              term: text.toLowerCase(),
-              field: type,
-            })
+        this.$store.state.tracker.selectedTimesheet.timesheet_fields.forEach(field => {
+          if (field.input_type !== 'text') {
+            return
+          }
 
-            items = items.map((item) => {
-              return { label: item }
-            })
+          const fieldRefName = `${field.machine_name}Input`
 
-            update(items)
-          },
-          onSelect: function(item) {
-            that.$refs[fieldRefName].value = item.label
-            that.changeFormValue(type, item.label)
-          },
-          render: function(item) {
-            if (that.$refs[fieldRefName].value !== item.label) {
-              const div = document.createElement('div')
-              div.innerHTML = item.label
+          autocomplete({
+            input: that.$refs[fieldRefName][0],
+            preventSubmit: 2, // OnSelect
+            showOnFocus: true,
+            minLength: 0,
+            fetch: async (text, update) => {
+              let items = await that.$store.dispatch('tracker/fetchAutoComplete', {
+                term: text.toLowerCase(),
+                field: field.machine_name,
+              })
 
-              return div
-            }
-          },
-        })
+              items = items.map((item) => {
+                return { label: item }
+              })
+
+              update(items)
+            },
+            onSelect: function(item) {
+              that.$refs[fieldRefName][0].value = item.label
+              that.changeFormValue(type, item.label)
+            },
+            render: function(item) {
+              if (that.$refs[fieldRefName][0].value !== item.label) {
+                const div = document.createElement('div')
+                div.innerHTML = item.label
+
+                return div
+              }
+            },
+          })
+
+          console.log('Autocomplete initialized for', field.machine_name)
+        });
       },
       initEvents() {
         const that = this
@@ -182,14 +207,15 @@
 
         this.visible = true
 
-        await this.waitUntil(() => {
-          return this.$refs.categoryInput
-        })
+        await this.waitForLastField()
 
         this.initAutoComplete()
 
-        if (!this.isTouchDevice) {
-          this.$refs.projectInput.focus()
+        const textFields = this.getTextFields()
+        if (textFields.length > 0) {
+          const firstField = textFields[0]
+
+          this.$refs[`${firstField.machine_name}Input`][0].focus()
         }
       },
       async waitUntil(condition) {
@@ -202,11 +228,30 @@
           }, 10)
         })
       },
+      async waitForLastField() {
+        const textFields = this.getTextFields()
+
+        if (textFields.length === 0) {
+          console.error('No fields available to process.')
+          return
+        }
+
+        const lastField = textFields[textFields.length - 1]
+
+        try {
+          await this.waitUntil(() => this.$refs[`${lastField.machine_name}Input`])
+        } catch (error) {
+          console.error(`Failed to find last field ${lastField.machine_name}: ${error.message}`)
+        }
+      },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {
           field: field,
           value: value,
         })
+      },
+      getTextFields() {
+        return this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.input_type === 'text')
       },
     },
   }

@@ -50,28 +50,28 @@ RSpec.describe TimeEntriesController, type: :controller do
 
   describe 'POST #edit' do
     it 'edits a time entry for the user' do
-      timesheet = create(:timesheet)
+      timesheet = create(:timesheet, :with_fields)
       time_entry = create(:time_entry, user: user, timesheet: timesheet)
       create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
 
       new_description = 'Updated Description'
 
-      post :edit, params: { time_entry: { id: time_entry.id, description: new_description }, timesheet_uuid: timesheet.uuid }
+      post :edit, params: { time_entry: { id: time_entry.id, fields: { description: new_description } }, timesheet_uuid: timesheet.uuid }
 
       expect(response).to have_http_status(:ok)
-      expect(TimeEntry.find(time_entry.id).description).to eq(new_description)
+      expect(TimeEntry.single(time_entry.id).fields['description']).to eq(new_description)
     end
 
     it 'creates a new time entry if id is not provided' do
-      timesheet = create(:timesheet)
+      timesheet = create(:timesheet, :with_fields)
       create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
 
       new_description = 'New Entry'
 
-      post :edit, params: { time_entry: { description: new_description }, timesheet_uuid: timesheet.uuid }
+      post :edit, params: { time_entry: { fields: { description: new_description } }, timesheet_uuid: timesheet.uuid }
 
       expect(response).to have_http_status(:ok)
-      expect(TimeEntry.last.description).to eq(new_description)
+      expect(TimeEntry.single(TimeEntry.last.id).fields['description']).to eq(new_description)
     end
 
     it 'returns a bad request if timesheet is not found' do
@@ -151,10 +151,10 @@ RSpec.describe TimeEntriesController, type: :controller do
 
   describe 'GET #auto_complete' do
     it 'returns auto-complete suggestions for category or project' do
-      timesheet = create(:timesheet)
+      timesheet = create(:timesheet, :with_fields)
       time_entry = create(:time_entry, user: user, timesheet: timesheet)
 
-      get :auto_complete, params: { field: 'category', term: 'search_term' }
+      get :auto_complete, params: { field: 'category', term: 'search_term', timesheet_uuid: timesheet.uuid }
 
       expect(response).to have_http_status(:ok)
     end

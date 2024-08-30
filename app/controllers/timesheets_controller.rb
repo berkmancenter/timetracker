@@ -3,17 +3,19 @@ class TimesheetsController < ApplicationController
   before_action :authenticate_user_json!
 
   def index
-    render json: current_user.user_timesheets, status: :ok
+    timesheets = current_user.user_timesheets
+    render json: timesheets.as_json(timesheet_json_params), status: :ok
   end
 
-  def index_where_admin
-    render json: current_user.user_timesheets(only_admin: true), status: :ok
+  def index_admin
+    timesheets = current_user.user_timesheets(only_admin: true)
+    render json: timesheets.as_json(timesheet_json_params), status: :ok
   end
 
   def show
     generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
 
-    render json: @timesheet, status: :ok
+    render json: @timesheet.as_json(timesheet_json_params), status: :ok
   end
 
   def upsert
@@ -152,10 +154,21 @@ class TimesheetsController < ApplicationController
   private
 
   def set_timesheet
-    @timesheet = Timesheet.where(id: params[:id]).first
+    @timesheet = Timesheet.includes(:timesheet_fields).where(id: params[:id]).first
   end
 
   def timesheet_params
-    params.require(:timesheet).permit(:id, :name)
+    params.require(:timesheet).permit(:id, :name, timesheet_fields_attributes: %i[id title input_type popular list _destroy])
+  end
+
+  def timesheet_json_params
+    {
+      only: %i[id name uuid roles created_at],
+      include: {
+        timesheet_fields: {
+          only: %i[id machine_name title order input_type popular list access_key access_value]
+        }
+      }
+    }
   end
 end

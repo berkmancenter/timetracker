@@ -101,5 +101,7 @@ module Timetracker
       config.rack_cas.server_url = ENV['DEVISE_CAS_AUTH_URL'] || 'https://cas.example.com'
       config.rack_cas.service = ENV['DEVISE_CAS_AUTH_SERVICE_PATH'] || '/users/service'
     end
+
+    config.active_support.cache_format_version = 7.1
   end
 end

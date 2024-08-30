@@ -7,11 +7,9 @@ const apiUrl = import.meta.env.VITE_API_URL
 
 const defaultEntry = {
   id: null,
-  category: '',
-  project: '',
-  description: '',
   decimal_time: '',
   entry_date: dayjs().format('MMMM D, YYYY'),
+  fields: {},
 }
 
 const state = {
@@ -22,10 +20,7 @@ const state = {
   selectedTimesheet: {},
   formEntry: JSON.parse(JSON.stringify(defaultEntry)),
   formMode: 'create',
-  popular: {
-    categories: [],
-    projects: [],
-  },
+  popular: {},
   periodTotals: [],
   periodTotalsMode: 'days',
   totalCurrentTimesheet: 0,
@@ -72,10 +67,10 @@ const mutations = {
     })
   },
   clearEntryForm(state) {
-    Object.assign(state.formEntry, defaultEntry)
+    state.formEntry = { ...JSON.parse(JSON.stringify(defaultEntry)) }
   },
   setFormField(state, data) {
-    state.formEntry[data.field] = data.value
+    state.formEntry.fields[data.field] = data.value
   },
   setFormEntry(state, entry) {
     state.formEntry = entry
@@ -158,7 +153,7 @@ const actions = {
   },
   async fetchAutoComplete(context, options) {
     return await context.dispatch('fetchGet', {
-      url: `${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}`,
+      url: `${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
       methodName: 'fetchAutoComplete',
     })
   },

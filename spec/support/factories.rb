@@ -33,10 +33,7 @@ FactoryBot.define do
 
   factory :time_entry do
     user
-    category { Faker::Lorem.word }
-    project { Faker::Lorem.word }
     decimal_time { Faker::Number.decimal(l_digits: 1, r_digits: 1) }
-    description { Faker::Lorem.sentence }
     entry_date { Faker::Date.backward(days: 30) }
     timesheet
   end
@@ -44,6 +41,47 @@ FactoryBot.define do
   factory :timesheet do
     name { Faker::Lorem.word }
     public_code { Faker::Alphanumeric.alpha(number: 10) }
+
+    trait :with_fields do
+      timesheet_fields { [build(:timesheet_field, :category), build(:timesheet_field, :project), build(:timesheet_field, :description)] }
+    end
+  end
+
+  factory :timesheet_field do
+    timesheet
+    input_type { 'text' }
+    machine_name { Faker::Lorem.word }
+    title { Faker::Lorem.word }
+    order { 1 }
+    description { Faker::Lorem.sentence }
+    metadata { {} }
+    popular { false }
+    list { false }
+    required { false }
+    access_key { nil }
+
+    trait :category do
+      machine_name { 'category' }
+      title { 'Category' }
+      list { true }
+    end
+
+    trait :project do
+      machine_name { 'project' }
+      title { 'Project' }
+      list { true }
+    end
+
+    trait :description do
+      machine_name { 'description' }
+      title { 'Description' }
+    end
+  end
+
+  factory :timesheet_field_data_item do
+    association :time_entry
+    association :timesheet_field, factory: :timesheet_field
+    value { Faker::Lorem.word }
   end
 
   factory :user do

@@ -28,9 +28,10 @@ class User < ActiveRecord::Base
         timesheets.name,
         timesheets.uuid,
         timesheets.created_at,
-        ARRAY_AGG(users_timesheets.role) AS roles
+        users_timesheets.timesheet_id,
+        ARRAY_AGG(DISTINCT users_timesheets.role) AS roles
       ')
-      .group('timesheets.id')
+      .group('timesheets.id, users_timesheets.timesheet_id')
   end
 
   def cas_extra_attributes=(extra_attributes)

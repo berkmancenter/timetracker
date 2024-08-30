@@ -12,8 +12,9 @@
 
     <div class="tracker-entries-wrapper" :class="{ 'tracker-entries-sudo': $store.state.shared.user.sudoMode }">
       <div class="tracker-entries-header">
-        <div>Project</div>
-        <div>Category</div>
+        <div v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
+          {{ field.title }}
+        </div>
         <div v-if="$store.state.shared.user.sudoMode">Email</div>
       </div>
 
@@ -26,21 +27,19 @@
 
             <div class="tracker-entries-day">
               <template v-for="entry in entries" :key="entry.id">
-                <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow, 'time-entries-entry-has-description': entry.description }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
+                <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow, 'time-entries-entry-has-description': entry.fields.description }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
                   <div class="tracker-entries-entry-meta">
-                    <div class="tracker-entries-entry-project">
-                      {{ entry.project }}
+                    <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
+                      {{ entry.fields[field.machine_name] }}
                     </div>
-                    <div class="tracker-entries-entry-category">
-                      {{ entry.category }}
-                    </div>
+
                     <div class="tracker-entries-entry-email" v-if="$store.state.shared.user.sudoMode">
                       {{ entry.email }}
                     </div>
                   </div>
 
-                  <div class="tracker-entries-entry-description" title="Description" :class="{ 'time-entries-entry-active': entry.actionsShow }" v-if="entry.description">
-                    {{ entry.description }}
+                  <div class="tracker-entries-entry-description" title="Description" :class="{ 'time-entries-entry-active': entry.actionsShow }" v-if="entry.fields.description">
+                    {{ entry.fields.description }}
                   </div>
 
                   <div class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</div>
@@ -353,8 +352,7 @@
     }
   }
 
-  .tracker-entries-entry-project,
-  .tracker-entries-entry-category,
+  .tracker-entries-entry-field,
   .tracker-entries-entry-description,
   .tracker-entries-entry-email {
     display: flex;
@@ -379,6 +377,8 @@
     display: flex;
     align-items: center;
     padding: 0.25rem;
+    width: 3.5rem;
+    justify-content: center;
   }
 
   .tracker-entries-entry-top-bar {
@@ -406,18 +406,6 @@
     align-items: center;
     justify-content: center;
     user-select: none;
-  }
-
-  .tracker-entries-entry-project {
-    .tracker-entries-entry-tag {
-      background-color: var(--project-color);
-    }
-  }
-
-  .tracker-entries-entry-category {
-    .tracker-entries-entry-tag {
-      background-color: var(--category-color);
-    }
   }
 
   .tracker-entries-entry-description {

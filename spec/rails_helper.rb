@@ -42,6 +42,12 @@ RSpec.configure do |config|
     # (and thus not be clickable) due to inadequately responsive design.
     Capybara.page.driver.resize_window_to(Capybara.page.driver.current_window_handle, 2_048, 600)
   end
+
+  config.after(:each, type: :feature) do |example|
+    if example.exception
+      save_screenshot("screenshot_on_error_#{example.description.parameterize}.png")
+    end
+  end
 end
 
 RSpec::Mocks.configuration.allow_message_expectations_on_nil = true

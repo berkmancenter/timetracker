@@ -18,8 +18,8 @@ RSpec.describe TimesheetsController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)).to match_array([
-        { 'id' => timesheet1.id, 'name' => 'Timesheet 1', 'uuid' => timesheet1.uuid, 'roles' => ['admin'], 'created_at' => timesheet1.created_at.as_json },
-        { 'id' => timesheet2.id, 'name' => 'Timesheet 2', 'uuid' => timesheet2.uuid, 'roles' => ['user'], 'created_at' => timesheet2.created_at.as_json }
+        { 'id' => timesheet1.id, 'name' => 'Timesheet 1', 'uuid' => timesheet1.uuid, 'roles' => ['admin'], 'created_at' => timesheet1.created_at.as_json, 'timesheet_fields' => [] },
+        { 'id' => timesheet2.id, 'name' => 'Timesheet 2', 'uuid' => timesheet2.uuid, 'roles' => ['user'], 'created_at' => timesheet2.created_at.as_json, 'timesheet_fields' => [] }
       ])
     end
 

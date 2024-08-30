@@ -14,33 +14,51 @@ RSpec.describe TimeEntry, type: :model do
 
   describe 'my_popular_categories' do
     let(:user) { create(:user) }
+    let(:timesheet) { create(:timesheet) }
+    let(:category_field) { create(:timesheet_field, machine_name: 'category', timesheet: timesheet, popular: true) }
+
+    before do
+      # Create time entries with custom category field data
+      create_list(:time_entry, 5, user: user, timesheet: timesheet).each do |entry|
+        create(:timesheet_field_data_item, time_entry: entry, field_id: category_field.id, value: 'Category A')
+      end
+      create_list(:time_entry, 3, user: user, timesheet: timesheet).each do |entry|
+        create(:timesheet_field_data_item, time_entry: entry, field_id: category_field.id, value: 'Category B')
+      end
+      create_list(:time_entry, 2, user: user, timesheet: timesheet).each do |entry|
+        create(:timesheet_field_data_item, time_entry: entry, field_id: category_field.id, value: 'Category C')
+      end
+    end
 
     it 'returns popular categories for the user' do
-      create_list(:time_entry, 5, user: user, category: 'Category A')
-      create_list(:time_entry, 3, user: user, category: 'Category B')
-      create_list(:time_entry, 2, user: user, category: 'Category C')
+      popular = TimeEntry.popular(user)
 
-      popular_categories = TimeEntry.my_popular_categories(user)
-
-      expect(popular_categories).to include('Category A')
-      expect(popular_categories).to include('Category B')
-      expect(popular_categories).to include('Category C')
+      expect(popular['category']).to eq(['Category A', 'Category B', 'Category C'])
     end
   end
 
   describe 'my_popular_projects' do
     let(:user) { create(:user) }
+    let(:timesheet) { create(:timesheet) }
+    let(:project_field) { create(:timesheet_field, machine_name: 'project', timesheet: timesheet, popular: true) }
+
+    before do
+      # Create time entries with custom project field data
+      create_list(:time_entry, 5, user: user, timesheet: timesheet).each do |entry|
+        create(:timesheet_field_data_item, time_entry: entry, field_id: project_field.id, value: 'Project X')
+      end
+      create_list(:time_entry, 3, user: user, timesheet: timesheet).each do |entry|
+        create(:timesheet_field_data_item, time_entry: entry, field_id: project_field.id, value: 'Project Y')
+      end
+      create_list(:time_entry, 2, user: user, timesheet: timesheet).each do |entry|
+        create(:timesheet_field_data_item, time_entry: entry, field_id: project_field.id, value: 'Project Z')
+      end
+    end
 
     it 'returns popular projects for the user' do
-      create_list(:time_entry, 5, user: user, project: 'Project X')
-      create_list(:time_entry, 3, user: user, project: 'Project Y')
-      create_list(:time_entry, 2, user: user, project: 'Project Z')
+      popular = TimeEntry.popular(user)
 
-      popular_projects = TimeEntry.my_popular_projects(user)
-
-      expect(popular_projects).to include('Project X')
-      expect(popular_projects).to include('Project Y')
-      expect(popular_projects).to include('Project Z')
+      expect(popular['project']).to eq(['Project X', 'Project Y', 'Project Z'])
     end
   end
 

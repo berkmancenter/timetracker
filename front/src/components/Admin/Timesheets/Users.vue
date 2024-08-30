@@ -31,7 +31,7 @@
             <td>{{ user.email }}</td>
             <td class="no-break">{{ formatIsoDateTimeToLocaleString(user.joined) }}</td>
             <td class="admin-table-actions">
-              <div class="admin-table-actions">
+              <div>
                 <a title="Remove user from timesheet" @click.prevent="removeFromTimesheetConfirm(user)">
                   <Icon :src="minusIcon" />
                 </a>

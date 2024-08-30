@@ -1,40 +1,88 @@
 class TimeEntry < ActiveRecord::Base
   belongs_to :user
   belongs_to :timesheet
+  has_many :timesheet_field_data_items, foreign_key: 'time_entry_id', dependent: :destroy
 
   attribute :username
 
   validates :user, :entry_date, presence: true
   validates :timesheet, presence: true
 
-  def self.my_popular_categories(user)
-    self.get_popular('category', user)
+  attr_accessor :fields
+
+  def self.single(id)
+    return nil if id.nil?
+
+    entry = TimeEntry
+            .select('time_entries.*, users.email, users.id AS user_id')
+            .includes(timesheet_field_data_items: :timesheet_field)
+            .joins(:user)
+            .find_by(id: id)
+
+    return nil unless entry
+
+    # Extract associated data items and map them
+    field_data = entry.timesheet_field_data_items.map do |field_data|
+      [field_data.timesheet_field.machine_name, field_data.value]
+    end.to_h
+
+    # Merge field data into entry attributes
+    entry.fields = field_data
+
+    entry
   end
 
-  def self.my_popular_projects(user)
-    self.get_popular('project', user)
+  def self.popular(user)
+    return {} unless user.present?
+
+    popular_fields = TimesheetField.where(popular: true)
+
+    popular_values = {}
+
+    popular_fields.each do |field|
+      data_items = TimesheetFieldDataItem
+        .joins(:time_entry)
+        .where(field_id: field.id, time_entries: { user_id: user.id })
+        .group(:value)
+        .order(Arel.sql('COUNT(*) DESC'))
+        .limit(20)
+        .count
+
+      popular_values[field.machine_name] = data_items.keys if data_items.keys.present?
+    end
+
+    popular_values
   end
 
-  def self.my_entries_by_month(users, month = Time.now.year.to_s + '-' + Time.now.month.to_s, alltime = false, timesheet)
+
+  def self.my_entries_by_month(users, month = "#{Time.now.year}-#{Time.now.month}", alltime = false, timesheet)
     return [] unless users.present?
     return [] if month.nil?
     return [] if timesheet.nil?
 
     user_ids = users.map(&:id)
-    month = (month) ? month : Time.now.year.to_s + '-' + Time.now.month.to_s
+    month ||= "#{Time.now.year}-#{Time.now.month}"
 
     entries = TimeEntry
               .select('time_entries.*, users.email, users.id AS user_id')
+              .includes(timesheet_field_data_items: :timesheet_field)
               .joins(:user)
               .where(users: { id: user_ids })
               .where(timesheet: timesheet)
               .order(entry_date: :desc, id: :desc)
 
-    if alltime
-      entries
-    else
-      entries
-        .where("#{year_month_entry_sql} = ?", month)
+    entries = entries.where("#{year_month_entry_sql} = ?", month) unless alltime
+
+    entries.map do |entry|
+      # Extract associated data items and map them
+      field_data = entry.timesheet_field_data_items.map do |field_data|
+        [field_data.timesheet_field.machine_name, field_data.value]
+      end.to_h
+
+      # Merge field data into entry attributes
+      entry.fields = field_data
+
+      entry
     end
   end
 
@@ -194,21 +242,12 @@ class TimeEntry < ActiveRecord::Base
       .first || 0
   end
 
-  private
-
-  def self.get_popular(type, user)
-    return [] unless user.present?
-
-    where_clause = "#{type} IS NOT NULL AND LENGTH(#{type}) > 0"
-    TimeEntry
-      .select(type)
-      .where(user: user)
-      .where(where_clause)
-      .group(type)
-      .order(Arel.sql('COUNT(*) DESC'))
-      .limit(20)
-      .pluck(type)
+  # Override the as_json method to include custom fields
+  def as_json(options = {})
+    super(options).merge('fields' => fields)
   end
+
+  private
 
   def self.year_month_entry_sql
     "EXTRACT(year FROM entry_date) || '-' || LPAD(EXTRACT(month FROM entry_date)::text, 2, '0')"

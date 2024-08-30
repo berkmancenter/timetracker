@@ -26,7 +26,7 @@
     name: 'PopularItems',
     props: {
       items: {
-        type: Array,
+        type: Object,
         required: true,
       },
       title: {

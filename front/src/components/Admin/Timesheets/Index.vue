@@ -25,7 +25,7 @@
             <td>{{ timesheet.name }}</td>
             <td>{{ formatIsoDateTimeToLocaleString(timesheet.created_at) }}</td>
             <td class="admin-table-actions">
-              <div class="admin-table-actions">
+              <div>
                 <router-link title="Edit timesheet" :to="`/admin/timesheets/${timesheet.id}/edit`" v-if="adminInTimesheet(timesheet)">
                   <Icon :src="editIcon" />
                 </router-link>
@@ -129,7 +129,7 @@
       async loadTimesheets() {
         this.mitt.emit('spinnerStart')
 
-        const timesheets = await this.$store.dispatch('admin/fetchTimesheets')
+        const timesheets = await this.$store.dispatch('admin/fetchAdminTimesheets')
 
         this.$store.dispatch('admin/setTimesheets', timesheets)
 

@@ -10,6 +10,14 @@ const defaultPeriod = {
 
 const defaultTimesheet = {
   name: '',
+  timesheet_fields: [],
+}
+
+const defaultTimesheetField = {
+  name: '',
+  input_type: 'text',
+  popular: false,
+  list: false,
 }
 
 const state = {
@@ -52,6 +60,12 @@ const mutations = {
   setPeriodCredits(state, periodCredits) {
     state.periodCredits = periodCredits
   },
+  addTimesheetField(state) {
+    state.timesheet.timesheet_fields.push(defaultTimesheetField)
+  },
+  removeTimesheetField(state, field) {
+    field._destroy = 1
+  },
 }
 
 const actions = {
@@ -80,7 +94,7 @@ const actions = {
     return data
   },
   async fetchAdminTimesheets(context) {
-    const response = await fetchIt(`${apiUrl}/timesheets/where_admin`)
+    const response = await fetchIt(`${apiUrl}/timesheets/index_admin`)
     const data = await response.json()
 
     return data
@@ -219,6 +233,9 @@ const actions = {
     return response
   },
   async saveTimesheet(context, timesheet) {
+    timesheet.timesheet_fields_attributes = timesheet.timesheet_fields
+    delete timesheet.timesheet_fields
+
     const response = await fetchIt(`${apiUrl}/timesheets/upsert`, {
       method: 'POST',
       headers: {
@@ -312,6 +329,12 @@ const actions = {
     })
 
     return response
+  },
+  addTimesheetField(context) {
+    context.commit('addTimesheetField')
+  },
+  removeTimesheetField(context, field) {
+    context.commit('removeTimesheetField', field)
   },
 }
 

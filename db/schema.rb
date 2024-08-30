@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_10_04_171912) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_29_120025) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -63,19 +63,43 @@ ActiveRecord::Schema[7.1].define(version: 2023_10_04_171912) do
 
   create_table "time_entries", force: :cascade do |t|
     t.bigint "user_id"
-    t.string "category", limit: 100, null: false
-    t.string "project", limit: 100
     t.decimal "decimal_time", precision: 4, scale: 2
-    t.string "description", limit: 5000
     t.date "entry_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "timesheet_id", null: false
-    t.index ["category"], name: "index_time_entries_on_category"
     t.index ["entry_date"], name: "index_time_entries_on_entry_date"
-    t.index ["project"], name: "index_time_entries_on_project"
     t.index ["timesheet_id"], name: "index_time_entries_on_timesheet_id"
     t.index ["user_id"], name: "index_time_entries_on_user_id"
+  end
+
+  create_table "timesheet_field_data_items", force: :cascade do |t|
+    t.integer "field_id", null: false
+    t.integer "time_entry_id", null: false
+    t.text "value"
+    t.jsonb "value_json", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["field_id"], name: "timesheet_fields_data_item_field_id"
+    t.index ["time_entry_id"], name: "custom_field_data_time_entry_id"
+  end
+
+  create_table "timesheet_fields", force: :cascade do |t|
+    t.string "input_type", limit: 50, null: false
+    t.string "machine_name", limit: 500, null: false
+    t.integer "timesheet_id"
+    t.integer "order", default: 1, null: false
+    t.string "title", limit: 500, null: false
+    t.text "description"
+    t.jsonb "metadata", default: {}, null: false
+    t.boolean "popular", default: false, null: false
+    t.boolean "list", default: false, null: false
+    t.boolean "required", default: false, null: false
+    t.string "access_key", limit: 1
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["machine_name"], name: "timesheet_fields_machine_name"
+    t.index ["timesheet_id"], name: "timesheet_fields_timesheet_id"
   end
 
   create_table "timesheets", force: :cascade do |t|
@@ -129,6 +153,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_10_04_171912) do
   add_foreign_key "invitations", "users", column: "used_by_id"
   add_foreign_key "periods", "timesheets"
   add_foreign_key "time_entries", "timesheets"
+  add_foreign_key "timesheet_field_data_items", "timesheet_fields", column: "field_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "users_timesheets", "timesheets"
   add_foreign_key "users_timesheets", "users"
 end
