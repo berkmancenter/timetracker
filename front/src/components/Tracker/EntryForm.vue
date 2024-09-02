@@ -179,7 +179,7 @@
             },
             onSelect: function(item) {
               that.$refs[fieldRefName][0].value = item.label
-              that.changeFormValue(type, item.label)
+              that.changeFormValue(field.machine_name, item.label)
             },
             render: function(item) {
               if (that.$refs[fieldRefName][0].value !== item.label) {
