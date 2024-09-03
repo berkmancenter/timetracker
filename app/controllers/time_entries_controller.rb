@@ -36,9 +36,12 @@ class TimeEntriesController < ApplicationController
           time_entry_id: time_entry.id
         )
 
-        field_data_item.value = value
-
-        field_data_item.save
+        if value.blank?
+          field_data_item.destroy if field_data_item.persisted?
+        else
+          field_data_item.value = value
+          field_data_item.save
+        end
       end
 
       render json: TimeEntry.single(time_entry.id), status: :ok
