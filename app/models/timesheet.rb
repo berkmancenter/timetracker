@@ -6,7 +6,7 @@ class Timesheet < ActiveRecord::Base
   has_many :users, through: :users_timesheets
   has_many :periods, dependent: :destroy
   has_many :invitations, dependent: :destroy
-  has_many :timesheet_fields, dependent: :destroy
+  has_many :timesheet_fields, -> { order(:order) }, dependent: :destroy
 
   accepts_nested_attributes_for :timesheet_fields, allow_destroy: true
 
