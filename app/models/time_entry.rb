@@ -36,7 +36,6 @@ class TimeEntry < ActiveRecord::Base
     return {} unless user.present?
 
     popular_fields = TimesheetField.where(popular: true)
-
     popular_values = {}
 
     popular_fields.each do |field|
@@ -48,12 +47,16 @@ class TimeEntry < ActiveRecord::Base
         .limit(20)
         .count
 
-      popular_values[field.machine_name] = data_items.keys if data_items.keys.present?
+      if data_items.keys.present?
+        # Merge the values, concatenating arrays if the key already exists
+        popular_values.merge!(field.machine_name => data_items.keys) do |key, old_val, new_val|
+          old_val | new_val # Use the union operator to combine arrays without duplicates
+        end
+      end
     end
 
     popular_values
   end
-
 
   def self.my_entries_by_month(users, month = "#{Time.now.year}-#{Time.now.month}", alltime = false, timesheet)
     return [] unless users.present?
