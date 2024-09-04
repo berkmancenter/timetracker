@@ -61,7 +61,7 @@ const mutations = {
     state.periodCredits = periodCredits
   },
   addTimesheetField(state) {
-    state.timesheet.timesheet_fields.push(defaultTimesheetField)
+    state.timesheet.timesheet_fields.push(JSON.parse(JSON.stringify(defaultTimesheetField)))
   },
   removeTimesheetField(state, field) {
     field._destroy = 1
