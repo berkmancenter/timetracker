@@ -22,10 +22,22 @@ Editing entry
 
 .. image:: /_static/images/edit_entry_2.png
 
+-------------
+
+.. image:: /_static/images/edit_entry_3.png
+
 Removing entry
 ==============
 
-.. image:: /_static/images/remove_entry.png
+.. image:: /_static/images/remove_entry_1.png
+
+-------------
+
+.. image:: /_static/images/remove_entry_2.png
+
+-------------
+
+.. image:: /_static/images/remove_entry_3.png
 
 Cloning entry
 =============
@@ -35,3 +47,7 @@ Cloning entry
 -------------
 
 .. image:: /_static/images/clone_entry_2.png
+
+-------------
+
+.. image:: /_static/images/clone_entry_3.png
