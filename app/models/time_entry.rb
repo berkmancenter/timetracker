@@ -42,6 +42,8 @@ class TimeEntry < ActiveRecord::Base
       data_items = TimesheetFieldDataItem
         .joins(:time_entry)
         .where(field_id: field.id, time_entries: { user_id: user.id })
+        .where.not(value: nil)
+        .where.not(value: '')
         .group(:value)
         .order(Arel.sql('COUNT(*) DESC'))
         .limit(20)
