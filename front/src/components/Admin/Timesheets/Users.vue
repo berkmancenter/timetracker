@@ -5,7 +5,7 @@
     <form class="form">
       <div class="mb-4">
         <a class="button is-info" @click="sudoUsers()">
-          <Icon :src="listIcon" />
+          <Icon :src="listIcon" :interactive="false" />
           View selected users timesheets
         </a>
       </div>

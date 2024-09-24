@@ -1,14 +1,14 @@
 <template>
   <div>
-    <article v-if="$store.state.shared.user.sudoMode" class="message is-warning">
+    <div v-if="$store.state.shared.user.sudoMode" class="message is-warning mt-2">
       <div class="message-body">
         <div><strong>You are viewing time entries of</strong></div>
         {{ activeUsersString }}
         <div>
-          <a class="button is-info mt-2" @click="unSudo()">Show only my time entries</a>
+          <a class="button is-info mt-2" @click="unSudo()">Show only my entries</a>
         </div>
       </div>
-    </article>
+    </div>
 
     <div class="tracker-entries-wrapper" :class="{ 'tracker-entries-sudo': $store.state.shared.user.sudoMode }">
       <div class="tracker-entries-header">
@@ -251,47 +251,45 @@
 
 <style lang="scss">
   .tracker-entries {
-    .tracker-entries-date-cell {
-      text-align: center;
-    }
+    &-date {
+      &-cell {
+        text-align: center;
+      }
 
-    .tracker-entries-date-row + .entry {
-      td {
-        border-top-width: 0.1rem;
+      &-row {
+        background-color: #fff;
+        margin-bottom: 1rem;
+
+        + .entry td {
+          border-top-width: 0.1rem;
+        }
       }
     }
 
-    .tracker-entries-date-row,
     th,
     .time-entries-entry-active {
       background-color: #fff;
     }
 
-    .tracker-entries-date-row {
-      margin-bottom: 1rem;
-    }
-
-    .tracker-entries-entry {
+    &-entry {
       padding: 1.75rem 0 0 0;
-      box-shadow: 0 1px 6px 0 rgba(32,33,36,.28);
+      box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
       margin-bottom: 0.75rem;
       margin-left: 1rem;
       margin-right: 1rem;
       position: relative;
 
-      > * {
-        &:last-child {
-          padding: 0;
-        }
+      > *:last-child {
+        padding: 0;
       }
 
-      .tracker-entries-entry-description {
+      &-description {
         white-space: pre-wrap;
         word-break: break-word;
         padding: 0.5rem;
       }
 
-      .tracker-entries-entry-meta {
+      &-meta {
         display: flex;
         width: 100%;
 
@@ -305,156 +303,144 @@
           }
         }
       }
-    }
 
-    .time-entries-entry-has-description {
-      .tracker-entries-entry-meta {
-        border-bottom: 1px solid var(--grey-from-bulma);
+      &-actions {
+        &-dropdown {
+          width: 1.75rem;
+          height: 1.75rem;
+          top: 0;
+          left: 0;
+          position: absolute;
+          cursor: pointer;
+          z-index: 2;
+          padding: 0;
+
+          img {
+            padding: 0;
+          }
+        }
+
+        &-fade-enter {
+          &-active {
+            transition: opacity 0.5s ease;
+            opacity: 1;
+          }
+
+          &-from {
+            opacity: 0;
+          }
+        }
       }
-    }
 
-    @media all and (max-width: 1300px) {
-      .tracker-entries-entry-meta {
-        display: block;
+      &-field,
+      &-description,
+      &-email {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        word-break: break-word;
+      }
+
+      &-email {
+        margin-left: auto;
+      }
+
+      &-decimal-time {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: var(--main-color);
+        color: #fff;
+        z-index: 2;
+        font-weight: bold;
+        height: 1.75rem;
+        display: flex;
+        align-items: center;
+        padding: 0.25rem;
+        width: 3.5rem;
+        justify-content: center;
+      }
+
+      &-top-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 0 auto;
+        height: 1.75rem;
         width: 100%;
+        background-color: var(--super-light-color);
+        z-index: 1;
+      }
+
+      &-tag {
+        background-color: var(--main-color);
+        color: #fff;
+        border-radius: 0.5rem;
+        margin-right: 1rem;
+        margin-left: 1rem;
+        height: 2rem;
+        width: 2rem;
+        min-width: 2rem;
+        min-height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
       }
     }
 
-    @media all and (max-width: 1300px) {
-      .tracker-entries-entry {
+    &-wrapper {
+      overflow-x: auto;
+    }
+
+    &-header {
+      display: flex;
+      font-weight: bold;
+      margin-left: 1rem;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--grey-from-bulma);
+
+      > * {
+        width: 50%;
+        border-right: 1px solid var(--grey-from-bulma);
+        padding: 0.5rem;
+      }
+    }
+
+    &-sudo {
+      .tracker-entries-header,
+      .tracker-entries-entry-meta {
+        > * {
+          width: 33%;
+          flex-grow: 1;
+        }
+      }
+
+      .tracker-entries-entry-meta {
+        &:last-child {
+          border-right: 1px solid var(--grey-from-bulma);
+        }
+      }
+    }
+  }
+
+  .time-entries-entry-has-description {
+    .tracker-entries-entry-meta {
+      border-bottom: 1px solid var(--grey-from-bulma);
+    }
+  }
+
+  @media all and (max-width: 1300px) {
+    .tracker-entries {
+      &-entry {
         margin-left: 0;
         margin-right: 0;
-      }
-    }
 
-    .tracker-entries-entry-actions-dropdown {
-      width: 1.75rem;
-      height: 1.75rem;
-      top: 0;
-      left: 0;
-      position: absolute;
-      cursor: pointer;
-      z-index: 2;
-      padding: 0;
-
-      img {
-        padding: 0;
-      }
-    }
-
-    .tracker-entries-entry-actions-fade-enter-active {
-      transition: opacity 0.5s ease;
-      opacity: 1;
-    }
-
-    .tracker-entries-entry-actions-fade-enter-from {
-      opacity: 0;
-    }
-  }
-
-  .tracker-entries-entry-field,
-  .tracker-entries-entry-description,
-  .tracker-entries-entry-email {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    word-break: break-word;
-  }
-
-  .tracker-entries-entry-email {
-    margin-left: auto;
-  }
-
-  .tracker-entries-entry-decimal-time {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: var(--main-color);
-    color: #fff;
-    z-index: 2;
-    font-weight: bold;
-    height: 1.75rem;
-    display: flex;
-    align-items: center;
-    padding: 0.25rem;
-    width: 3.5rem;
-    justify-content: center;
-  }
-
-  .tracker-entries-entry-top-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 0 auto;
-    height: 1.75rem;
-    width: 100%;
-    background-color: var(--super-light-color);
-    z-index: 1;
-  }
-
-  .tracker-entries-entry-tag {
-    background-color: var(--main-color);
-    color: #fff;
-    border-radius: 0.5rem;
-    margin-right: 1rem;
-    margin-left: 1rem;
-    height: 2rem;
-    width: 2rem;
-    min-width: 2rem;
-    min-height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-  }
-
-  .tracker-entries-entry-description {
-    .tracker-entries-entry-tag {
-      background-color: var(--description-color);
-    }
-  }
-
-  .tracker-entries-entry-email {
-    .tracker-entries-entry-tag {
-      background-color: var(--email-color);
-    }
-  }
-
-  .tracker-entries-wrapper {
-    overflow-x: auto;
-  }
-
-  .tracker-entries-header {
-    display: flex;
-    font-weight: bold;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid var(--grey-from-bulma);
-
-    > * {
-      width: 50%;
-      border-right: 1px solid var(--grey-from-bulma);
-      padding: 0.5rem;
-    }
-  }
-
-  .tracker-entries-sudo {
-    .tracker-entries-header {
-      > * {
-        width: 33%;
-        flex-grow: 1;
-      }
-    }
-
-    .tracker-entries-entry-meta {
-      > * {
-        width: 33%;
-        flex-grow: 1;
-      }
-
-      &:last-child {
-        border-right: 1px solid var(--grey-from-bulma);
+        &-meta {
+          display: block;
+          width: 100%;
+        }
       }
     }
   }

@@ -163,15 +163,15 @@
 </script>
 
 <style lang="scss">
-  @import '@/assets/scss/admin-table.scss';
+  .admin-periods-credits {
+    &-table-hours {
+      width: 8rem;
+    }
 
-  .admin-periods-credits-table-hours {
-    width: 8rem;
-  }
-
-  .admin-periods-credits-info {
-    span {
-      margin-bottom: 1rem;
+    &-info {
+      span {
+        margin-bottom: 1rem;
+      }
     }
   }
 </style>

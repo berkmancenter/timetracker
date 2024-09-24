@@ -79,102 +79,83 @@
     background-color: var(--super-light-color);
   }
 
-  .switmenu-menu {
-    position: fixed;
-    overflow-y: auto;
-    overflow-x: hidden;
-    width: 25%;
-    top: 5.5rem;
-    bottom: 0;
-    left: 0;
-    z-index: 1;
-    display: none;
-    background-color: #ffffff;
-    padding-bottom: 1rem;
-    padding-right: 0.5rem;
-    border-right: 2px solid #F5F5F6;
-    background-color: var(--super-light-color);
+  .switmenu {
+    &-menu {
+      position: fixed;
+      overflow-y: auto;
+      overflow-x: hidden;
+      width: 25%;
+      top: 5.5rem;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      display: none;
+      background-color: var(--super-light-color);
+      padding-bottom: 1rem;
+      padding-right: 0.5rem;
+      border-right: 2px solid #F5F5F6;
 
-    @media all and (max-width: 1600px) {
-      width: 30%;
+      &-active {
+        display: block;
+      }
+
+      @media all and (max-width: 1600px) { width: 30%; }
+      @media all and (max-width: 1300px) { width: 35%; }
+      @media all and (max-width: 900px) { width: 40%; }
+      @media all and (max-width: 700px) { width: 100%; }
     }
 
-    @media all and (max-width: 1300px) {
-      width: 35%;
+    &-html-open {
+      @media all and (max-width: 700px) {
+        overflow: hidden;
+      }
+
+      .switmenu-content {
+        margin-left: calc(25% + 1rem);
+
+        @media all and (max-width: 1600px) { margin-left: calc(30% + 1rem); }
+        @media all and (max-width: 1300px) { margin-left: calc(35% + 1rem); }
+        @media all and (max-width: 900px) { margin-left: calc(40% + 1rem); }
+        @media all and (max-width: 700px) { margin-left: 100%; }
+      }
+
+      .switmenu-section {
+        &-header {
+          margin-bottom: 0.5rem;
+          padding: 0.25rem 1rem;
+          background-color: #ffffff;
+          border-radius: 0 0.8rem 0.8rem 0;
+          box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+          user-select: none;
+          display: flex;
+        }
+
+        &-content {
+          padding: 0 1rem;
+
+          table {
+            width: 100%;
+          }
+        }
+      }
     }
 
-    @media all and (max-width: 900px) {
-      width: 40%;
-    }
-
-    @media all and (max-width: 700px) {
-      width: 100%;
-    }
-
-    &.switmenu-menu-active {
-      display: block;
-    }
-  }
-
-  .switmenu-html-open {
-    @media all and (max-width: 700px) {
+    &-content {
+      background-color: #ffffff;
+      margin-top: 5.5rem;
+      margin-left: 1rem;
+      margin-right: 1rem;
+      border-radius: 1rem;
+      padding-top: 0.5rem;
+      box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
       overflow: hidden;
-    }
-
-    .switmenu-content {
-      margin-left: calc(25% + 1rem);
-
-      @media all and (max-width: 1600px) {
-        margin-left: calc(30% + 1rem);
-      }
-
-      @media all and (max-width: 1300px) {
-        margin-left: calc(35% + 1rem);
-      }
-
-      @media all and (max-width: 900px) {
-        margin-left: calc(40% + 1rem);
-      }
 
       @media all and (max-width: 700px) {
-        margin-left: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 0;
+        margin-top: 4rem;
       }
-    }
-
-    .switmenu-section-header {
-      margin-bottom: 0.5rem;
-      padding: 0.25rem 1rem;
-      background-color: #ffffff;
-      border-radius: 0 0.8rem 0.8rem 0;
-      box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
-      user-select: none;
-      display: flex;
-    }
-
-    .switmenu-section-content {
-      padding: 0 1rem;
-
-      table {
-        width: 100%;
-      }
-    }
-  }
-
-  .switmenu-content {
-    background-color: #ffffff;
-    margin-top: 5.5rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    border-radius: 1rem;
-    padding-top: 0.5rem;
-    box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
-    overflow: hidden;
-
-    @media all and (max-width: 700px) {
-      margin-left: 0;
-      margin-right: 0;
-      border-radius: 0;
-      margin-top: 4rem;
     }
   }
 </style>

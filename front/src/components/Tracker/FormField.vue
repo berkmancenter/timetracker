@@ -11,7 +11,7 @@
       <div class="field">
         <div class="control">
           <slot></slot>
-          <span class="accesskey">alt-{{ accessKey }}</span>
+          <span class="accesskey" v-if="accessKey">alt-{{ accessKey }}</span>
         </div>
       </div>
     </div>
@@ -57,11 +57,11 @@ export default {
       align-items: center;
     }
 
-    .tracker-entry-form-field-required {
+    &-required {
       color: rgb(224, 81, 81);
     }
 
-    .tracker-entry-form-field-tag {
+    &-tag {
       color: #fff;
       border-radius: 0.5rem;
       margin-right: 1rem;

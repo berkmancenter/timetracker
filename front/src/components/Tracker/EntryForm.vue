@@ -7,7 +7,7 @@
     @confirm="submitForm()"
     @cancel="visible = false"
   >
-    <div id="tracker-entry-form">
+    <div class="tracker-entry-form">
       <form @submit.prevent="submitForm()" ref="entryForm">
         <template v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields" :key="field.id">
           <FormField
@@ -258,8 +258,8 @@
 </script>
 
 <style lang="scss">
-  #tracker-entry-form {
-    .tracker-entry-form-submit-button {
+  .tracker-entry-form {
+    &-submit-button {
       position: absolute;
       left: -9999px;
     }

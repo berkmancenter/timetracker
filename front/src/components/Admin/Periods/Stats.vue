@@ -92,29 +92,29 @@
 </script>
 
 <style lang="scss">
-  @import '@/assets/scss/admin-table.scss';
-
   .admin-periods-stats {
-    .admin-periods-stats-period-balance {
+    &-period-balance {
       color: #078907;
-
-      &.admin-periods-stats-period-negative-balance {
-        color: #db0404;
-      }
     }
 
-    .admin-periods-stats-info {
+    &-period-negative-balance {
+        color: #db0404;
+      }
+
+    &-info {
       span {
         margin-bottom: 1rem;
       }
     }
 
-    .admin-periods-stats-table-narrow-cell {
-      max-width: 6rem;
-    }
+    &-table {
+      &-narrow-cell {
+        max-width: 6rem;
+      }
 
-    .admin-periods-stats-table-email {
-      min-width: 10rem;
+      &-email {
+        min-width: 10rem;
+      }
     }
   }
 </style>
