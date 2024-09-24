@@ -12,4 +12,11 @@ const formatIsoDateTimeToLocaleString = (isoString) => {
   return formattedDate
 }
 
-export { formatIsoDateTimeToLocaleString }
+const getTimestamp = (date) => {
+  return new Date(date).getTime()
+}
+
+export {
+  formatIsoDateTimeToLocaleString,
+  getTimestamp,
+}

@@ -21,11 +21,11 @@
       <thead>
         <tr class="no-select">
           <th class="admin-periods-stats-table-email">Email</th>
-          <th class="admin-periods-stats-table-narrow-cell">Hours</th>
-          <th class="admin-periods-stats-table-narrow-cell">Total hours</th>
-          <th class="admin-periods-stats-table-narrow-cell">Should have now</th>
-          <th class="admin-periods-stats-table-narrow-cell">Balance</th>
-          <th class="admin-periods-stats-table-narrow-cell">Balance percentage</th>
+          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Hours</th>
+          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Total hours</th>
+          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Should have now</th>
+          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance</th>
+          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance percentage</th>
         </tr>
       </thead>
       <tbody>
