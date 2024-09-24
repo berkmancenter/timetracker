@@ -12,7 +12,11 @@
     </div>
 
     <div class="mb-4">
-      <a class="button is-info" @click="getCsv()">Download CSV</a>
+      <ActionButton
+        :icon="downloadIcon"
+        buttonText="Download CSV"
+        @click="getCsv()"
+      />
     </div>
 
     <super-admin-filter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
@@ -48,17 +52,21 @@
 <script>
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
+  import downloadIcon from '@/images/download_main.svg'
 
   export default {
     name: 'AdminPeriodsStats',
     components: {
       AdminTable,
       SuperAdminFilter,
+      ActionButton,
     },
     data() {
       return {
         filteredItems: [],
         apiUrl: import.meta.env.VITE_API_URL,
+        downloadIcon,
       }
     },
     created() {

@@ -4,10 +4,11 @@
 
     <form class="form">
       <div class="mb-4">
-        <a class="button is-info" @click="sudoUsers()">
-          <Icon :src="listIcon" :interactive="false" />
-          View selected users timesheets
-        </a>
+        <ActionButton
+          :icon="listIcon"
+          buttonText="View selected users timesheets"
+          @click="sudoUsers()"
+        />
       </div>
 
       <super-admin-filter :users="users" @change="superAdminFilterChanged" />
@@ -110,11 +111,12 @@
   import minusIcon from '@/images/minus.svg'
   import yesIcon from '@/images/yes.svg'
   import noIcon from '@/images/no.svg'
-  import listIcon from '@/images/list_white.svg'
+  import listIcon from '@/images/list_main.svg'
   import toggleAdminIcon from '@/images/toggle_admin.svg'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
   import Modal from '@/components/Shared/Modal.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
   import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
 
   export default {
@@ -124,6 +126,7 @@
       AdminTable,
       SuperAdminFilter,
       Modal,
+      ActionButton,
     },
     data() {
       return {

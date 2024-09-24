@@ -12,8 +12,18 @@
     </div>
 
     <div class="mb-4">
-      <a class="button is-info mr-2" @click="saveCreditsSelectedModalOpen()" ref="saveSelectedButton">Set hours selected</a>
-      <a class="button is-info mr-2" @click="saveCreditsAll()" ref="saveAllButton">Save all visible</a>
+      <ActionButton
+        class="mr-2"
+        :icon="saveSelectedIcon"
+        buttonText="Set hours selected"
+        @click="saveCreditsSelectedModalOpen()"
+      />
+
+      <ActionButton
+        :icon="saveAllIcon"
+        buttonText="Save all visible"
+        @click="saveCreditsAll"
+      />
     </div>
 
     <super-admin-filter :users="$store.state.admin.periodCredits?.credits" @change="superAdminFilterChanged" />
@@ -61,6 +71,9 @@
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
   import Modal from '@/components/Shared/Modal.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
+  import saveAllIcon from '@/images/all_main.svg'
+  import saveSelectedIcon from '@/images/selected_main.svg'
 
   export default {
     name: 'AdminPeriodsCredits',
@@ -68,12 +81,15 @@
       AdminTable,
       SuperAdminFilter,
       Modal,
+      ActionButton,
     },
     data() {
       return {
         filteredItems: [],
         periodCreditsSelectedSetModalStatus: false,
         creditHours: 0.0,
+        saveAllIcon,
+        saveSelectedIcon,
       }
     },
     created() {
