@@ -1,8 +1,8 @@
 <template>
   <VueFinalModal class="tracker-modal" content-class="tracker-modal-content" overlay-transition="vfm-fade" content-transition="vfm-fade" @opened="opened()">
     <div class="tracker-modal-title is-size-4">
-      <div>{{ title }}</div>
-      <div class="tracker-modal-close" @click="$emit('cancel')">
+      <div class="tracker-modal-title-text">{{ title }}</div>
+      <div class="tracker-modal-title-close" @click="$emit('cancel')">
         <Icon :src="closeIcon" />
       </div>
     </div>
@@ -74,65 +74,83 @@
 </script>
 
 <style lang="scss">
-  .tracker-modal {
+  $tm: "tracker-modal";
+
+  .#{$tm} {
     display: flex;
     justify-content: center;
     align-items: center;
     overflow-y: auto;
 
     .vfm--overlay {
-      background: #232429b3;
+      background: rgba(35, 36, 41, 0.7);
     }
-  }
 
-  .tracker-modal-title {
-    padding: 0.25rem 1rem;
-    padding: 1rem;
-    background-color: var(--main-color);
-    color: #ffffff;
-    display: flex;
+    &-title {
+      background-color: var(--main-color);
+      color: #ffffff;
+      display: flex;
+      height: 3.5rem;
+      align-items: center;
 
-    .tracker-modal-close {
-      height: 1.5rem;
-      width: 1.5rem;
-      margin-left: auto;
+      &-text {
+        padding-left: 1rem;
+      }
 
-      img {
-        padding: 0;
+      &-close {
+        height: 3.5rem;
+        width: 3.5rem;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        img {
+          padding: 0;
+          height: 2rem;
+          width: 2rem;
+
+          &:hover {
+            background-color: unset;
+          }
+        }
 
         &:hover {
-          background-color: unset;
+          background-color: rgba(255, 255, 255, 0.1);
         }
       }
     }
-  }
 
-  .tracker-modal-content {
-    background: #ffffff;
-    border-radius: 0.5rem;
-    width: 32em;
-    max-width: 100%;
-  }
+    &-content {
+      background: #ffffff;
+      border-radius: 0.5rem;
+      width: 32em;
+      max-width: 100%;
 
-  .tracker-modal-content-wrapper {
-    padding: 1rem
-  }
+      &-wrapper {
+        padding: 1rem;
+      }
 
-  .tracker-modal-content > * + *{
-    margin: 0.5rem 0;
-  }
+      > * + * {
+        margin: 0.5rem 0;
+      }
 
-  .dark .tracker-modal-content {
-    background: #000000;
-  }
+      .dark & {
+        background: #000000;
+      }
+    }
 
-  .tracker-modal-buttons {
-    border-top: 1px solid var(--grey-from-bulma);
+    &-buttons {
+      border-top: 1px solid var(--grey-from-bulma);
 
-    .tracker-modal-buttons-confirm {
-      &.button.is-success:focus:not(:active),
-      &.button.is-success.is-focused:not(:active) {
-        box-shadow: 0 0 0 0.4rem #48c78e40;
+      &-confirm {
+        &.button.is-success {
+          &:focus:not(:active),
+          &.is-focused:not(:active) {
+            box-shadow: 0 0 0 0.4rem rgba(72, 199, 142, 0.25);
+          }
+        }
       }
     }
   }
