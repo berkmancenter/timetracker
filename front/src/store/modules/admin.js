@@ -18,6 +18,7 @@ const defaultTimesheetField = {
   input_type: 'text',
   popular: false,
   list: false,
+  order: 1,
 }
 
 const state = {
@@ -61,7 +62,9 @@ const mutations = {
     state.periodCredits = periodCredits
   },
   addTimesheetField(state) {
-    state.timesheet.timesheet_fields.push(JSON.parse(JSON.stringify(defaultTimesheetField)))
+    let field = JSON.parse(JSON.stringify(defaultTimesheetField))
+    field.order = state.timesheet.timesheet_fields.length + 1
+    state.timesheet.timesheet_fields.push(field)
   },
   removeTimesheetField(state, field) {
     field._destroy = 1

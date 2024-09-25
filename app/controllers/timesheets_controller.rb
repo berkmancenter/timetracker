@@ -158,7 +158,7 @@ class TimesheetsController < ApplicationController
   end
 
   def timesheet_params
-    params.require(:timesheet).permit(:id, :name, timesheet_fields_attributes: %i[id title input_type popular list _destroy])
+    params.require(:timesheet).permit(:id, :name, timesheet_fields_attributes: %i[id title input_type popular list order _destroy])
   end
 
   def timesheet_json_params

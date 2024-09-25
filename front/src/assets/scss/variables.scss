@@ -1,6 +1,8 @@
+@use 'sass:color';
+
 $variables: (
   main-color: #890309,
-  main-color-lighter: lighten(#890309, 65%),
+  main-color-lighter: color.adjust(#890309, $lightness: 65%),
   secondary-color: #8996A0,
   super-light-color: #f3f3f1,
   greyish-color: #f2eeed,
