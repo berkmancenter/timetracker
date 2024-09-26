@@ -45,6 +45,10 @@
 </script>
 
 <style lang="scss">
+  .admin-menu {
+    user-select: none;
+  }
+
   .router-link-active {
     &.admin-menu-item-hidden-active {
       display: none;

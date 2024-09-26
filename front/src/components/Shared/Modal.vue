@@ -92,6 +92,7 @@
       display: flex;
       height: 3.5rem;
       align-items: center;
+      user-select: none;
 
       &-text {
         padding-left: 1rem;

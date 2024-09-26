@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tracker-entries">
     <div v-if="$store.state.shared.user.sudoMode" class="message is-warning mt-2">
       <div class="message-body">
         <div><strong>You are viewing time entries of</strong></div>
@@ -18,7 +18,7 @@
         <div v-if="$store.state.shared.user.sudoMode">Email</div>
       </div>
 
-      <div class="tracker-entries">
+      <div>
         <template v-for="(entries, date) in entriesByDate">
           <div>
             <div class="tracker-entries-date-row">
@@ -251,6 +251,12 @@
 
 <style lang="scss">
   .tracker-entries {
+    .tracker-entries-header,
+    .tracker-entries-date-row,
+    .tracker-entries-entry-decimal-time {
+      user-select: none;
+    }
+
     &-date {
       &-cell {
         text-align: center;

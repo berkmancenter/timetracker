@@ -24,6 +24,7 @@
     max-height: 100%;
     padding: 0.5rem;
     vertical-align: middle;
+    user-select: none;
 
     &-interactive {
       cursor: pointer;

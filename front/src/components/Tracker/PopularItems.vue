@@ -76,5 +76,7 @@
       display: flex;
       flex-wrap: wrap;
     }
+
+    user-select: none;
   }
 </style>

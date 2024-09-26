@@ -11,7 +11,7 @@
       <div class="field">
         <div class="control">
           <slot></slot>
-          <span class="accesskey" v-if="accessKey">alt-{{ accessKey }}</span>
+          <span class="tracker-entry-form-field-accesskey" v-if="accessKey">alt-{{ accessKey }}</span>
         </div>
       </div>
     </div>
@@ -48,8 +48,9 @@ export default {
 
 <style lang="scss">
   .tracker-entry-form-field {
-    .accesskey {
+    &-accesskey {
       color: #cccccc;
+      user-select: none;
     }
 
     label {
