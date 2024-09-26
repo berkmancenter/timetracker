@@ -16,7 +16,7 @@ const state = {
   timesheets: [],
   months: [],
   entries: [],
-  selectedMonth: 'all',
+  selectedMonth: '',
   selectedTimesheet: {},
   formEntry: JSON.parse(JSON.stringify(defaultEntry)),
   formMode: 'create',
