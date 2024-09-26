@@ -27,7 +27,7 @@
 
             <div class="tracker-entries-day">
               <template v-for="entry in entries" :key="entry.id">
-                <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow, 'time-entries-entry-has-description': entry.fields.description }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)">
+                <div class="tracker-entries-entry" :class="{ 'time-entries-entry-active': entry.actionsShow, 'time-entries-entry-has-description': entry.fields.description }" @mouseenter="enterEntry(entry)" @mouseleave="leaveEntry(entry)" @click="openMenu(entry, $event)">
                   <div class="tracker-entries-entry-meta">
                     <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
                       {{ entry.fields[field.machine_name] }}
@@ -45,10 +45,8 @@
                   <div class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</div>
                   <div class="tracker-entries-entry-top-bar"></div>
 
-                  <VDropdown @apply-show="showedActionsDropdown(entry)" @apply-hide="hidActionsDropdown(entry)" class="tracker-entries-entry-actions-dropdown">
-                    <Transition name="tracker-entries-entry-actions-fade">
-                      <Icon :src="dropdownIcon" :interactive="false" v-show="entry.actionsShow || entry.actionsDropdownShow || isTouchDevice" />
-                    </Transition>
+                  <VDropdown :ref="`entry${entry.id}Menu`" class="tracker-entries-entry-actions-dropdown" placement="top" :flip="false" :referenceNode="() => $refs[`entry${entry.id}MenuRef`][0]">
+                    <div :ref="`entry${entry.id}MenuRef`" class="tracker-entries-entry-actions-dropdown-ref-item"></div>
 
                     <template #popper>
                       <a v-if="entry.user_id === $store.state.shared.user.user_id" class="dropdown-item" title="Edit entry" @click="editEntry(entry)" v-close-popper>
@@ -239,11 +237,18 @@
         this.actionsShow = false
         entry.actionsShow = false
       },
-      showedActionsDropdown(entry) {
-        entry.actionsDropdownShow = true
-      },
-      hidActionsDropdown(entry) {
-        entry.actionsDropdownShow = false
+      openMenu(entry, event) {
+        let parentElem = this.$refs[`entry${entry.id}MenuRef`][0].offsetParent
+        let parentRect = parentElem.getBoundingClientRect()
+
+        // Calculate the local coordinates relative to the parent element
+        let refElem = this.$refs[`entry${entry.id}MenuRef`][0]
+        refElem.style.left = `${event.clientX - parentRect.left}px`
+        refElem.style.top = `${event.clientY - parentRect.top}px`
+
+        // Hide and show the dropdown menu to update its position
+        this.$refs[`entry${entry.id}Menu`][0].hide()
+        this.$refs[`entry${entry.id}Menu`][0].show()
       },
     }
   }
@@ -278,6 +283,13 @@
     }
 
     &-entry {
+      transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+      &:hover {
+        cursor: pointer;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3), 0 5px 10px rgba(0, 0, 0, 0.2);
+      }
+
       padding: 1.75rem 0 0 0;
       box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
       margin-bottom: 0.75rem;
@@ -312,14 +324,11 @@
 
       &-actions {
         &-dropdown {
-          width: 1.75rem;
-          height: 1.75rem;
-          top: 0;
-          left: 0;
-          position: absolute;
-          cursor: pointer;
-          z-index: 2;
-          padding: 0;
+          &-ref-item {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+          }
 
           img {
             padding: 0;

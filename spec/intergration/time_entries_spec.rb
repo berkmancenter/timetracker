@@ -32,14 +32,12 @@ feature 'Timesheets' do
     fill_in 'Time spent', with: '10'
     click_on 'Add entry'
 
-    page.find('.tracker-entries-entry', text: 'World-takeover machine').hover
-    page.find('.tracker-entries-entry', text: 'World-takeover machine').find('.tracker-entries-entry-actions-dropdown').click
+    page.find('.tracker-entries-entry', text: 'World-takeover machine').click
     page.find('a[title="Edit entry"]').click
     fill_in 'Time spent', with: '12'
     click_on 'Save changes'
 
-    page.find('.tracker-entries-entry', text: 'Time machine').hover
-    page.find('.tracker-entries-entry', text: 'Time machine').find('.tracker-entries-entry-actions-dropdown').click
+    page.find('.tracker-entries-entry', text: 'Time machine').click
     page.find('a[title="Edit entry"]').click
     fill_in 'Time spent', with: '2'
     click_on 'Save changes'
@@ -73,8 +71,7 @@ feature 'Timesheets' do
     expect(page).to have_selector '.tracker-entries-entry', text: 'World-takeover machine'
     expect(page).to have_selector '.tracker-entries-entry-decimal-time', text: '5.0'
 
-    page.find('.tracker-entries-entry', text: 'World-takeover machine').hover
-    page.find('.tracker-entries-entry', text: 'World-takeover machine').find('.tracker-entries-entry-actions-dropdown').click
+    page.find('.tracker-entries-entry', text: 'World-takeover machine').click
     page.find('a[title="Delete entry"]').click
     click_on 'Confirm'
 
@@ -94,8 +91,7 @@ feature 'Timesheets' do
     expect(page).to have_selector '.tracker-entries-entry', text: 'World-takeover machine', count: 1
     expect(page).to have_selector '.tracker-entries-entry-decimal-time', text: '5.0', count: 1
 
-    page.find('.tracker-entries-entry', text: 'World-takeover machine').hover
-    page.find('.tracker-entries-entry', text: 'World-takeover machine').find('.tracker-entries-entry-actions-dropdown').click
+    page.find('.tracker-entries-entry', text: 'World-takeover machine').click
     page.find('a[title="Clone entry"]').click
     click_on 'Add entry'
 
