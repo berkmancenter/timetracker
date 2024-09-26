@@ -58,19 +58,21 @@
 </script>
 
 <style lang="scss">
-  .tracker-months-select {
-    select {
-      width: 100%;
-      text-align: center;
+  .tracker-months {
+    &-select {
+      select {
+        width: 100%;
+        text-align: center;
+      }
     }
-  }
 
-  .tracker-months-csv {
-    padding-left: 0.5rem;
-    padding: 0.5rem;
+    &-csv {
+      padding-left: 0.5rem;
+      padding: 0.5rem;
 
-    img {
-      width: 2rem;
+      img {
+        width: 2rem;
+      }
     }
   }
 
