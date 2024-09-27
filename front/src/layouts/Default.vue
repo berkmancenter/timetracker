@@ -15,7 +15,7 @@
           <Icon :src="menuIcon" />
         </a>
 
-        <router-link :to="'/'" @click="reloadPath" class="top-nav-name-link ml-2">
+        <router-link :to="'/'" @click="reloadPath" class="top-nav-brand-name-link ml-2">
           <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACKer</h3>
         </router-link>
       </div>
@@ -112,6 +112,7 @@
 </script>
 
 <style lang="scss">
+  // Global Styles
   html {
     overflow-y: auto;
   }
@@ -121,6 +122,7 @@
     font-family: var(--main-font-family);
   }
 
+  // Top Navigation
   .top-nav {
     height: 4rem;
     border-bottom: 5px solid var(--main-color);
@@ -133,12 +135,12 @@
     background-color: #ffffff;
     box-sizing: content-box;
 
-    .top-nav-brand {
+    &-brand {
       display: flex;
       align-items: center;
       margin-left: 1rem;
 
-      .top-nav-name-link {
+      &-name-link {
         color: #ffffff;
         margin: 0 auto;
 
@@ -159,20 +161,20 @@
       }
     }
 
-    .top-nav-user-menu {
-      .top-nav-user-menu-toggler {
+    &-user-menu {
+      &-toggler {
         display: flex;
       }
     }
 
-    .top-nav-end {
+    &-end {
       margin-left: auto;
       display: flex;
       align-items: center;
       margin-right: 1rem;
     }
 
-    .top-nav-button {
+    &-button {
       height: 4rem;
       width: 4rem;
       display: block;
@@ -184,13 +186,14 @@
         padding: 0.5rem;
       }
 
-      &:hover
+      &:hover,
       img:hover {
         background-color: var(--greyish-color);
       }
     }
   }
 
+  // Side Menu
   .switmenu-menu {
     ul {
       a {
@@ -221,32 +224,22 @@
     }
   }
 
+  // Container
   .container.is-fluid {
     padding: 0 1rem;
   }
 
-  .side-menu-toggler {
-    padding: 0;
-    width: 2rem;
-    height: 2rem;
-    background-color: #ffffff;
-  }
-
+  // Timetracker Content
   .timetracker-content {
     background-color: #ffffff;
-    margin-top: 5.5rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    margin-bottom: 2rem;
+    margin: 5.5rem 1rem 2rem;
     border-radius: 1rem;
     padding-top: 0.5rem;
     box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
 
     @media all and (max-width: 700px) {
-      margin-left: 0;
-      margin-right: 0;
+      margin: 4rem 0 2rem;
       border-radius: 0;
-      margin-top: 4rem;
     }
 
     @media all and (min-width: 1300px) {
@@ -254,6 +247,7 @@
     }
   }
 
+  // Footer
   footer#footer {
     background: var(--main-color);
     padding: 1rem;
@@ -265,23 +259,19 @@
     margin-top: 2rem;
   }
 
-  /*
-    Custom scrollbar styling
-  */
+  // Custom Scrollbar
   ::-webkit-scrollbar {
     width: 6px;
   }
 
   ::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-    -webkit-border-radius: 10px;
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb {
-    -webkit-border-radius: 10px;
     border-radius: 10px;
-    background: rgb(209, 184, 185, 1);
+    background: rgb(209, 184, 185);
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
   }
 </style>
