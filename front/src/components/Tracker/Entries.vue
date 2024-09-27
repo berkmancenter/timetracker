@@ -58,8 +58,7 @@
                   <VDropdown
                     :ref="`entry${entry.id}Menu`"
                     class="tracker-entries-entry-actions-dropdown"
-                    placement="auto"
-                    :flip="false"
+                    placement="right"
                     :referenceNode="() => $refs[`entry${entry.id}MenuRef`][0]"
                     @apply-hide="closeMenu(entry)"
                   >

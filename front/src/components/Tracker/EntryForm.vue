@@ -190,8 +190,6 @@
               }
             },
           })
-
-          console.log('Autocomplete initialized for', field.machine_name)
         });
       },
       initEvents() {
