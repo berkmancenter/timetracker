@@ -28,6 +28,12 @@ table.table.admin-table {
 
 .admin-table-actions {
   width: 12rem;
+
+  img {
+    &:hover {
+      background-color: #ffffff;
+    }
+  }
 }
 
 .admin-table-selector {

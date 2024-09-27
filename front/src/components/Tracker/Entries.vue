@@ -58,7 +58,7 @@
                   <VDropdown
                     :ref="`entry${entry.id}Menu`"
                     class="tracker-entries-entry-actions-dropdown"
-                    placement="top"
+                    placement="auto"
                     :flip="false"
                     :referenceNode="() => $refs[`entry${entry.id}MenuRef`][0]"
                     @apply-hide="closeMenu(entry)"
@@ -327,11 +327,10 @@
 
       &-active {
         box-shadow: 0 0 10px var(--blue-stronger-color);
-        transform: translateY(-3px);
       }
 
       padding: 1.75rem 0 0 0;
-      box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+      box-shadow: 0 1px 0.5rem 0 rgba(32, 33, 36, 0.28);
       margin-bottom: 1rem;
       margin-left: 1rem;
       margin-right: 1rem;

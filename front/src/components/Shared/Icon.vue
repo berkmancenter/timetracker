@@ -29,9 +29,5 @@
     &-interactive {
       cursor: pointer;
     }
-
-    &-interactive:hover {
-      background-color: #fff;
-    }
   }
 </style>
