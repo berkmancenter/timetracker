@@ -1,5 +1,11 @@
 <template>
-  <component :is="tagName" class="tracker-action-button button" :class="{ 'tracker-action-button-active': active }" @click="handleClick" v-bind:disabled="disabled ? true : null">
+  <component
+    :is="tagName"
+    class="tracker-action-button button"
+    :class="{ 'tracker-action-button-active': active }"
+    @click="handleClick"
+    v-bind:disabled="disabled ? true : null"
+  >
     <Icon :src="icon" :interactive="false" />
     <div>{{ buttonText }}</div>
   </component>

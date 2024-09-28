@@ -17,12 +17,14 @@
         :icon="saveSelectedIcon"
         buttonText="Set hours selected"
         @click="saveCreditsSelectedModalOpen()"
+        :disabled="saveSelectedDisabled"
       />
 
       <ActionButton
         :icon="saveAllIcon"
         buttonText="Save all visible"
         @click="saveCreditsAll"
+        :disabled="saveAllDisabled"
       />
     </div>
 
@@ -90,6 +92,8 @@
         creditHours: 0.0,
         saveAllIcon,
         saveSelectedIcon,
+        saveSelectedDisabled: false,
+        saveAllDisabled: false,
       }
     },
     created() {
@@ -120,7 +124,7 @@
       },
       async saveCreditsAll() {
         this.mitt.emit('spinnerStart')
-        this.$refs.saveAllButton.disabled = true
+        this.saveAllDisabled = true
 
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
           id: this.$store.state.admin.periodCredits.period.id,
@@ -134,7 +138,7 @@
         }
 
         this.mitt.emit('spinnerStop')
-        this.$refs.saveAllButton.disabled = false
+        this.saveAllDisabled = false
       },
       saveCreditsSelectedModalOpen() {
         const selected = this.filteredItems.filter(credit => credit.selected)
@@ -151,7 +155,7 @@
         const selected = this.filteredItems.filter(credit => credit.selected)
 
         this.mitt.emit('spinnerStart')
-        this.$refs.saveSelectedButton.disabled = true
+        this.saveSelectedDisabled = true
 
         selected
           .map(credit => credit.credit_amount = this.creditHours)
@@ -168,7 +172,7 @@
         }
 
         this.mitt.emit('spinnerStop')
-        this.$refs.saveSelectedButton.disabled = false
+        this.saveSelectedDisabled = false
         this.periodCreditsSelectedSetModalStatus = false
       },
       superAdminFilterChanged(users) {
