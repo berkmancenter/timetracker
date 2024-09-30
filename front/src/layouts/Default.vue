@@ -112,7 +112,6 @@
 </script>
 
 <style lang="scss">
-  // Global Styles
   html {
     overflow-y: auto;
   }
@@ -257,6 +256,28 @@
     color: #ffffff;
     font-weight: bold;
     margin-top: 2rem;
+  }
+
+  button,
+  a.button {
+    img.tracker-icon {
+      padding: 0;
+      margin-right: 0.2rem;
+    }
+
+    > * {
+      height: 100%;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  label {
+    user-select: none;
+  }
+
+  // Disable pull-to-refresh
+  html {
+    overscroll-behavior: none;
   }
 
   // Custom Scrollbar
