@@ -49,7 +49,6 @@ Rails.application.routes.draw do
       post :upsert
       post :delete
       get 'join/:code', action: :join
-      get :where_admin, action: :index_where_admin
       get :index_admin
     end
     member do

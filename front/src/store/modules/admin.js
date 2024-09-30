@@ -14,7 +14,7 @@ const defaultTimesheet = {
 }
 
 const defaultTimesheetField = {
-  name: '',
+  title: '',
   input_type: 'text',
   popular: false,
   list: false,

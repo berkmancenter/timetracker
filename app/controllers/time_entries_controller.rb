@@ -2,123 +2,115 @@ class TimeEntriesController < ApplicationController
   before_action :set_timesheet, only: %i[entries edit popular days months totals]
   before_action :authenticate_user_json!
 
+  # GET /time_entries
+  # Returns a list of time entries for the current user and current month
+  # If the 'month' parameter is set to 'all', it will return all entries for the current user
+  # If the 'csv' parameter is set, it will return the entries in CSV format
   def entries
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
+    return render_bad_request if @timesheet.nil?
+    return render_unauthorized unless user_can_use_timesheet?(@timesheet)
     render_entries_csv and return if params[:csv]
 
     month = params[:month]
-    render json: TimeEntry.my_entries_by_month(get_active_users, month, month == 'all', @timesheet), status: :ok
+    render json: TimeEntry.my_entries_by_month(active_users, month, month == 'all', @timesheet), status: :ok
   end
 
+  # POST /time_entries
+  # Creates or updates a time entry
   def edit
     time_entry_params = params.require(:time_entry).permit(:id, :decimal_time, :entry_date)
     custom_fields = params[:time_entry][:fields] || {}
 
-    time_entry = TimeEntry.find_by_id(params[:time_entry][:id]) || TimeEntry.new(entry_date: Time.now, decimal_time: 0)
+    time_entry = TimeEntry.find_or_initialize_by(id: params[:time_entry][:id]) do |entry|
+      entry.entry_date = Time.now
+      entry.decimal_time = 0
+    end
 
-    generic_bad_request_response and return unless request.post? || request.patch?
-    generic_unauthorized_response and return if time_entry.id && time_entry.user != current_user && !superadmin?
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
+    return render_bad_request unless request.post? || request.patch?
+    return render_unauthorized if time_entry.persisted? && !time_entry_owned_by_current_user?(time_entry)
+    return render_bad_request if @timesheet.nil?
+    return render_unauthorized unless user_can_use_timesheet?(@timesheet)
 
-    time_entry.attributes = time_entry_params
-    time_entry.timesheet = @timesheet
-    time_entry.user = current_user
-
-    if time_entry.save
-      custom_fields.each do |machine_name, value|
-        timesheet_field = TimesheetField.find_by(machine_name: machine_name, timesheet: @timesheet)
-        next unless timesheet_field
-
-        field_data_item = TimesheetFieldDataItem.find_or_initialize_by(
-          field_id: timesheet_field.id,
-          time_entry_id: time_entry.id
-        )
-
-        if value.blank?
-          field_data_item.destroy if field_data_item.persisted?
-        else
-          field_data_item.value = value
-          field_data_item.save
-        end
-      end
-
+    if update_time_entry(time_entry, time_entry_params, custom_fields)
       render json: TimeEntry.single(time_entry.id), status: :ok
     else
-      generic_bad_request_response
+      render_bad_request
     end
   end
 
+  # GET /time_entries/:id/delete
+  # Deletes a time entry
   def delete
-    te = TimeEntry.find(params[:id])
+    time_entry = TimeEntry.find(params[:id])
 
-    generic_unauthorized_response and return if te.user != current_user && !superadmin?
+    return render_unauthorized unless time_entry_owned_by_current_user?(time_entry)
 
-    te.destroy
+    time_entry.destroy
 
     render json: { message: 'ok' }, status: :ok
   end
 
+  # GET /time_entries/popular
+  # Returns a list of popular values for the custom fields
   def popular
     render json: TimeEntry.popular(current_user), status: :ok
   end
 
+  # GET /time_entries/days
+  # Returns a list of total hours for each day in the month
+  # If the 'mode' parameter is set to 'weeks', it will return the total hours for each week
   def days
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
+    return render_bad_request if @timesheet.nil?
+    return render_unauthorized unless user_can_use_timesheet?(@timesheet)
 
-    if params[:mode] == 'weeks'
-      entries = TimeEntry.total_hours_by_month_week(get_active_users, params[:month], @timesheet)
-    else
-      entries = TimeEntry.total_hours_by_month_day(get_active_users, params[:month], @timesheet)
-    end
+    entries = if params[:mode] == 'weeks'
+                TimeEntry.total_hours_by_month_week(active_users, params[:month], @timesheet)
+              else
+                TimeEntry.total_hours_by_month_day(active_users, params[:month], @timesheet)
+              end
 
     render json: entries, status: :ok
   end
 
+  # GET /time_entries/months
+  # Returns a list of months with time entries
   def months
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
+    return render_bad_request if @timesheet.nil?
+    return render_unauthorized unless user_can_use_timesheet?(@timesheet)
 
-    render json: TimeEntry.entry_list_by_month(get_active_users, @timesheet)
+    render json: TimeEntry.entry_list_by_month(active_users, @timesheet)
   end
 
+  # GET /time_entries/totals
+  # Returns the total hours for the current month and the current timesheet
   def totals
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.user?(current_user) || superadmin?
+    return render_bad_request if @timesheet.nil?
+    return render_unauthorized unless user_can_use_timesheet?(@timesheet)
 
     render json: {
-      total_hours_current_month: TimeEntry.total_hours_by_month(get_active_users, params[:month], @timesheet),
-      total_hours_current_timesheet: TimeEntry.total_hours_by_timesheet(get_active_users, @timesheet)
+      total_hours_current_month: TimeEntry.total_hours_by_month(active_users, params[:month], @timesheet),
+      total_hours_current_timesheet: TimeEntry.total_hours_by_timesheet(active_users, @timesheet)
     }, status: :ok
   end
 
+  # GET /time_entries/auto_complete
+  # Returns a list of values for the custom fields that match the term
   def auto_complete
-    if params[:field].nil? || params[:term].nil?
-      generic_bad_request_response
-      return
-    end
+    return render_bad_request if params[:field].nil? || params[:term].nil?
 
-    field = params[:field]
-    term = params[:term]
-    field_obj = TimesheetField.joins(:timesheet).where(machine_name: field, timesheets: { uuid: params[:timesheet_uuid] }).first
+    field_obj = TimesheetField.joins(:timesheet)
+                              .find_by(machine_name: params[:field], timesheets: { uuid: params[:timesheet_uuid] })
+    return render_bad_request unless field_obj.present?
 
-    unless field_obj.present?
-      generic_bad_request_response
-      return
-    end
-
-    values = TimeEntry
-      .where(user: current_user)
-      .joins(:timesheet_field_data_items)
-      .where('timesheet_field_data_items.field_id IN (?)', field_obj.id)
-      .where('timesheet_field_data_items.value ILIKE ?', "%#{term}%")
-      .where('timesheet_field_data_items.value IS NOT NULL AND LENGTH(timesheet_field_data_items.value) > 0')
-      .group('timesheet_field_data_items.value')
-      .order(Arel.sql('COUNT(*) DESC'))
-      .limit(5)
-      .pluck('timesheet_field_data_items.value')
+    values = TimeEntry.where(user: current_user)
+                      .joins(:timesheet_field_data_items)
+                      .where(timesheet_field_data_items: { field_id: field_obj.id })
+                      .where('timesheet_field_data_items.value ILIKE ?', "%#{params[:term]}%")
+                      .where.not('timesheet_field_data_items.value' => [nil, ''])
+                      .group('timesheet_field_data_items.value')
+                      .order(Arel.sql('COUNT(*) DESC'))
+                      .limit(5)
+                      .pluck('timesheet_field_data_items.value')
 
     render json: values
   end
@@ -129,9 +121,9 @@ class TimeEntriesController < ApplicationController
     @current_month ||= (params[:month].blank?) ? "#{Time.now.to_date.year}-#{Time.now.strftime("%m")}" : params[:month]
   end
 
-  def get_active_users
+  def active_users
     unless session["#{current_user.id}_active_users"].blank?
-      generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
+      render_unauthorized and return unless user_can_use_timesheet?(@timesheet)
       session["#{current_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
     else
       [current_user]
@@ -139,35 +131,27 @@ class TimeEntriesController < ApplicationController
   end
 
   def render_entries_csv
-    columns = ['username', 'entry_date', 'decimal_time']
+    columns = %w[username entry_date decimal_time] + @timesheet.timesheet_fields.map(&:machine_name)
+    entries = fetch_entries_for_csv
 
-    custom_fields = @timesheet.timesheet_fields.map(&:machine_name)
-    columns += custom_fields
+    render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: format_entries_for_csv(entries, columns), columns: columns)
+  end
 
-    objects = []
-    @entries = []
+  def fetch_entries_for_csv
+    TimeEntry.my_entries_by_month(active_users, current_month, current_month == 'all', @timesheet)
+  end
 
-    # Fetch time entries based on the current month
-    if current_month == 'all'
-      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, true, @timesheet)
-    else
-      @entries = TimeEntry.my_entries_by_month(get_active_users, current_month, false, @timesheet)
-    end
+  def format_entries_for_csv(entries, columns)
+    entries.map do |entry|
+      entry_attrs = entry.attributes
+      entry_attrs['username'] = entry.user.email
 
-    @entries.each do |te|
-      te.username = te.user.email
-
-      te_obj = te.attributes
-
-      # Custom fields
-      te.fields.each do |key, value|
-        te_obj[key] = value
+      entry.fields.each do |key, value|
+        entry_attrs[key] = value
       end
 
-      objects << te_obj
+      entry_attrs
     end
-
-    render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: objects, columns: columns)
   end
 
   def set_timesheet
@@ -175,14 +159,13 @@ class TimeEntriesController < ApplicationController
   end
 
   def render_csv(param)
-    param[:filebase] = param[:filebase].blank? ? param[:model].to_s.tableize : param[:filebase]
-    param[:columns] = param[:model].columns.collect(&:name) if param[:columns].blank?
+    param[:filebase] ||= param[:model].to_s.tableize
+    param[:columns] ||= param[:model].columns.collect(&:name)
 
     csv_string = CSV.generate do |csv|
       csv << param[:columns]
       param[:objects].each do |record|
-        line = param[:columns].collect { |col| record[col].to_s.chomp }
-        csv << line
+        csv << param[:columns].map { |col| record[col].to_s.chomp }
       end
     end
 
@@ -191,5 +174,36 @@ class TimeEntriesController < ApplicationController
       type: 'application/octet-stream',
       filename: "#{param[:filebase]}-#{Time.now.to_formatted_s(:number)}.csv"
     )
+  end
+
+  def time_entry_owned_by_current_user?(time_entry)
+    time_entry.user == current_user || superadmin?
+  end
+
+  def update_time_entry(time_entry, time_entry_params, custom_fields)
+    time_entry.assign_attributes(time_entry_params)
+    time_entry.timesheet = @timesheet
+    time_entry.user = current_user
+
+    if time_entry.save
+      update_custom_fields(time_entry, custom_fields)
+      true
+    else
+      false
+    end
+  end
+
+  def update_custom_fields(time_entry, custom_fields)
+    custom_fields.each do |machine_name, value|
+      timesheet_field = TimesheetField.find_by(machine_name: machine_name, timesheet: @timesheet)
+      next unless timesheet_field
+
+      field_data_item = TimesheetFieldDataItem.find_or_initialize_by(field_id: timesheet_field.id, time_entry_id: time_entry.id)
+      if value.blank?
+        field_data_item.destroy if field_data_item.persisted?
+      else
+        field_data_item.update(value: value)
+      end
+    end
   end
 end

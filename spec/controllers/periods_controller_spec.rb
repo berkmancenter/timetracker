@@ -47,6 +47,7 @@ RSpec.describe PeriodsController, type: :controller do
   describe 'POST #upsert' do
     it 'creates a new period' do
       timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
       post :upsert, params: { period: attributes_for(:period, timesheet_id: timesheet.id) }
       post :upsert, params: { period: attributes_for(:period, timesheet_id: timesheet.id) }
 

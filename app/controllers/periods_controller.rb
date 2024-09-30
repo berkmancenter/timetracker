@@ -9,75 +9,55 @@ class PeriodsController < ApplicationController
     }
   }.freeze
 
+  # GET /periods
+  # Returns all periods for the current user
   def index
     periods = Period.user_periods(current_user)
-
     render json: periods.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
+  # GET /periods/:id
+  # Returns a specific period
   def show
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
+    return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
 
     render json: @period.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
+  # POST /periods/upsert
+  # Creates or updates a period
   def upsert
-    if period_params[:id]
-      period = Period.find(period_params['id'])
+    period = find_or_initialize_period
 
-      generic_unauthorized_response and return unless period.timesheet.admin?(current_user) || superadmin?
-
-      period.assign_attributes(period_params)
-    else
-      period = Period.new(period_params)
-    end
+    return render_bad_request if period.timesheet.nil?
+    return render_unauthorized unless user_can_manage_timesheet?(period.timesheet)
 
     if period.save
       render json: { period: period.as_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
     else
-      render json: { message: period.errors.full_messages.join(', ') }, status: :bad_request
+      render_bad_request(period.errors.full_messages.join(', '))
     end
   end
 
+  # POST /periods/delete
+  # Deletes periods
   def delete
     periods_ids = params[:periods]
 
-    unauth = false
-    Period.where(id: periods_ids).each do |p|
-      unauth = true unless p.timesheet.admin?(current_user)
-    end
-    generic_unauthorized_response and return if unauth && !superadmin?
+    return render_bad_request('No periods selected.') unless periods_ids&.any?
+    return render_unauthorize if unauthorized_periods?(periods_ids) && !superadmin?
 
-    if periods_ids&.any?
-      Period.where(id: periods_ids).destroy_all
-
-      render json: { message: 'ok' }, status: :ok
-    else
-      render json: { message: 'No periods selected.' }, status: :bad_request
-    end
+    Period.where(id: periods_ids).destroy_all
+    render json: { message: 'ok' }, status: :ok
   end
 
+  # GET /periods/:id/credits
+  # Returns the credits for a period
   def credits
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
+    return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
 
-    users = @period.timesheet.users.select('
-      users.id,
-      users.email,
-      users.username,
-      users.superadmin,
-      ARRAY_AGG(users_timesheets.role) AS roles
-    ').group(:id).order(:username)
-
-    credits = users.map do |user|
-      {
-        user_id: user.id,
-        username: user.username,
-        admin: @period.timesheet.admin?(user),
-        email: user.email,
-        roles: user.roles,
-        credit_amount: Credit.where(user: user, period: @period)&.first&.amount || 0.00
-      }
-    end
+    users = load_users_with_roles(@period.timesheet)
+    credits = build_credits(users, @period)
 
     render json: {
       period: @period.as_json(PERIOD_PUBLIC_FIELDS),
@@ -85,68 +65,26 @@ class PeriodsController < ApplicationController
     }, status: :ok
   end
 
+  # POST /periods/:id/credits
+  # Sets the credits for a period
   def set_credits
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
+    return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
+    return render_bad_request('No users or credits selected.') unless params[:credits]&.any?
 
-    unless params[:credits]&.any?
-      render json: { message: 'No users or credits selected.' }, status: :bad_request
-      return
-    end
-
-    new_credits_values = {}
-
-    timesheet_user_ids = @period.timesheet.users.pluck(:id)
-
-    params[:credits].each do |credit_data|
-      user_id = credit_data['user_id'].to_i
-
-      next if !credit_data['credit_amount'].present? || credit_data['credit_amount'].to_d == 0.0.to_d || !timesheet_user_ids.include?(user_id)
-
-      new_credits_values[user_id] = credit_data['credit_amount']
-    end
-
-    new_credits = []
-
-    @period.credits.each do |existing_credit|
-      user_id = existing_credit.user_id
-
-      if new_credits_values.key?(user_id)
-        value = new_credits_values[user_id]
-
-        next if existing_credit.amount.to_d == value.to_d
-
-        existing_credit.amount = value
-        new_credit = existing_credit
-        new_credits_values.delete(user_id)
-      else
-        new_credit = existing_credit
-      end
-
-      new_credits << new_credit
-    end
-
-    new_credits_values.each do |user_id, value|
-      new_credit = Credit.new(
-        user_id: user_id,
-        period: @period,
-        amount: value.to_d
-      )
-
-      new_credits << new_credit
-    end
-
-    @period.credits = new_credits
+    new_credits = build_new_credits(params[:credits], @period)
+    @period.credits = new_credits.compact
     @period.save
 
     render json: @period.credits, status: :ok
   end
 
+  # GET /periods/:id/stats
+  # Returns the stats for a period
   def stats
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
+    return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
 
     stats = @period.get_stats
-
-    render_stats_csv(stats) and return if params[:csv]
+    return render_stats_csv(stats) if params[:csv]
 
     render json: {
       period: @period,
@@ -154,19 +92,16 @@ class PeriodsController < ApplicationController
     }, status: :ok
   end
 
+  # POST /periods/:id/clone
+  # Clones a period with its credits
   def clone
-    generic_unauthorized_response and return unless @period.timesheet.admin?(current_user) || superadmin?
+    return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
 
-    cloned_period = @period.dup
-    cloned_period.name << ' clone'
-
-    cloned_credits = @period.credits.map(&:dup)
-    cloned_period.credits = cloned_credits
-
+    cloned_period = clone_period(@period)
     if cloned_period.save
-      render json: { period: @period.as_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
+      render json: { period: cloned_period.as_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
     else
-      render json: { message: @period.errors.full_messages.join(', ') }, status: :bad_request
+      render_bad_request(cloned_period.errors.full_messages.join(', '))
     end
   end
 
@@ -196,5 +131,85 @@ class PeriodsController < ApplicationController
       type: 'application/octet-stream',
       filename: "#{@period.name.parameterize}-statistics-#{Time.now.to_formatted_s(:number)}.csv"
     )
+  end
+
+  def find_or_initialize_period
+    if period_params[:id]
+      Period.find(period_params[:id]).tap do |period|
+        period.assign_attributes(period_params)
+      end
+    else
+      Period.new(period_params)
+    end
+  end
+
+  def unauthorized_periods?(periods_ids)
+    Period.where(id: periods_ids).any? { |p| !p.timesheet.admin?(current_user) }
+  end
+
+  def load_users_with_roles(timesheet)
+    timesheet.users.select('
+      users.id,
+      users.email,
+      users.username,
+      users.superadmin,
+      ARRAY_AGG(users_timesheets.role) AS roles
+    ').group(:id).order(:username)
+  end
+
+  def build_credits(users, period)
+    users.map do |user|
+      {
+        user_id: user.id,
+        username: user.username,
+        admin: period.timesheet.admin?(user),
+        email: user.email,
+        roles: user.roles,
+        credit_amount: Credit.where(user: user, period: period).first&.amount || 0.00
+      }
+    end
+  end
+
+  def build_new_credits(credits_params, period)
+    new_credits_values = extract_new_credits_values(credits_params, period.timesheet.users.pluck(:id))
+
+    existing_and_new_credits = period.credits.each_with_object([]) do |existing_credit, collection|
+      if new_credits_values.key?(existing_credit.user_id)
+        value = new_credits_values[existing_credit.user_id]
+        next if existing_credit.amount.to_d == value.to_d
+
+        existing_credit.amount = value
+        new_credits_values.delete(existing_credit.user_id)
+      end
+      collection << existing_credit
+    end
+
+    new_credits_values.each do |user_id, value|
+      existing_and_new_credits << Credit.new(
+        user_id: user_id,
+        period: period,
+        amount: value.to_d
+      )
+    end
+
+    existing_and_new_credits
+  end
+
+  def extract_new_credits_values(credits_params, timesheet_user_ids)
+    credits_params.each_with_object({}) do |credit_data, new_credits_values|
+      user_id = credit_data['user_id'].to_i
+      credit_amount = credit_data['credit_amount'].to_d
+
+      next if !credit_data['credit_amount'].present? || credit_amount == 0.0 || !timesheet_user_ids.include?(user_id)
+
+      new_credits_values[user_id] = credit_amount
+    end
+  end
+
+  def clone_period(original_period)
+    original_period.dup.tap do |cloned_period|
+      cloned_period.name = "#{original_period.name} clone"
+      cloned_period.credits = original_period.credits.map(&:dup)
+    end
   end
 end

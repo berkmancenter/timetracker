@@ -2,159 +2,136 @@ class TimesheetsController < ApplicationController
   before_action :set_timesheet, only: %i[show send_invitations leave users delete_users change_users_role]
   before_action :authenticate_user_json!
 
+  # GET /timesheets
+  # Returns all timesheets for the current user
   def index
     timesheets = current_user.user_timesheets
     render json: timesheets.as_json(timesheet_json_params), status: :ok
   end
 
+  # GET /timesheets/index_admin
+  # Returns all timesheets for the current user where the user is an admin
   def index_admin
     timesheets = current_user.user_timesheets(only_admin: true)
     render json: timesheets.as_json(timesheet_json_params), status: :ok
   end
 
+  # GET /timesheets/:id
+  # Returns a specific timesheet
   def show
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
+    return unless authorize_user_for_timesheet!(@timesheet)
 
     render json: @timesheet.as_json(timesheet_json_params), status: :ok
   end
 
+  # POST /timesheets/upsert
+  # Creates or updates a timesheet
   def upsert
-    new_record = nil
-    if timesheet_params[:id]
-      timesheet = Timesheet.find(timesheet_params['id'])
+    timesheet, new_record = set_or_create_timesheet
 
-      generic_unauthorized_response and return unless timesheet.admin?(current_user) || superadmin?
-
-      timesheet.assign_attributes(timesheet_params)
-    else
-      new_record = true
-      timesheet = Timesheet.new(timesheet_params)
-    end
+    return unless authorize_user_for_timesheet!(timesheet) if timesheet.persisted?
 
     if timesheet.save
-      UsersTimesheet.create(user: current_user, timesheet: timesheet, role: 'admin') if new_record
+      assign_current_user_as_admin(timesheet) if new_record
       render json: { timesheet: timesheet }, status: :ok
     else
-      render json: { message: timesheet.errors.full_messages.join(', ') }, status: :bad_request
+      render_bad_request(timesheet.errors.full_messages.join(', '))
     end
   end
 
+  # POST /timesheets/delete
+  # Deletes timesheets
   def delete
     timesheets_ids = params[:timesheets]
+    unauthorized = Timesheet.where(id: timesheets_ids).any? { |t| !user_can_manage_timesheet?(t) }
 
-    unauth = false
-    Timesheet.where(id: timesheets_ids).each do |t|
-      unauth = true unless t.admin?(current_user)
-    end
-    generic_unauthorized_response and return if unauth && !superadmin?
+    return render_unauthorized if unauthorized || timesheets_ids.blank?
 
-    if timesheets_ids&.any?
-      Timesheet.where(id: timesheets_ids).destroy_all
-
-      render json: { message: 'ok' }, status: :ok
-    else
-      render json: { message: 'No timesheets selected.' }, status: :bad_request
-    end
+    Timesheet.where(id: timesheets_ids).destroy_all
+    render json: { message: 'ok' }, status: :ok
   end
 
+  # POST /timesheets/:id/send_invitations
+  # Sends email invitations to users to join a timesheet
   def send_invitations
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
+    return unless authorize_user_for_timesheet!(@timesheet)
 
-    email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
-    emails = params[:emails].scan(email_regex)
-
+    emails = extract_emails(params[:emails])
     role = params[:role]
 
     unless Invitation::VALID_ROLES.include?(role)
-      render json: { message: 'Invalid role provided' }, status: :unprocessable_entity
-      return
+      return render_unprocessable_entity('Invalid role provided')
     end
 
-    invitations = []
-    emails.each do |e|
-      invitations << Invitation.new(email: e, sender: current_user, timesheet: @timesheet, role: role)
-    end
-
-    Invitation.import!(invitations)
-
-    invitations.each do |i|
-      InvitationMailer.send_invitation(
-        @timesheet, i
-      ).deliver_later
-    end
-
+    invitations = create_invitations(emails, role)
+    deliver_invitations(invitations)
     render json: { message: 'ok' }, status: :ok
   end
 
+  # GET /timesheets/join/:code
+  # Joins a timesheet using an invitation code
   def join
-    invitation = Invitation.where(code: params[:code]).first
-
-    generic_bad_request_response and return if invitation.nil? || invitation.used
+    invitation = Invitation.find_by(code: params[:code])
+    return render_bad_request('Invalid or already used invitation') unless valid_invitation?(invitation)
 
     timesheet = invitation.timesheet
-
     ut = UsersTimesheet.new(user: current_user, timesheet: timesheet, role: invitation.role)
 
     if ut.save
-      invitation.used_by = current_user
-      invitation.used = true
-      invitation.save
-
+      mark_invitation_as_used(invitation)
       render json: { timesheet: timesheet }, status: :ok
     else
-      render json: { message: ut.errors.full_messages.join(', ') }, status: :bad_request
+      render_bad_request(ut.errors.full_messages.join(', '))
     end
   end
 
+  # GET /timesheets/:id/leave
+  # Leaves a timesheet
   def leave
-    UsersTimesheet
-      .where(user: current_user, timesheet: @timesheet)
-      .destroy_all
-
+    UsersTimesheet.where(user: current_user, timesheet: @timesheet).destroy_all
     render json: { message: 'ok' }, status: :ok
   end
 
+  # GET /timesheets/:id/users
+  # Returns all users for a timesheet
   def users
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
+    return unless authorize_user_for_timesheet!(@timesheet)
 
     render json: @timesheet.all_users, status: :ok
   end
 
+  # POST /timesheets/:id/delete_users
+  # Deletes users from a timesheet
   def delete_users
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
+    return unless authorize_user_for_timesheet!(@timesheet)
 
     user_ids = params[:users]
-
-    if user_ids&.any?
-      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).destroy_all
-
-      render json: { message: 'ok' }, status: :ok
+    if user_ids.blank?
+      render_bad_request('No users selected.')
     else
-      render json: { message: 'No users selected.' }, status: :bad_request
+      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).destroy_all
+      render json: { message: 'ok' }, status: :ok
     end
   end
 
+  # POST /timesheets/:id/change_users_role
+  # Changes the role of users in a timesheet
   def change_users_role
-    generic_bad_request_response and return if @timesheet.nil?
-    generic_unauthorized_response and return unless @timesheet.admin?(current_user) || superadmin?
+    return unless authorize_user_for_timesheet!(@timesheet)
 
     user_ids = params[:users]
-
-    if user_ids&.any?
-      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).update_all(role: params[:role])
-
-      render json: { message: 'ok' }, status: :ok
+    if user_ids.blank?
+      render_bad_request('No users selected.')
     else
-      render json: { message: 'No users selected.' }, status: :bad_request
+      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).update_all(role: params[:role])
+      render json: { message: 'ok' }, status: :ok
     end
   end
 
   private
 
   def set_timesheet
-    @timesheet = Timesheet.includes(:timesheet_fields).where(id: params[:id]).first
+    @timesheet = Timesheet.includes(:timesheet_fields).find_by(id: params[:id])
   end
 
   def timesheet_params
@@ -170,5 +147,41 @@ class TimesheetsController < ApplicationController
         }
       }
     }
+  end
+
+  def set_or_create_timesheet
+    if timesheet_params[:id]
+      timesheet = Timesheet.find(timesheet_params[:id])
+      timesheet.assign_attributes(timesheet_params)
+      [timesheet, false]
+    else
+      [Timesheet.new(timesheet_params), true]
+    end
+  end
+
+  def assign_current_user_as_admin(timesheet)
+    UsersTimesheet.create(user: current_user, timesheet: timesheet, role: 'admin')
+  end
+
+  def extract_emails(email_string)
+    email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
+    email_string.scan(email_regex)
+  end
+
+  def create_invitations(emails, role)
+    emails.map { |email| Invitation.new(email: email, sender: current_user, timesheet: @timesheet, role: role) }
+  end
+
+  def deliver_invitations(invitations)
+    Invitation.import!(invitations)
+    invitations.each { |invitation| InvitationMailer.send_invitation(@timesheet, invitation).deliver_later }
+  end
+
+  def valid_invitation?(invitation)
+    invitation.present? && !invitation.used
+  end
+
+  def mark_invitation_as_used(invitation)
+    invitation.update(used_by: current_user, used: true)
   end
 end

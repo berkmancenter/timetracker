@@ -3,11 +3,11 @@ require 'rails_helper'
 RSpec.describe ApplicationController, type: :controller do
   controller do
     def bad_request_action
-      generic_bad_request_response
+      render_bad_request
     end
 
     def unauthorized_action
-      generic_unauthorized_response
+      render_unauthorized
     end
   end
 
@@ -31,7 +31,7 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  describe 'generic_bad_request_response' do
+  describe 'render_bad_request' do
     it 'returns a JSON response with status :bad_request' do
       get :bad_request_action
       expect(response).to have_http_status(:bad_request)
@@ -39,7 +39,7 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  describe 'generic_unauthorized_response' do
+  describe 'render_unauthorized' do
     it 'returns a JSON response with status :unauthorized' do
       get :unauthorized_action
       expect(response).to have_http_status(:unauthorized)

@@ -1,13 +1,15 @@
 class FrontController < ApplicationController
   before_action :authenticate_user!
 
+  # GET /
+  # Passes the request to the front-end
   def index
     render file: 'public/index_f.html', layout: false
   end
 
   def authenticate_user!
-    redirect_to new_user_session_path and return if current_user.nil?
+    return super if current_user.present?
 
-    super
+    redirect_to new_user_session_path
   end
 end
