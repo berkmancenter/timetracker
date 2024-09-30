@@ -209,8 +209,9 @@
 
         this.initAutoComplete()
 
+        // Focus the first field if not on a touch device
         const textFields = this.getTextFields()
-        if (textFields.length > 0) {
+        if (textFields.length > 0 && this.isTouchDevice === false) {
           const firstField = textFields[0]
 
           this.$refs[`${firstField.machine_name}Input`][0].focus()

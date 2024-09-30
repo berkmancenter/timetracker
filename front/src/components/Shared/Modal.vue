@@ -81,6 +81,7 @@
     justify-content: center;
     align-items: center;
     overflow-y: auto;
+    z-index: 10002;
 
     .vfm--overlay {
       background: rgba(35, 36, 41, 0.7);
