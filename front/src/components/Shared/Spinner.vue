@@ -36,6 +36,6 @@
   .timetracker-spinner {
     width: 2rem;
     height: 2rem;
-    margin-right: 1rem;
+    margin: 0 0.5rem;
   }
 </style>

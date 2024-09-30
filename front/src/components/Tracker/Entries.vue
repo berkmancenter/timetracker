@@ -493,7 +493,6 @@
         margin-right: 0;
 
         &-meta {
-          display: block;
           width: 100%;
         }
       }

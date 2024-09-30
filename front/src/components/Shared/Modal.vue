@@ -1,5 +1,12 @@
 <template>
-  <VueFinalModal class="tracker-modal" content-class="tracker-modal-content" overlay-transition="vfm-fade" content-transition="vfm-fade" @opened="opened()">
+  <VueFinalModal
+    class="tracker-modal"
+    content-class="tracker-modal-content"
+    overlay-transition="vfm-fade"
+    content-transition="vfm-fade"
+    @opened="opened()"
+    @closed="closed()"
+  >
     <div class="tracker-modal-title is-size-4">
       <div class="tracker-modal-title-text">{{ title }}</div>
       <div class="tracker-modal-title-close" @click="$emit('cancel')">
@@ -65,9 +72,14 @@
     },
     methods: {
       opened() {
+        document.querySelector('html').style.overflow = 'hidden'
+
         if (this.focusOnConfirm && this.$refs.confirmButton) {
           this.$refs.confirmButton.focus()
         }
+      },
+      closed() {
+        document.querySelector('html').style.overflow = 'auto'
       },
     },
   }
@@ -81,7 +93,14 @@
     justify-content: center;
     align-items: center;
     overflow-y: auto;
-    z-index: 10002;
+    z-index: 10002 !important;
+
+    @media all and (max-width: 700px) {
+      display: block;
+      justify-content: unset;
+      align-items: unset;
+      background-color: #ffffff;
+    }
 
     .vfm--overlay {
       background: rgba(35, 36, 41, 0.7);
@@ -91,12 +110,11 @@
       background-color: var(--main-color);
       color: #ffffff;
       display: flex;
-      height: 3.5rem;
       align-items: center;
       user-select: none;
 
       &-text {
-        padding-left: 1rem;
+        padding: 0.5rem 1rem;
       }
 
       &-close {

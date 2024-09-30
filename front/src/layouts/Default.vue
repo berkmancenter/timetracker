@@ -190,6 +190,12 @@
         background-color: var(--greyish-color);
       }
     }
+
+    @media all and (max-width: 700px) {
+      &-help {
+        display: none;
+      }
+    }
   }
 
   // Side Menu
