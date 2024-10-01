@@ -57,7 +57,7 @@
   }
 </script>
 
-<style>
+<style lang="scss">
   .tracker-action-button {
     padding: 0.5rem 0.5rem;
 

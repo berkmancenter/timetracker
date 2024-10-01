@@ -1,10 +1,12 @@
 <template>
+  <Breadcrumbs :crumbs="breadcrumbs" />
+
   <div class="content admin-timesheets-invitations-form">
     <h4 class="is-size-4">Invitations</h4>
 
     <div class="mb-4">
       Send invitations for
-      <span class="tag is-black is-large">{{ $store.state.admin.timesheet.name }}</span>
+      <span class="tag is-black is-medium">{{ $store.state.admin.timesheet.name }}</span>
       timesheet
     </div>
 
@@ -52,11 +54,13 @@
 
 <script>
   import Icon from '@/components/Shared/Icon.vue'
+  import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
     name: 'AdminTimesheetsInvitationsForm',
     components: {
       Icon,
+      Breadcrumbs,
     },
     data() {
       return {
@@ -66,6 +70,22 @@
         ],
         selectedRole: 'user',
       }
+    },
+    computed: {
+      breadcrumbs() {
+        return [
+          {
+            text: 'Timesheets',
+            link: '/admin/timesheets',
+          },
+          {
+            text: this.$store.state.admin.timesheet.name,
+          },
+          {
+            text: 'Invite',
+          },
+        ]
+      },
     },
     created() {
       this.initialDataLoad()

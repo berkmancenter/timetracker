@@ -1,6 +1,8 @@
 <template>
+  <Breadcrumbs :crumbs="breadcrumbs" />
+
   <div class="content admin-timesheets-form">
-    <h4 class="is-size-4">{{ title }}</h4>
+    <h4 class="is-size-4">{{ title() }}</h4>
 
     <form class="form" @submit.prevent="save">
       <div class="field">
@@ -109,11 +111,13 @@
   import upIcon from '@/images/up_main.svg'
   import downIcon from '@/images/down_main.svg'
   import orderBy from 'lodash/orderBy'
+  import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
     name: 'AdminTimesheetsForm',
     components: {
       Icon,
+      Breadcrumbs,
     },
     data() {
       return {
@@ -124,17 +128,33 @@
       }
     },
     computed: {
-      title() {
-        if (this.$route.params.id) {
-          return 'Edit timesheet'
-        } else {
-          return 'New timesheet'
-        }
-      },
       filteredFields() {
         let timesheetFields = this.$store.state.admin?.timesheet?.timesheet_fields
         timesheetFields = orderBy(timesheetFields, ['order'], ['asc'])
         return (timesheetFields || []).filter(field => !field._destroy)
+      },
+      breadcrumbs() {
+        let breadcrumbs = []
+
+        breadcrumbs.push({
+          text: 'Timesheets',
+          link: '/admin/timesheets',
+        })
+
+        if (this.$route.params.id) {
+          breadcrumbs.push({
+            text: this.$store.state.admin.timesheet.name,
+          })
+          breadcrumbs.push({
+            text: 'Edit timesheet',
+          })
+        } else {
+          breadcrumbs.push({
+            text: 'New timesheet',
+          })
+        }
+
+        return breadcrumbs
       },
     },
     created() {
@@ -194,6 +214,13 @@
         const nextField = this.filteredFields.find(f => f.order === field.order - direction)
         if (nextField) {
           nextField.order = field.order - direction
+        }
+      },
+      title() {
+        if (this.$route.params.id) {
+          return 'Edit timesheet'
+        } else {
+          return 'New timesheet'
         }
       },
     },

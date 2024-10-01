@@ -1,6 +1,10 @@
 <template>
+  <Breadcrumbs :crumbs="breadcrumbs" />
+
   <div class="content admin-timesheet-users">
     <h4 class="is-size-4">Users</h4>
+
+    <p>Manage users for <span class="tag is-black is-medium">{{ timesheet.name }}</span> timesheet.</p>
 
     <form class="form">
       <div class="mb-4">
@@ -118,6 +122,7 @@
   import Modal from '@/components/Shared/Modal.vue'
   import ActionButton from '@/components/Shared/ActionButton.vue'
   import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
+  import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
     name: 'AdminTimesheetUsers',
@@ -127,6 +132,7 @@
       SuperAdminFilter,
       Modal,
       ActionButton,
+      Breadcrumbs,
     },
     data() {
       return {
@@ -149,7 +155,24 @@
         changeUsersRoleCurrent: null,
         changeUsersRoleSelected: 'admin',
         formatIsoDateTimeToLocaleString,
+        timesheet: {},
       }
+    },
+    computed: {
+      breadcrumbs() {
+        return [
+          {
+            text: 'Timesheets',
+            link: '/admin/timesheets',
+          },
+          {
+            text: this.timesheet.name,
+          },
+          {
+            text: 'Users',
+          },
+        ]
+      },
     },
     created() {
       this.initialDataLoad()

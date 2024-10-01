@@ -1,4 +1,6 @@
 <template>
+  <Breadcrumbs :crumbs="breadcrumbs" />
+
   <div class="content admin-periods-form">
     <h4 class="is-size-4">{{ title }}</h4>
 
@@ -48,11 +50,13 @@
 
 <script>
   import Icon from '@/components/Shared/Icon.vue'
+  import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
     name: 'AdminPeriodsForm',
     components: {
       Icon,
+      Breadcrumbs,
     },
     data() {
       return {
@@ -66,7 +70,30 @@
         } else {
           return 'New period'
         }
-      }
+      },
+      breadcrumbs() {
+        let breadcrumbs = []
+
+        breadcrumbs.push({
+          text: 'Periods',
+          link: '/admin/periods',
+        })
+
+        if (this.$route.params.id) {
+          breadcrumbs.push({
+            text: this.$store.state.admin.period.name,
+          })
+          breadcrumbs.push({
+            text: 'Edit period',
+          })
+        } else {
+          breadcrumbs.push({
+            text: 'New period',
+          })
+        }
+
+        return breadcrumbs
+      },
     },
     created() {
       this.$store.dispatch('admin/clearPeriod')

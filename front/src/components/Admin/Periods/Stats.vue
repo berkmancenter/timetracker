@@ -1,4 +1,6 @@
 <template>
+  <Breadcrumbs :crumbs="breadcrumbs" />
+
   <div class="content admin-periods-stats">
     <h4 class="is-size-4">Statistics</h4>
 
@@ -54,6 +56,7 @@
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
   import ActionButton from '@/components/Shared/ActionButton.vue'
   import downloadIcon from '@/images/download_main.svg'
+  import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
     name: 'AdminPeriodsStats',
@@ -61,6 +64,7 @@
       AdminTable,
       SuperAdminFilter,
       ActionButton,
+      Breadcrumbs,
     },
     data() {
       return {
@@ -68,6 +72,22 @@
         apiUrl: import.meta.env.VITE_API_URL,
         downloadIcon,
       }
+    },
+    computed: {
+      breadcrumbs() {
+        return [
+          {
+            text: 'Periods',
+            link: '/admin/periods',
+          },
+          {
+            text: this.$store.state.admin.periodStats?.period?.name,
+          },
+          {
+            text: 'Statistics',
+          },
+        ]
+      },
     },
     created() {
       this.initialDataLoad()

@@ -1,4 +1,6 @@
 <template>
+  <Breadcrumbs :crumbs="breadcrumbs" />
+
   <div class="content admin-periods-credits">
     <h4 class="is-size-4">Hours</h4>
 
@@ -76,6 +78,7 @@
   import ActionButton from '@/components/Shared/ActionButton.vue'
   import saveAllIcon from '@/images/all_main.svg'
   import saveSelectedIcon from '@/images/selected_main.svg'
+  import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
     name: 'AdminPeriodsCredits',
@@ -84,6 +87,7 @@
       SuperAdminFilter,
       Modal,
       ActionButton,
+      Breadcrumbs,
     },
     data() {
       return {
@@ -95,6 +99,22 @@
         saveSelectedDisabled: false,
         saveAllDisabled: false,
       }
+    },
+    computed: {
+      breadcrumbs() {
+        return [
+          {
+            text: 'Periods',
+            link: '/admin/periods',
+          },
+          {
+            text: this.$store.state.admin.periodCredits?.period?.name,
+          },
+          {
+            text: 'Set hours',
+          },
+        ]
+      },
     },
     created() {
       this.initialDataLoad()
