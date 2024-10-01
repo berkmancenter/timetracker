@@ -245,8 +245,6 @@
           this.$store.dispatch('shared/setUser', user)
 
           this.redirectToSelectedMonth(this.$store)
-
-          this.awn.success('Showing only your timesheets.')
         } else {
           this.awn.warning('Something went wrong, try again.')
         }

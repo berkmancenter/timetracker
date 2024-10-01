@@ -130,7 +130,7 @@
       async loadTimesheets() {
         this.mitt.emit('spinnerStart')
 
-        const timesheets = await this.$store.dispatch('admin/fetchAdminTimesheets')
+        const timesheets = await this.$store.dispatch('admin/fetchTimesheets')
 
         this.$store.dispatch('admin/setTimesheets', timesheets)
 
