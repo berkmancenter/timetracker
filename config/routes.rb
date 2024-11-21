@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: 'registrations' }
   root to: 'front#index'
 
-  get :ping, to: 'application#ping'
+  get :ping, to: 'front#ping'
 
   resources :time_entries do
     collection do
