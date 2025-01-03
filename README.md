@@ -6,7 +6,7 @@ TimeTracker is a simple open-source time reporting application.
 
 ## Documentation
 
-https://cyber.harvard.edu/team/timetracker/docs/index.html
+https://berkman-klein-center.gitbook.io/timetracker
 
 ## License
 

@@ -24,7 +24,7 @@
         <spinner />
 
         <div class="top-nav-help top-nav-button">
-          <a href="https://cyber.harvard.edu/team/timetracker/docs/index.html" target="_blank">
+          <a href="https://berkman-klein-center.gitbook.io/timetracker" target="_blank">
             <Icon :src="helpIcon" />
           </a>
         </div>
