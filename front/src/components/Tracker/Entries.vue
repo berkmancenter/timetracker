@@ -19,86 +19,88 @@
       </div>
 
       <div>
-        <template v-for="(entries, date) in entriesByDate">
+        <TransitionGroup name="entry-item-fade">
+          <template v-for="(entries, date) in entriesByDate" :key="date">
           <div>
             <div class="tracker-entries-date-row">
               <div class="tracker-entries-date-cell is-size-4" v-if="isNewDay(date)">{{ formatDate(date) }}</div>
             </div>
 
             <div class="tracker-entries-day">
-              <template v-for="entry in entries" :key="entry.id">
-                <div
-                  class="tracker-entries-entry"
-                  :class="{ 'tracker-entries-entry-active': entry.active, 'time-entries-entry-has-description': entry.fields.description }"
-                  @mouseenter="enterEntry(entry)"
-                  @mouseleave="leaveEntry(entry)"
-                  @click="openMenu(entry, $event)"
-                >
-                  <div class="tracker-entries-entry-meta">
-                    <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
-                      {{ entry.fields[field.machine_name] }}
-                    </div>
-
-                    <div class="tracker-entries-entry-email" v-if="$store.state.shared.user.sudoMode">
-                      {{ entry.email }}
-                    </div>
-                  </div>
-
+              <TransitionGroup name="entry-item-fade">
+                <template v-for="entry in entries" :key="entry.id">
                   <div
-                    class="tracker-entries-entry-description"
-                    title="Description"
-                    v-if="entry.fields.description"
+                    class="tracker-entries-entry"
+                    :class="{ 'tracker-entries-entry-active': entry.active, 'time-entries-entry-has-description': entry.fields.description }"
+                    @mouseenter="enterEntry(entry)"
+                    @mouseleave="leaveEntry(entry)"
+                    @click="openMenu(entry, $event)"
                   >
-                    {{ entry.fields.description }}
+                    <div class="tracker-entries-entry-meta">
+                      <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
+                        {{ entry.fields[field.machine_name] }}
+                      </div>
+
+                      <div class="tracker-entries-entry-email" v-if="$store.state.shared.user.sudoMode">
+                        {{ entry.email }}
+                      </div>
+                    </div>
+
+                    <div
+                      class="tracker-entries-entry-description"
+                      title="Description"
+                      v-if="entry.fields.description"
+                    >
+                      {{ entry.fields.description }}
+                    </div>
+
+                    <div class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</div>
+                    <div class="tracker-entries-entry-top-bar"></div>
+
+                    <VDropdown
+                      :ref="`entry${entry.id}Menu`"
+                      class="tracker-entries-entry-actions-dropdown"
+                      placement="right"
+                      :referenceNode="() => $refs[`entry${entry.id}MenuRef`][0]"
+                      @apply-hide="closeMenu(entry)"
+                    >
+                      <div :ref="`entry${entry.id}MenuRef`" class="tracker-entries-entry-actions-dropdown-ref-item"></div>
+
+                      <template #popper>
+                        <a
+                          v-if="entry.user_id === $store.state.shared.user.user_id"
+                          class="dropdown-item"
+                          title="Edit entry"
+                          @click="editEntry(entry)"
+                          v-close-popper
+                        >
+                          <Icon :src="editIcon" /> Edit entry
+                        </a>
+                        <a
+                          class="dropdown-item"
+                          title="Delete entry"
+                          @click="deleteEntryConfirm(entry)"
+                          v-close-popper
+                        >
+                          <Icon :src="minusIcon" /> Remove entry
+                        </a>
+                        <a
+                          class="dropdown-item"
+                          title="Clone entry"
+                          @click="cloneEntry(entry)"
+                          v-close-popper
+                        >
+                          <Icon :src="cloneIcon" /> Clone entry
+                        </a>
+                      </template>
+                    </VDropdown>
                   </div>
-
-                  <div class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</div>
-                  <div class="tracker-entries-entry-top-bar"></div>
-
-                  <VDropdown
-                    :ref="`entry${entry.id}Menu`"
-                    class="tracker-entries-entry-actions-dropdown"
-                    placement="right"
-                    :referenceNode="() => $refs[`entry${entry.id}MenuRef`][0]"
-                    @apply-hide="closeMenu(entry)"
-                  >
-                    <div :ref="`entry${entry.id}MenuRef`" class="tracker-entries-entry-actions-dropdown-ref-item"></div>
-
-                    <template #popper>
-                      <a
-                        v-if="entry.user_id === $store.state.shared.user.user_id"
-                        class="dropdown-item"
-                        title="Edit entry"
-                        @click="editEntry(entry)"
-                        v-close-popper
-                      >
-                        <Icon :src="editIcon" /> Edit entry
-                      </a>
-                      <a
-                        class="dropdown-item"
-                        title="Delete entry"
-                        @click="deleteEntryConfirm(entry)"
-                        v-close-popper
-                      >
-                        <Icon :src="minusIcon" /> Remove entry
-                      </a>
-                      <a
-                        class="dropdown-item"
-                        title="Clone entry"
-                        @click="cloneEntry(entry)"
-                        v-close-popper
-                      >
-                        <Icon :src="cloneIcon" /> Clone entry
-                      </a>
-                    </template>
-                  </VDropdown>
-                </div>
-
-                <div class="is-clearfix"></div>
-              </template>
+                </template>
+              </TransitionGroup>
             </div>
           </div>
         </template>
+        </TransitionGroup>
       </div>
     </div>
   </div>
@@ -499,5 +501,16 @@
     .tracker-entries-wrapper {
       padding: 0 0.5rem;
     }
+  }
+
+  // Animations
+  .entry-item-fade-enter-active,
+  .entry-item-fade-leave-active {
+    transition: opacity 0.5s ease;
+  }
+
+  .entry-item-fade-enter-from,
+  .entry-item-fade-leave-to {
+    opacity: 0;
   }
 </style>
