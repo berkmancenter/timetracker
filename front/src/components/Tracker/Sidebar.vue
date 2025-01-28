@@ -27,5 +27,21 @@
       Popular,
       AdminMenu,
     },
+    mounted() {
+      document.body.classList.add('tracker-entries')
+    },
+    beforeUnmount() {
+      document.body.classList.remove('tracker-entries')
+    }
   }
 </script>
+
+<style lang="scss">
+  .tracker-entries {
+    .admin-menu {
+      @media all and (min-width: 701px) {
+        display: none;
+      }
+    }
+  }
+</style>

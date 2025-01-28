@@ -19,11 +19,6 @@
       return {
         adminMenuItems: [
           {
-            label: 'Back to tracking',
-            name: 'tracker.index',
-            class: 'admin-menu-item-hidden-active',
-          },
-          {
             label: 'Timesheets',
             name: 'timesheets.index',
           },

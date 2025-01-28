@@ -15,8 +15,25 @@
           <Icon :src="menuIcon" />
         </a>
 
-        <router-link :to="'/'" @click="reloadPath" class="top-nav-brand-name-link ml-2">
+        <div class="top-nav-brand-name-link ml-2">
           <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACKer</h3>
+        </div>
+
+        <router-link
+          :to="{ name: 'tracker.index' }"
+          @click="reloadPath"
+          class="ml-4 top-nav-button top-nav-button-menu"
+          :class="{ 'top-nav-button-menu-active': isMenuItemActive('tracker') }"
+        >
+          Time entries
+        </router-link>
+
+        <router-link
+          :to="{ name: 'timesheets.index' }"
+          class="ml-2 top-nav-button top-nav-button-menu"
+          :class="{ 'top-nav-button-menu-active': isMenuItemActive('timesheets') }"
+        >
+          Timesheets
         </router-link>
       </div>
 
@@ -107,6 +124,17 @@
         this.mitt.emit('spinnerStart')
         await this.$store.dispatch('shared/logout')
       },
+      isMenuItemActive(type) {
+        if (this.$route.name === 'tracker.index' && type === 'tracker') {
+          return true
+        }
+
+        if (this.$route.name === 'timesheets.index' && type === 'timesheets') {
+          return true
+        }
+
+        return false
+      },
     },
   }
 </script>
@@ -188,6 +216,25 @@
       &:hover,
       img:hover {
         background-color: var(--greyish-color);
+      }
+
+      &-menu {
+        height: 2.5rem;
+        width: auto;
+        display: flex;
+        align-items: center;
+        padding: 0 0.5rem;
+        border-radius: 0.5rem;
+
+        @media all and (max-width: 700px) {
+          display: none;
+        }
+
+        &:hover,
+        &-active {
+          background-color: var(--greyish-color);
+          color: #000000;
+        }
       }
     }
 
