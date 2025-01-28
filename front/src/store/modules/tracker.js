@@ -16,6 +16,7 @@ const state = {
   timesheets: [],
   months: [],
   entries: [],
+  entriesBeforeChange: false,
   selectedMonth: '',
   selectedTimesheet: {},
   formEntry: JSON.parse(JSON.stringify(defaultEntry)),
@@ -36,7 +37,12 @@ const mutations = {
     state.months = months
   },
   setEntries(state, entries) {
+    state.entriesBeforeChange = true
     state.entries = entries
+
+    setTimeout(() => {
+      state.entriesBeforeChange = false
+    }, 1)
   },
   setPopular(state, popular) {
     state.popular = popular

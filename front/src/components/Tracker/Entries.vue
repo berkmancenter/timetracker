@@ -12,14 +12,14 @@
 
     <div class="tracker-entries-wrapper" :class="{ 'tracker-entries-sudo': $store.state.shared.user.sudoMode }">
       <div class="tracker-entries-header">
-        <div v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
+        <div v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
           {{ field.title }}
         </div>
         <div v-if="$store.state.shared.user.sudoMode">Email</div>
       </div>
 
       <div>
-        <TransitionGroup name="entry-item-fade">
+        <TransitionGroup name="entry-item-fade" :css="$store.state.tracker.entriesBeforeChange === false">
           <template v-for="(entries, date) in entriesByDate" :key="date">
           <div>
             <div class="tracker-entries-date-row">
@@ -27,7 +27,7 @@
             </div>
 
             <div class="tracker-entries-day">
-              <TransitionGroup name="entry-item-fade">
+              <TransitionGroup name="entry-item-fade" :css="$store.state.tracker.entriesBeforeChange === false">
                 <template v-for="entry in entries" :key="entry.id">
                   <div
                     class="tracker-entries-entry"
