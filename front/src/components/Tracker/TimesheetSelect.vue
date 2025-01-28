@@ -5,7 +5,7 @@
     <div class="switmenu-section-content">
       <div class="select">
         <select ref="timesheetsSelect" v-model="selectedTimesheet" @change="changeTimesheet($event)">
-          <option v-for="timesheet in $store.state.tracker.timesheets" :key="timesheet.id" :value="timesheet.id">
+          <option v-for="timesheet in timesheets" :key="timesheet.id" :value="timesheet.id">
             {{ timesheet.name }}
           </option>
         </select>
@@ -16,6 +16,7 @@
 
 <script>
   import { redirectToSelectedMonth } from '@/router/index'
+  import orderBy from 'lodash/orderBy'
 
   export default {
     name: 'TimesheetSelect',
@@ -25,6 +26,11 @@
         selectedTimesheet: null,
         redirectToSelectedMonth: redirectToSelectedMonth,
       }
+    },
+    computed: {
+      timesheets() {
+        return orderBy(this.$store.state.tracker.timesheets, ['name'], ['asc'])
+      },
     },
     mounted() {
       if (this.$store.state.tracker.selectedTimesheet?.id) {
