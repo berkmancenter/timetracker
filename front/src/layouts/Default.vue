@@ -295,7 +295,7 @@
     }
 
     @media all and (min-width: 1300px) {
-      max-width: 1000px;
+      max-width: 1500px;
     }
   }
 

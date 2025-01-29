@@ -1,6 +1,6 @@
 <template>
   <div class="admin-menu">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Manage</h5>
+    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Menu</h5>
 
     <div class="switmenu-section-content">
       <ul>
@@ -18,6 +18,10 @@
     data() {
       return {
         adminMenuItems: [
+        {
+            label: 'Time entries',
+            name: 'tracker.index',
+          },
           {
             label: 'Timesheets',
             name: 'timesheets.index',

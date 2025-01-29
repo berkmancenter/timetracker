@@ -1,11 +1,11 @@
 <template>
   <div>
+    <admin-menu />
     <timesheet-select></timesheet-select>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <month-select></month-select>
     <totals></totals>
     <period-totals></period-totals>
-    <admin-menu />
   </div>
 </template>
 

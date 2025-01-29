@@ -32,6 +32,8 @@
     .tracker-admin {
       .switmenu-menu {
         width: 200px;
+
+        @media all and (max-width: 700px) { width: 100%; }
       }
 
       .switmenu-content {
