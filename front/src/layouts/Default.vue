@@ -35,6 +35,14 @@
         >
           Timesheets
         </router-link>
+
+        <router-link
+          :to="{ name: 'periods.index' }"
+          class="ml-2 top-nav-button top-nav-button-menu"
+          :class="{ 'top-nav-button-menu-active': isMenuItemActive('periods') }"
+        >
+          Periods
+        </router-link>
       </div>
 
       <div class="top-nav-end">
@@ -130,6 +138,10 @@
         }
 
         if (this.$route.name === 'timesheets.index' && type === 'timesheets') {
+          return true
+        }
+
+        if (this.$route.name === 'periods.index' && type === 'periods') {
           return true
         }
 
