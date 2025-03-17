@@ -1,6 +1,5 @@
 const interval = 60000
 const apiUrl = import.meta.env.VITE_API_URL
-const environment = import.meta.env.VITE_ENVIRONMENT
 
 const ping = () => {
   const xhr = new XMLHttpRequest()

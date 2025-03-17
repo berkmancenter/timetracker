@@ -4,7 +4,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2204:current
-      docker_layer_caching: true
+      docker_layer_caching: false
 
     steps:
       - checkout
@@ -13,13 +13,21 @@ jobs:
           command: |
             sudo chown -R 1000 .
       - run:
-          name: Docker Compose
+          name: Docker compose
           command: |
-            docker-compose -f docker-compose.test.yml --env-file .env.test up -d
-            sleep 60
+            docker compose -f docker/docker-compose.test.yml up -d
       - run:
-          name: Wait for DB
-          command: timeout 5m bash -c "until docker-compose -f docker-compose.test.yml --env-file .env.test exec postgres pg_isready ; do sleep 5 ; done"
+          name: Wait for migrations
+          command: |
+            echo "Waiting for migrations to complete..."
+            bash -c '
+            until docker compose -f docker/docker-compose.test.yml logs app | grep "Migrations ran successfully."; do
+              echo "Waiting for migrations..."
+              sleep 2
+            done
+            echo "Migrations completed successfully!"
+            '
       - run:
           name: Tests
-          command: docker-compose -f docker-compose.test.yml --env-file .env.test exec app bash -c "cd front && ./deploy.sh && cd .. && bundle install && rake db:drop db:create db:migrate && cd front && ./deploy.sh && cd .. && rspec"
+          command: 
+            docker compose -f docker/docker-compose.test.yml exec app bash -c "bundle exec rspec"

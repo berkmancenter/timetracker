@@ -4,7 +4,7 @@ class FrontController < ApplicationController
   # GET /
   # Passes the request to the front-end
   def index
-    render file: 'public/index_f.html', layout: false
+    render file: Rails.root.join('public', 'index_f.html').to_s, layout: false
   end
 
   # GET /ping

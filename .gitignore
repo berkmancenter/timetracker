@@ -48,3 +48,8 @@ docker_website_bash_history
 public/index_f.html
 public/front_assets
 docs/build
+
+# Ignore all environment files (except templates).
+/.env
+/.env.*
+!/.env.sample

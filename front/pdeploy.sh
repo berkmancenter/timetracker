@@ -1,1 +1,1 @@
-VITE_ENV=production ./deploy.sh
+VITE_ENVIRONMENT=production ./deploy.sh

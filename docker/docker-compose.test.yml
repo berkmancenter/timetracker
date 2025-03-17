@@ -1,0 +1,27 @@
+services:
+  db:
+    image: 'postgres:14'
+    environment:
+      POSTGRES_USER: timetracker_test
+      POSTGRES_PASSWORD: so_wow_much_secure
+      POSTGRES_DB: timetracker_test
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U timetracker_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    environment:
+      - APP_ENV=test
+    ports:
+      - '6868:3000'
+      - '6767:5173'
+    restart: always

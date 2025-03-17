@@ -1,18 +1,7 @@
 #!/bin/bash
 
-: ${VITE_ENV:=development}
-env_filename=".env"
-
-if [ -f ".env.$VITE_ENV" ]; then
-  env_filename=".env.$VITE_ENV"
-fi
-
-if [ -f ".env.$VITE_ENV.local" ]; then
-  env_filename=".env.$VITE_ENV.local"
-fi
-
 set -o allexport
-source $env_filename
+. /app/front/.env
 set +o allexport
 
 CONFIG_FILE=vite.config.js
