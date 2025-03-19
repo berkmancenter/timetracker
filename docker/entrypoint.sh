@@ -58,7 +58,7 @@ rm -f tmp/pids/server.pid
 
 # Precompiling assets and building front-end application.
 if [ "$APP_ENV" = "production" ]; then
-  SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=development ./bin/rails assets:precompile
+  SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=development rails assets:precompile
 fi
 
 # Build the front-end application.
@@ -67,11 +67,11 @@ cd front
 cd /app
 
 # Migrate or setup the database.
-if ./bin/rails db:migrate 2>/dev/null; then
+if rails db:migrate 2>/dev/null; then
   echo "Migrations ran successfully."
 else
   echo "Migrations failed, setting up the database..."
-  ./bin/rails db:setup && ./bin/rails db:migrate
+  rails db:setup && rails db:migrate
 fi
 
 # Execute the main process.
