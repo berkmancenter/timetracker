@@ -3,7 +3,7 @@
     <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Month</h5>
 
     <div class="switmenu-section-content">
-      <div class="tracker-months-select is-flex">
+      <div class="tracker-months-select">
         <div class="select is-flex-grow-1">
           <select v-model="$store.state.tracker.selectedMonth" @change="changeMonth">
             <option value="all">All</option>
@@ -73,6 +73,11 @@
       img {
         width: 2rem;
       }
+    }
+
+    &-select {
+      display: flex;
+      align-items: center;
     }
   }
 

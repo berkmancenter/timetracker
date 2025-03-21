@@ -6,10 +6,15 @@
 
     <form class="form">
       <div class="mb-4">
-        <router-link :to="'/admin/periods/new'" class="button is-success">
-          <Icon :src="addIcon" :interactive="false" />
-          Add period
+        <router-link :to="'/admin/periods/new'">
+          <ActionButton
+            class="is-success"
+            :icon="addIcon"
+            buttonText="Add period"
+            :button="true"
+          />
         </router-link>
+
       </div>
 
       <admin-table :tableClasses="['admin-periods-table']">
@@ -77,6 +82,7 @@
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import orderBy from 'lodash/orderBy'
   import Modal from '@/components/Shared/Modal.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
 
   export default {
     name: 'AdminPeriods',
@@ -84,6 +90,7 @@
       Icon,
       AdminTable,
       Modal,
+      ActionButton,
     },
     data() {
       return {

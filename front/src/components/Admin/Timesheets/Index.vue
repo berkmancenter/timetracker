@@ -6,9 +6,13 @@
 
     <form class="form">
       <div class="mb-4">
-        <router-link :to="'/admin/timesheets/new'" class="button is-success">
-          <Icon :src="addIcon" :interactive="false" />
-          Add timesheet
+        <router-link :to="'/admin/timesheets/new'">
+          <ActionButton
+            class="is-success"
+            :icon="addIcon"
+            buttonText="Add timesheet"
+            :button="true"
+          />
         </router-link>
       </div>
 
@@ -84,10 +88,13 @@
   import leaveIcon from '@/images/leave.svg'
   import usersIcon from '@/images/users.svg'
   import addIcon from '@/images/add_white.svg'
-  import AdminTable from '@/components/Admin/AdminTable.vue'
+
   import orderBy from 'lodash/orderBy'
-  import Modal from '@/components/Shared/Modal.vue'
   import { formatIsoDateTimeToLocaleString, getTimestamp } from '@/lib/date-time.js'
+
+  import ActionButton from '@/components/Shared/ActionButton.vue'
+  import AdminTable from '@/components/Admin/AdminTable.vue'
+  import Modal from '@/components/Shared/Modal.vue'
 
   export default {
     name: 'AdminTimesheets',
@@ -95,6 +102,7 @@
       Icon,
       AdminTable,
       Modal,
+      ActionButton,
     },
     data() {
       return {
@@ -107,6 +115,7 @@
         leaveIcon,
         usersIcon,
         addIcon,
+
         removeTimesheetModalStatus: false,
         removeTimesheetModalCurrent: null,
         leaveTimesheetModalStatus: false,

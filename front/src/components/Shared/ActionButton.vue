@@ -69,8 +69,9 @@
       background-color: var(--super-light-color);
     }
 
-    img {
+    > img {
       margin-right: 0.4rem !important;
+      height: 1.5rem !important;
     }
   }
 </style>

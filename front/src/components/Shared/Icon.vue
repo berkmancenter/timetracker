@@ -20,7 +20,7 @@
 
 <style lang="scss">
   img.tracker-icon {
-    max-width: 3rem;
+    max-width: 2.5rem;
     max-height: 100%;
     padding: 0.5rem;
     vertical-align: middle;

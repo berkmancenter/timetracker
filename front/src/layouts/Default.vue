@@ -222,6 +222,7 @@
       img {
         height: 3rem;
         width: 3rem;
+        max-width: 3rem;
         padding: 0.5rem;
       }
 

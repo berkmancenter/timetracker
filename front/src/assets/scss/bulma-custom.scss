@@ -1,5 +1,10 @@
+:root {
+  --bulma-dropdown-divider-background-color: hsl(0, 0%, 93%);
+}
+
 .button.is-success {
   background-color: var(--blue-stronger-color);
+  color: #fff;
 
   &:hover,
   &:active,
