@@ -54,10 +54,13 @@
     </div>
   </Modal>
 
-  <button class="button is-success mb-2 ml-4" @click="openForm(true)">
-    <Icon :src="addIcon" :interactive="false" />
-    Add time entry
-  </button>
+  <ActionButton
+    class="is-success"
+    :icon="addIcon"
+    buttonText="Add time entry"
+    @click="openForm()"
+    :button="true"
+  />
 </template>
 
 <script>
@@ -66,6 +69,7 @@
   import Icon from '@/components/Shared/Icon.vue'
   import autocomplete from 'autocompleter'
   import Modal from '@/components/Shared/Modal.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
 
   export default {
     name: 'EntryForm',
@@ -73,6 +77,7 @@
       FormField,
       Icon,
       Modal,
+      ActionButton,
     },
     data() {
       return {
