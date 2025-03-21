@@ -18,4 +18,7 @@ export default defineConfig({
   build: {
     assetsDir: 'front_assets',
   },
+  optimizeDeps: {
+    exclude: ['bulma'],
+  }
 })
