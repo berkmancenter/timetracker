@@ -102,18 +102,31 @@
     },
     computed: {
       breadcrumbs() {
-        return [
-          {
-            text: 'Periods',
-            link: '/admin/periods',
-          },
-          {
-            text: this.$store.state.admin.periodCredits?.period?.name,
-          },
-          {
-            text: 'Set hours',
-          },
-        ]
+        let breadcrumbs = []
+
+        breadcrumbs.push({
+          text: 'Timesheets',
+          link: '/admin/timesheets',
+        })
+
+        breadcrumbs.push({
+          text: this.$store.state.admin?.timesheet?.name,
+        })
+
+        breadcrumbs.push({
+          text: 'Periods',
+          link: `/admin/timesheets/${this.$store.state.admin?.timesheet?.id}/periods`,
+        })
+
+        breadcrumbs.push({
+          text: this.$store.state.admin.periodCredits?.period?.name,
+        })
+
+        breadcrumbs.push({
+          text: 'Set hours',
+        })
+
+        return breadcrumbs
       },
     },
     created() {
@@ -126,8 +139,12 @@
       async loadCredits() {
         this.mitt.emit('spinnerStart')
 
-        const periodCredits = await this.$store.dispatch('admin/fetchPeriodCredits', this.$route.params.id)
-
+        const periodCredits = await this.$store.dispatch('admin/fetchPeriodCredits', {
+          periodId: this.$route.params.id,
+          timesheetId: this.$route.params.timesheet_id,
+        })
+        const timesheet = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.timesheet_id)
+        this.$store.dispatch('admin/setTimesheet', timesheet)
         this.$store.dispatch('admin/setPeriodCredits', periodCredits)
 
         this.mitt.emit('spinnerStop')
@@ -147,7 +164,8 @@
         this.saveAllDisabled = true
 
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
-          id: this.$store.state.admin.periodCredits.period.id,
+          periodId: this.$route.params.id,
+          timesheetId: this.$route.params.timesheet_id,
           credits: this.filteredItems,
         })
 
@@ -181,7 +199,8 @@
           .map(credit => credit.credit_amount = this.creditHours)
 
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
-          id: this.$store.state.admin.periodCredits.period.id,
+          periodId: this.$route.params.id,
+          timesheetId: this.$route.params.timesheet_id,
           credits: selected,
         })
 

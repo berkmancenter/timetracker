@@ -9,14 +9,16 @@ class PeriodsController < ApplicationController
     }
   }.freeze
 
-  # GET /periods
+  # GET /timesheets/:timesheet_id/periods
   # Returns all periods for the current user
   def index
-    periods = Period.user_periods(current_user)
+    timesheet = Timesheet.find(params[:timesheet_id])
+    periods = Period.timesheet_periods(timesheet)
+
     render json: periods.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
-  # GET /periods/:id
+  # GET /timesheets/:timesheet_id/periods/:id
   # Returns a specific period
   def show
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
@@ -24,7 +26,7 @@ class PeriodsController < ApplicationController
     render json: @period.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
   end
 
-  # POST /periods/upsert
+  # POST /timesheets/:timesheet_id/periods/upsert
   # Creates or updates a period
   def upsert
     period = find_or_initialize_period
@@ -39,7 +41,7 @@ class PeriodsController < ApplicationController
     end
   end
 
-  # POST /periods/delete
+  # POST /timesheets/:timesheet_id/periods/delete
   # Deletes periods
   def delete
     periods_ids = params[:periods]
@@ -51,7 +53,7 @@ class PeriodsController < ApplicationController
     render json: { message: 'ok' }, status: :ok
   end
 
-  # GET /periods/:id/credits
+  # GET /timesheets/:timesheet_id/periods/:id/credits
   # Returns the credits for a period
   def credits
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
@@ -65,7 +67,7 @@ class PeriodsController < ApplicationController
     }, status: :ok
   end
 
-  # POST /periods/:id/credits
+  # POST /timesheets/:timesheet_id/periods/:id/credits
   # Sets the credits for a period
   def set_credits
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
@@ -78,7 +80,7 @@ class PeriodsController < ApplicationController
     render json: @period.credits, status: :ok
   end
 
-  # GET /periods/:id/stats
+  # GET /timesheets/:timesheet_id/periods/:id/stats
   # Returns the stats for a period
   def stats
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
@@ -92,7 +94,7 @@ class PeriodsController < ApplicationController
     }, status: :ok
   end
 
-  # POST /periods/:id/clone
+  # POST /timesheets/:timesheet_id/periods/:id/clone
   # Clones a period with its credits
   def clone
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)

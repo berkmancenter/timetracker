@@ -13,19 +13,6 @@
       </div>
 
       <div class="field">
-        <label class="label">Timesheet</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="$store.state.admin.period.timesheet_id" required="true">
-              <option v-for="timesheet in timesheets" :key="timesheet.id" :value="timesheet.id">
-                {{ timesheet.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
         <label class="label">From</label>
         <div class="control">
           <date-picker v-model:value="$store.state.admin.period.from" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="from"></date-picker>
@@ -75,14 +62,24 @@
         let breadcrumbs = []
 
         breadcrumbs.push({
+          text: 'Timesheets',
+          link: '/admin/timesheets',
+        })
+
+        breadcrumbs.push({
+          text: this.$store.state.admin?.timesheet?.name,
+        })
+
+        breadcrumbs.push({
           text: 'Periods',
-          link: '/admin/periods',
+          link: `/admin/timesheets/${this.$store.state.admin?.timesheet?.id}/periods`,
         })
 
         if (this.$route.params.id) {
           breadcrumbs.push({
-            text: this.$store.state.admin.period.name,
+            text: this.$store.state.admin?.period?.name,
           })
+
           breadcrumbs.push({
             text: 'Edit period',
           })
@@ -100,16 +97,18 @@
       this.initialDataLoad()
     },
     methods: {
-      initialDataLoad() {
-        this.loadPeriod()
-      },
-      async loadPeriod() {
+      async initialDataLoad() {
         this.timesheets = await this.$store.dispatch('admin/fetchAdminTimesheets')
+        const timesheet = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.timesheet_id)
+        this.$store.dispatch('admin/setTimesheet', timesheet)
 
         if (this.$route.params.id) {
           this.mitt.emit('spinnerStart')
 
-          const response = await this.$store.dispatch('admin/fetchPeriod', this.$route.params.id)
+          const response = await this.$store.dispatch('admin/fetchPeriod', {
+            timesheetId: this.$route.params.timesheet_id,
+            periodId: this.$route.params.id,
+          })
 
           response.from = new Date(response.from).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -131,13 +130,17 @@
       async save() {
         this.mitt.emit('spinnerStart')
         this.$refs.submitButton.disabled = true
+        this.$store.state.admin.period.timesheet_id = this.$route.params.timesheet_id
 
-        const response = await this.$store.dispatch('admin/savePeriod', this.$store.state.admin.period)
+        const response = await this.$store.dispatch('admin/savePeriod', {
+          timesheet_id: this.$route.params.timesheet_id,
+          period: this.$store.state.admin.period,
+        })
 
         if (response?.ok) {
           this.awn.success('Period has been saved.')
           this.$router.push({
-            path: '/admin/periods'
+            path: `/admin/timesheets/${this.$route.params.timesheet_id}/periods`,
           })
         } else {
           this.awn.warning('Something went wrong, try again.')

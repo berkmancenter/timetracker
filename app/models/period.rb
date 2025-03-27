@@ -48,4 +48,35 @@ class Period < ActiveRecord::Base
             }
           )
   end
+
+  def self.timesheet_periods(timesheet)
+    Period.where(timesheet_id: timesheet.id)
+  end
+
+  def self.user_periods_for_timesheet(user, timesheet)
+    return Period.all if user.superadmin
+
+    Period.joins(timesheet: :users_timesheets)
+          .where(
+            users_timesheets: {
+              user_id: user.id,
+              role: 'admin'
+            },
+            periods: {
+              timesheet_id: timesheet.id
+            }
+          )
+  end
+
+  def self.admin_periods_for_timesheet(timesheet)
+    return Period.all if timesheet.superadmin
+
+    Period.joins(:users_timesheets)
+          .where(
+            users_timesheets: {
+              timesheet_id: timesheet.id,
+              role: 'admin'
+            }
+          )
+  end
 end

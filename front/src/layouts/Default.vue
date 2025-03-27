@@ -35,14 +35,6 @@
         >
           Timesheets
         </router-link>
-
-        <router-link
-          :to="{ name: 'periods.index' }"
-          class="ml-2 top-nav-button top-nav-button-menu"
-          :class="{ 'top-nav-button-menu-active': isMenuItemActive('periods') }"
-        >
-          Periods
-        </router-link>
       </div>
 
       <div class="top-nav-end">
@@ -238,6 +230,7 @@
         align-items: center;
         padding: 0 0.5rem;
         border-radius: 0.5rem;
+        color: #000000;
 
         @media all and (max-width: 700px) {
           display: none;
@@ -308,7 +301,7 @@
     }
 
     @media all and (min-width: 1300px) {
-      max-width: 1500px;
+      max-width: 1200px;
     }
   }
 

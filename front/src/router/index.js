@@ -23,46 +23,6 @@ const router = createRouter({
           name: 'tracker.index',
         },
         {
-          path: 'admin/periods',
-          components: {
-            default: () => import('@/components/Admin/Periods/Index.vue'),
-            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
-          },
-          name: 'periods.index',
-        },
-        {
-          path: 'admin/periods/new',
-          components: {
-            default: () => import('@/components/Admin/Periods/Form.vue'),
-            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
-          },
-          name: 'periods.new',
-        },
-        {
-          path: 'admin/periods/:id/edit',
-          components: {
-            default: () => import('@/components/Admin/Periods/Form.vue'),
-            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
-          },
-          name: 'periods.edit',
-        },
-        {
-          path: 'admin/periods/:id/stats',
-          components: {
-            default: () => import('@/components/Admin/Periods/Stats.vue'),
-            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
-          },
-          name: 'periods.stats',
-        },
-        {
-          path: 'admin/periods/:id/credits',
-          components: {
-            default: () => import('@/components/Admin/Periods/Credits.vue'),
-            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
-          },
-          name: 'periods.credits',
-        },
-        {
           path: 'admin/timesheets',
           components: {
             default: () => import('@/components/Admin/Timesheets/Index.vue'),
@@ -101,6 +61,46 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.users',
+        },
+        {
+          path: 'admin/timesheets/:timesheet_id/periods',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Periods/Index.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'periods.index',
+        },
+        {
+          path: 'admin/timesheets/:timesheet_id/periods/new',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Periods/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'periods.new',
+        },
+        {
+          path: 'admin/timesheets/:timesheet_id/periods/:id/edit',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Periods/Form.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'periods.edit',
+        },
+        {
+          path: 'admin/timesheets/:timesheet_id/periods/:id/stats',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Periods/Stats.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'periods.stats',
+        },
+        {
+          path: 'admin/timesheets/:timesheet_id/periods/:id/credits',
+          components: {
+            default: () => import('@/components/Admin/Timesheets/Periods/Credits.vue'),
+            Sidebar: () => import('@/components/Admin/Sidebar.vue'),
+          },
+          name: 'periods.credits',
         },
         {
           path: 'join/:code',

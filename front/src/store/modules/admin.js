@@ -78,14 +78,14 @@ const actions = {
 
     return data
   },
-  async fetchPeriods(context) {
-    const response = await fetchIt(`${apiUrl}/periods`)
+  async fetchPeriods(context, timesheetId) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${timesheetId}/periods`)
     const data = await response.json()
 
     return data
   },
-  async fetchPeriod(context, id) {
-    const response = await fetchIt(`${apiUrl}/periods/${id}`)
+  async fetchPeriod(context, periodData) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${periodData.timesheetId}/periods/${periodData.periodId}`)
     const data = await response.json()
 
     return data
@@ -108,14 +108,14 @@ const actions = {
 
     return data
   },
-  async fetchPeriodStats(context, id) {
-    const response = await fetchIt(`${apiUrl}/periods/${id}/stats`)
+  async fetchPeriodStats(context, periodData) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${periodData.timesheetId}/periods/${periodData.periodId}/stats`)
     const data = await response.json()
 
     return data
   },
-  async fetchPeriodCredits(context, id) {
-    const response = await fetchIt(`${apiUrl}/periods/${id}/credits`)
+  async fetchPeriodCredits(context, periodData) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${periodData.timesheetId}/periods/${periodData.periodId}/credits`)
     const data = await response.json()
 
     return data
@@ -207,15 +207,15 @@ const actions = {
 
     return response
   },
-  async savePeriod(context, period) {
-    const response = await fetchIt(`${apiUrl}/periods/upsert`, {
+  async savePeriod(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/upsert`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        period: period,
+        period: data.period,
       }),
     })
 
@@ -252,22 +252,22 @@ const actions = {
 
     return response
   },
-  async deletePeriods(context, periods) {
-    const response = await fetchIt(`${apiUrl}/periods/delete`, {
+  async deletePeriods(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/delete`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        periods: periods,
+        periods: data.periods,
       }),
     })
 
     return response
   },
   async savePeriodCredits(context, data) {
-    const response = await fetchIt(`${apiUrl}/periods/${data.id}/set_credits`, {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/${data.periodId}/set_credits`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -280,8 +280,8 @@ const actions = {
 
     return response
   },
-  async clonePeriod(context, periodId) {
-    const response = await fetchIt(`${apiUrl}/periods/${periodId}/clone`, {
+  async clonePeriod(context, data) {
+    const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/${data.periodId}/clone`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',

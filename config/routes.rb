@@ -30,20 +30,6 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :periods do
-    member do
-      get :credits
-      get :stats
-      post :stats
-      post :set_credits
-      post :clone
-    end
-    collection do
-      post :upsert
-      post :delete
-    end
-  end
-
   resources :timesheets do
     collection do
       post :upsert
@@ -57,6 +43,20 @@ Rails.application.routes.draw do
       get :users
       post :delete_users
       post :change_users_role
+    end
+
+    resources :periods do
+      member do
+        get :credits
+        get :stats
+        post :stats
+        post :set_credits
+        post :clone
+      end
+      collection do
+        post :upsert
+        post :delete
+      end
     end
   end
 

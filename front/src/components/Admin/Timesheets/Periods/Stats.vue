@@ -75,18 +75,31 @@
     },
     computed: {
       breadcrumbs() {
-        return [
-          {
-            text: 'Periods',
-            link: '/admin/periods',
-          },
-          {
-            text: this.$store.state.admin.periodStats?.period?.name,
-          },
-          {
-            text: 'Statistics',
-          },
-        ]
+        let breadcrumbs = []
+
+        breadcrumbs.push({
+          text: 'Timesheets',
+          link: '/admin/timesheets',
+        })
+
+        breadcrumbs.push({
+          text: this.$store.state.admin?.timesheet?.name,
+        })
+
+        breadcrumbs.push({
+          text: 'Periods',
+          link: `/admin/timesheets/${this.$store.state.admin?.timesheet?.id}/periods`,
+        })
+
+        breadcrumbs.push({
+          text: this.$store.state.admin.periodStats?.period?.name,
+        })
+
+        breadcrumbs.push({
+          text: 'Statistics',
+        })
+
+        return breadcrumbs
       },
     },
     created() {
@@ -99,8 +112,12 @@
       async loadStats() {
         this.mitt.emit('spinnerStart')
 
-        const periodStats = await this.$store.dispatch('admin/fetchPeriodStats', this.$route.params.id)
-
+        const periodStats = await this.$store.dispatch('admin/fetchPeriodStats', {
+          periodId: this.$route.params.id,
+          timesheetId: this.$route.params.timesheet_id,
+        })
+        const timesheet = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.timesheet_id)
+        this.$store.dispatch('admin/setTimesheet', timesheet)
         this.$store.dispatch('admin/setPeriodStats', periodStats)
 
         this.mitt.emit('spinnerStop')
@@ -113,7 +130,7 @@
           .map(user => user.user_id)
           .join(',')
 
-        window.location.href = `${this.apiUrl}/periods/${this.$route.params.id}/stats?csv=true&user_ids=${usersIds}`
+        window.location.href = `${this.apiUrl}/timesheets/${this.$route.params.timesheet_id}/periods/${this.$route.params.id}/stats?csv=true&user_ids=${usersIds}`
       },
     },
   }
