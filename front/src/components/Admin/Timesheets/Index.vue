@@ -36,6 +36,9 @@
                 <router-link title="Invite users to timesheet" :to="`/admin/timesheets/${timesheet.id}/invite`" v-if="adminInTimesheet(timesheet)">
                   <Icon :src="inviteIcon" />
                 </router-link>
+                <router-link title="Periods" :to="`/admin/timesheets/${timesheet.id}/periods`" v-if="adminInTimesheet(timesheet)">
+                  <Icon :src="periodIcon" />
+                </router-link>
                 <router-link title="List of timesheet users" :to="`/admin/timesheets/${timesheet.id}/users`" v-if="adminInTimesheet(timesheet)">
                   <Icon :src="usersIcon" />
                 </router-link>
@@ -88,6 +91,7 @@
   import leaveIcon from '@/images/leave.svg'
   import usersIcon from '@/images/users.svg'
   import addIcon from '@/images/add_white.svg'
+  import periodIcon from '@/images/period.svg'
 
   import orderBy from 'lodash/orderBy'
   import { formatIsoDateTimeToLocaleString, getTimestamp } from '@/lib/date-time.js'
@@ -115,6 +119,7 @@
         leaveIcon,
         usersIcon,
         addIcon,
+        periodIcon,
 
         removeTimesheetModalStatus: false,
         removeTimesheetModalCurrent: null,

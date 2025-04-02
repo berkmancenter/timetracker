@@ -26,10 +26,6 @@
             label: 'Timesheets',
             name: 'timesheets.index',
           },
-          {
-            label: 'Periods',
-            name: 'periods.index',
-          },
         ],
       }
     },
