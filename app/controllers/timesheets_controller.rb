@@ -31,6 +31,13 @@ class TimesheetsController < ApplicationController
 
     return unless authorize_user_for_timesheet!(timesheet) if timesheet.persisted?
 
+    # Check if there's at least one non-destroyed timesheet field
+    has_valid_fields = timesheet_params[:timesheet_fields_attributes]&.any? do |field|
+      field[:_destroy].nil? || field[:_destroy].to_s != 'true'
+    end
+
+    return render_bad_request('Timesheet must have at least one field') unless has_valid_fields
+
     if timesheet.save
       assign_current_user_as_admin(timesheet) if new_record
       render json: { timesheet: timesheet }, status: :ok

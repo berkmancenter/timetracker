@@ -236,8 +236,8 @@ const actions = {
     return response
   },
   async saveTimesheet(context, timesheet) {
+    // To make Rails (backend) happy we need to rename timesheet_fields to timesheet_fields_attributes
     timesheet.timesheet_fields_attributes = timesheet.timesheet_fields
-    delete timesheet.timesheet_fields
 
     const response = await fetchIt(`${apiUrl}/timesheets/upsert`, {
       method: 'POST',

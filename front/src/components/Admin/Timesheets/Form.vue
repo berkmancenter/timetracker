@@ -15,6 +15,10 @@
       <div class="field admin-timesheets-form-fields">
         <label class="label">Fields</label>
 
+        <div class="notification" v-if="filteredFields.length === 0">
+          You need are least 1 field to be able to save the timesheet.
+        </div>
+
         <div class="admin-timesheets-form-fields-field" v-for="field in filteredFields" :key="field.id">
           <div class="field">
             <label class="label">Title</label>
@@ -180,6 +184,11 @@
         }
       },
       async save() {
+        if (this.$store.state.admin.timesheet.timesheet_fields.length === 0) {
+          this.awn.warning('You need at least 1 field to be able to save the timesheet.')
+          return
+        }
+
         this.mitt.emit('spinnerStart')
         this.$refs.submitButton.disabled = true
 
