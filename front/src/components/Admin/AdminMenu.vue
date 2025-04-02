@@ -5,7 +5,8 @@
     <div class="switmenu-section-content">
       <ul>
         <li v-for="adminMenuItem in adminMenuItems">
-          <router-link :to="adminMenuItem" :class="adminMenuItem.class" @click="hideMenuMobile">{{ adminMenuItem.label }}</router-link>
+          <router-link v-if="!adminMenuItem.external" :to="adminMenuItem" :class="adminMenuItem.class" @click="hideMenuMobile">{{ adminMenuItem.label }}</router-link>
+          <a v-if="adminMenuItem.external" :href="adminMenuItem.link" :class="adminMenuItem.class" @click="hideMenuMobile" target="_blank">{{ adminMenuItem.label }}</a>
         </li>
       </ul>
     </div>
@@ -26,6 +27,11 @@
             label: 'Timesheets',
             name: 'timesheets.index',
           },
+          {
+            label: 'Help',
+            external: true,
+            link: 'https://berkman-klein-center.gitbook.io/timetracker',
+          }
         ],
       }
     },
