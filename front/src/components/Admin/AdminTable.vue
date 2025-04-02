@@ -68,5 +68,47 @@
 </script>
 
 <style lang="scss">
-  @import '@/assets/scss/admin-table.scss'
+  .admin-table-wrapper {
+    overflow-x: auto;
+  }
+
+  table.table.admin-table {
+    width: 100%;
+
+    td {
+      word-break: break-word;
+      vertical-align: middle;
+    }
+
+    input[type=checkbox] {
+      transform: scale(2);
+      cursor: pointer;
+    }
+
+    &.table-hovered {
+      tbody {
+        tr:hover {
+          background-color: #e4e4e4;
+
+          td {
+            background-color: #e4e4e4;
+          }
+        }
+      }
+    }
+  }
+
+  .admin-table-actions {
+    width: 12rem;
+
+    img {
+      &:hover {
+        background-color: #ffffff;
+      }
+    }
+  }
+
+  .admin-table-selector {
+    width: 6rem;
+  }
 </style>

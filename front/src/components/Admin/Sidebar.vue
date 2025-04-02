@@ -1,16 +1,19 @@
 <template>
   <div>
-    <admin-menu />
+    <main-menu
+      header-class="switmenu-section-header"
+      content-class="switmenu-section-content"
+    />
   </div>
 </template>
 
 <script>
-  import AdminMenu from '@/components/Admin/AdminMenu.vue'
+  import MainMenu from '@/components/Shared/Menu.vue'
 
   export default {
     name: 'AdminSidebar',
     components: {
-      AdminMenu,
+      MainMenu,
     },
     mounted() {
       document.body.classList.add('tracker-admin')

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-menu />
+    <main-menu />
     <timesheet-select></timesheet-select>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <month-select></month-select>
@@ -15,7 +15,7 @@
   import MonthSelect from '@/components/Tracker/MonthSelect.vue'
   import TimesheetSelect from '@/components/Tracker/TimesheetSelect.vue'
   import Popular from '@/components/Tracker/Popular.vue'
-  import AdminMenu from '@/components/Admin/AdminMenu.vue'
+  import MainMenu from '@/components/Shared/Menu.vue'
 
   export default {
     name: 'Sidebar',
@@ -25,7 +25,7 @@
       MonthSelect,
       TimesheetSelect,
       Popular,
-      AdminMenu,
+      MainMenu,
     },
     mounted() {
       document.body.classList.add('tracker-entries')
@@ -38,7 +38,7 @@
 
 <style lang="scss">
   .tracker-entries {
-    .admin-menu {
+    .timetracker-menu {
       @media all and (min-width: 701px) {
         display: none;
       }
