@@ -42,7 +42,17 @@ RSpec.describe TimesheetsController, type: :controller do
     describe 'POST #upsert' do
     it 'creates a new timesheet' do
       expect do
-        post :upsert, params: { timesheet: { name: 'New Timesheet' } }
+        post :upsert, params: {
+          timesheet: {
+            name: 'New Timesheet',
+            timesheet_fields_attributes: [
+              {
+                title: 'Category',
+                input_type: 'text'
+              }
+            ]
+          }
+        }
       end.to change(Timesheet, :count).by(1)
 
       expect(response).to have_http_status(:ok)
@@ -50,10 +60,21 @@ RSpec.describe TimesheetsController, type: :controller do
     end
 
     it 'updates an existing timesheet' do
-      existing_timesheet = create(:timesheet, name: 'Existing Timesheet')
+      existing_timesheet = create(:timesheet, :with_fields, name: 'Existing Timesheet')
       create(:users_timesheet, user: user, timesheet: existing_timesheet, role: 'admin')
 
-      post :upsert, params: { timesheet: { id: existing_timesheet.id, name: 'Updated Timesheet' } }
+      post :upsert, params: {
+        timesheet: {
+          id: existing_timesheet.id,
+          name: 'Updated Timesheet',
+          timesheet_fields_attributes: [
+            {
+              title: 'Category 123',
+              input_type: 'text'
+            }
+          ]
+        }
+      }
 
       existing_timesheet.reload
       expect(existing_timesheet.name).to eq('Updated Timesheet')
@@ -64,7 +85,7 @@ RSpec.describe TimesheetsController, type: :controller do
       post :upsert, params: { timesheet: { name: nil } }
 
       expect(response).to have_http_status(:bad_request)
-      expect(JSON.parse(response.body)['message']).to include("Name can't be blank")
+      expect(JSON.parse(response.body)['message']).to include('Timesheet must have at least one field')
     end
   end
 

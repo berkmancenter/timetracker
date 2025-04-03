@@ -17,6 +17,8 @@ feature 'Timesheets' do
     visit front_path('admin/timesheets/new')
 
     fill_in 'Name', with: 'Bright new timesheet'
+    page.find('a[title="Add new field"]').click
+    fill_in 'Title', with: 'Bright new field'
     click_on 'Submit'
 
     expect(page).to have_content('Create new timesheets for yourself')
