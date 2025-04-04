@@ -354,4 +354,15 @@
     background: rgb(209, 184, 185);
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
   }
+
+  // Admin customizations
+  .tracker-admin {
+    .side-menu-toggler {
+      display: none;
+
+      @media all and (max-width: 700px) {
+        display: block;
+      }
+    }
+  }
 </style>

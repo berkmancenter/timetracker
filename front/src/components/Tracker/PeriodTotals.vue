@@ -24,7 +24,7 @@
           <template v-for="(item, index) in $store.state.tracker.periodTotals" :key="index">
             <tr>
               <td>{{ item.date }}</td>
-              <td>{{ item.total_hours }}</td>
+              <td class="tracker-period-totals-number-cell">{{ item.total_hours }}</td>
             </tr>
             <tr v-if="$store.state.shared.user.sudoMode">
               <td colspan="2">{{ item.email }}</td>
@@ -105,6 +105,11 @@
         border-color: hsl(229, 53%, 53%);
         z-index: 4;
       }
+    }
+
+    &-number-cell {
+      width: 4rem;
+      text-align: right !important;
     }
   }
 </style>

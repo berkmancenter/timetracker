@@ -11,11 +11,11 @@
             </tr>
             <tr>
               <td>Total hours</td>
-              <td>{{ $store.state.tracker.totalCurrentTimesheet }}</td>
+              <td class="tracker-totals-number-cell">{{ $store.state.tracker.totalCurrentTimesheet }}</td>
             </tr>
             <tr v-if="$store.state.tracker.selectedMonth !== 'all'">
               <td>Total hours in current month</td>
-              <td>{{ $store.state.tracker.totalCurrentMonth }}</td>
+              <td class="tracker-totals-number-cell">{{ $store.state.tracker.totalCurrentMonth }}</td>
             </tr>
           </tbody>
         </table>
@@ -38,5 +38,10 @@
 <style lang="scss">
   .tracker-totals {
     background-color: #ffffff;
+
+    &-number-cell {
+      width: 4rem;
+      text-align: right !important;
+    }
   }
 </style>

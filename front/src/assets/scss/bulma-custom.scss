@@ -9,7 +9,7 @@
   &:hover,
   &:active,
   &:focus {
-    background-color: var(--blue-stronger-color) !important;
+    background-color: var(--blue-lighter-color) !important;
   }
 }
 
@@ -31,4 +31,8 @@
   ul {
     margin: 0;
   }
+}
+
+.notification {
+  padding: 0.5rem 1rem;
 }

@@ -36,7 +36,7 @@ RSpec.describe TimeEntriesController, type: :controller do
     end
 
     it 'returns time entries as CSV if csv param is present' do
-      timesheet = create(:timesheet)
+      timesheet = create(:timesheet, :with_fields)
       create(:time_entry, user: user, timesheet: timesheet)
       create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
 

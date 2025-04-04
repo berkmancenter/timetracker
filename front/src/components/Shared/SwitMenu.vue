@@ -29,6 +29,7 @@
       }
     },
     mounted () {
+      const that = this
       this.mitt.on('closeSideMenu', () => that.closeMenu())
 
       this.button = document.querySelector(this.buttonSelector)
@@ -45,7 +46,6 @@
 
       this.button.onclick = this.toggleMenu
 
-      const that = this
       document.querySelectorAll('.switmenu-menu a').forEach(function(element) {
         if (that.closeOnClick) {
           element.onclick = function() {
@@ -85,17 +85,24 @@
       overflow-y: auto;
       overflow-x: hidden;
       width: 25%;
-      top: 5.5rem;
+      top: 4.5rem;
       bottom: 0;
       left: 0;
       z-index: 1;
-      display: none;
-      background-color: var(--super-light-color);
+      background-color: var(--greyish-color);
+      padding-top: 1rem;
       padding-bottom: 1rem;
       padding-right: 0.5rem;
-      border-right: 2px solid #F5F5F6;
-
+      transform: translateX(-100%);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), 
+                  opacity 0.3s ease-in-out;
+      will-change: transform, opacity;
+      
       &-active {
+        transform: translateX(0);
+        opacity: 1;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         display: block;
       }
 
@@ -112,6 +119,7 @@
 
       .switmenu-content {
         margin-left: calc(25% + 1rem);
+        transform: scale(0.98);
 
         @media all and (max-width: 1600px) { margin-left: calc(30% + 1rem); }
         @media all and (max-width: 1300px) { margin-left: calc(35% + 1rem); }
@@ -128,10 +136,12 @@
           box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
           user-select: none;
           display: flex;
+          animation: fadeIn 0.4s ease-in-out forwards;
         }
 
         &-content {
           padding: 0 1rem;
+          animation: slideUp 0.5s ease-out forwards;
 
           table {
             width: 100%;
@@ -149,6 +159,10 @@
       padding-top: 0.5rem;
       box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
       overflow: hidden;
+      transition: margin-left 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                  transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      will-change: transform, margin-left;
+      transform: scale(1);
 
       @media all and (max-width: 700px) {
         margin-left: 0;
@@ -157,5 +171,15 @@
         margin-top: 4rem;
       }
     }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>

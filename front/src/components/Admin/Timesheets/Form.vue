@@ -15,19 +15,23 @@
       <div class="field admin-timesheets-form-fields">
         <label class="label">Fields</label>
 
-        <div class="admin-timesheets-form-fields-field" v-for="field in filteredFields" :key="field.id">
+        <div class="notification" v-if="filteredFields.length === 0">
+          You need are least 1 field to be able to save the timesheet.
+        </div>
+
+        <div class="admin-timesheets-form-fields-field" v-for="(field, index) in filteredFields" :key="field.id || index">
           <div class="field">
-            <label class="label">Title</label>
+            <label class="label" :for="`field-title-${index}`">Title</label>
             <div class="control">
-              <input class="input" type="text" v-model="field.title" required="true">
+              <input class="input" type="text" v-model="field.title" required="true" :id="`field-title-${index}`">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Type</label>
+            <label class="label" :for="`field-type-${index}`">Type</label>
             <div class="control">
               <div class="select">
-                <select v-model="field.input_type" required="true">
+                <select v-model="field.input_type" required="true" :id="`field-type-${index}`">
                   <option value="text">
                     Short text
                   </option>
@@ -40,10 +44,10 @@
           </div>
 
           <div class="field">
-            <label class="label">Show top values in sidebar</label>
+            <label class="label" :for="`field-popular-${index}`">Show top values in sidebar</label>
             <div class="control">
               <div class="select">
-                <select v-model="field.popular" required="true">
+                <select v-model="field.popular" required="true" :id="`field-popular-${index}`">
                   <option value="true">
                     Yes
                   </option>
@@ -56,10 +60,10 @@
           </div>
 
           <div class="field">
-            <label class="label">Show in time entries table</label>
+            <label class="label" :for="`field-list-${index}`">Show in time entries table</label>
             <div class="control">
               <div class="select">
-                <select v-model="field.list" required="true">
+                <select v-model="field.list" required="true" :id="`field-list-${index}`">
                   <option value="true">
                     Yes
                   </option>
@@ -180,6 +184,11 @@
         }
       },
       async save() {
+        if (this.$store.state.admin.timesheet.timesheet_fields.length === 0) {
+          this.awn.warning('You need at least 1 field to be able to save the timesheet.')
+          return
+        }
+
         this.mitt.emit('spinnerStart')
         this.$refs.submitButton.disabled = true
 

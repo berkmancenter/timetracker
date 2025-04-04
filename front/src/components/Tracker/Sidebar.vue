@@ -1,6 +1,9 @@
 <template>
   <div>
-    <main-menu />
+    <main-menu
+      header-class="switmenu-section-header"
+      content-class="switmenu-section-content"
+    />
     <timesheet-select></timesheet-select>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
     <month-select></month-select>
