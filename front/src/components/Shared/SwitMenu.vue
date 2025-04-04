@@ -119,7 +119,6 @@
 
       .switmenu-content {
         margin-left: calc(25% + 1rem);
-        transform: scale(0.98);
 
         @media all and (max-width: 1600px) { margin-left: calc(30% + 1rem); }
         @media all and (max-width: 1300px) { margin-left: calc(35% + 1rem); }
