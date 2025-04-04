@@ -55,7 +55,7 @@
   </Modal>
 
   <ActionButton
-    class="is-success"
+    class="is-success mb-2"
     :icon="addIcon"
     buttonText="Add time entry"
     @click="openForm()"
