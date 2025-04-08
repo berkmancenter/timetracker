@@ -1,32 +1,33 @@
 <template>
   <VueFinalModal
-    class="tracker-modal"
-    content-class="tracker-modal-content"
+    class="timetracker-modal"
+    content-class="timetracker-modal-content"
     overlay-transition="vfm-fade"
     content-transition="vfm-fade"
     @opened="opened()"
     @closed="closed()"
+    :clickOutside="clickOutside"
   >
-    <div class="tracker-modal-title is-size-4">
-      <div class="tracker-modal-title-text">{{ title }}</div>
-      <div class="tracker-modal-title-close" @click="$emit('cancel')">
+    <div class="timetracker-modal-title is-size-4">
+      <div class="timetracker-modal-title-text">{{ title }}</div>
+      <div class="timetracker-modal-title-close" @click="$emit('cancel')">
         <Icon :src="closeIcon" />
       </div>
     </div>
 
-    <div class="tracker-modal-content-wrapper">
-      <div class="tracker-modal-content-slot">
+    <div class="timetracker-modal-content-wrapper">
+      <div class="timetracker-modal-content-slot">
         <slot />
       </div>
 
-      <div class="tracker-modal-buttons pt-5 mt-5">
-        <button class="tracker-modal-buttons-confirm button is-success ld-ext-right" :class="{ running: working }" accesskey="s" @click="$emit('confirm')" ref="confirmButton">
+      <div class="timetracker-modal-buttons pt-5 mt-5">
+        <button class="timetracker-modal-buttons-confirm button is-success ld-ext-right" :class="{ running: working }" v-if="showConfirmButton" accesskey="s" @click="$emit('confirm')" ref="confirmButton">
           {{ confirmButtonTitle }}
           <div class="ld ld-ring ld-spin"></div>
         </button>
 
-        <button class="button ml-2" @click="$emit('cancel')">
-          Cancel
+        <button class="button ml-2" @click="$emit('cancel')" v-if="showCancelButton">
+          {{ cancelButtonTitle }}
         </button>
       </div>
     </div>
@@ -56,10 +57,30 @@
         required: false,
         default: 'Confirm',
       },
+      cancelButtonTitle: {
+        type: String,
+        required: false,
+        default: 'Cancel',
+      },
       focusOnConfirm: {
         type: Boolean,
         required: false,
         default: true,
+      },
+      showConfirmButton: {
+        type: Boolean,
+        required: false,
+        default: true,
+      },
+      showCancelButton: {
+        type: Boolean,
+        required: false,
+        default: true,
+      },
+      clickOutside: {
+        type: Function,
+        required: false,
+        default: () => {},
       },
     },
     components: {
@@ -86,7 +107,7 @@
 </script>
 
 <style lang="scss">
-  $tm: "tracker-modal";
+  $tm: "timetracker-modal";
 
   .#{$tm} {
     display: flex;
@@ -112,6 +133,7 @@
       display: flex;
       align-items: center;
       user-select: none;
+      height: 3.5rem;
 
       &-text {
         padding: 0.5rem 1rem;
@@ -147,9 +169,12 @@
       border-radius: 0.5rem;
       width: 32em;
       max-width: 100%;
+      margin: 0 auto;
 
       &-wrapper {
         padding: 1rem;
+        max-height: calc(100vh - 6.5rem);
+        overflow-y: scroll;
       }
 
       > * + * {

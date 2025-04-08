@@ -53,14 +53,6 @@
       </form>
     </div>
   </Modal>
-
-  <ActionButton
-    class="is-success mb-2"
-    :icon="addIcon"
-    buttonText="Add time entry"
-    @click="openForm()"
-    :button="true"
-  />
 </template>
 
 <script>
@@ -199,6 +191,7 @@
       },
       initEvents() {
         const that = this
+        this.mitt.on('addEntry', () => that.openForm(true))
         this.mitt.on('editEntry', () => that.openForm())
         this.mitt.on('cloneEntry', () => that.openForm())
         this.mitt.on('popularSelected', () => that.openForm())
