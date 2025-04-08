@@ -1,5 +1,31 @@
 <template>
   <div class="tracker-entries">
+    <div class="tracker-entries-navigation">
+      <ActionButton
+        class="is-success mb-2"
+        :icon="addIcon"
+        buttonText="Add time entry"
+        @click="openForm()"
+        :button="true"
+      />
+
+      <div class="tracker-entries-navigation-dates">
+        <router-link :to="'/admin/timesheets/new'">
+          <ActionButton
+            buttonText="Prev month"
+            :button="true"
+          />
+        </router-link>
+
+        <router-link :to="'/admin/timesheets/new'">
+          <ActionButton
+            buttonText="Next month"
+            :button="true"
+          />
+        </router-link>
+      </div>
+    </div>
+
     <div v-if="$store.state.shared.user.sudoMode" class="message is-warning mt-2">
       <div class="message-body">
         <div><strong>You are viewing time entries of</strong></div>
@@ -117,32 +143,39 @@
 
 <script>
   import Icon from '@/components/Shared/Icon.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
+  import Modal from '@/components/Shared/Modal.vue'
+
   import dayjs from 'dayjs'
   import utc from 'dayjs/plugin/utc'
+  import { redirectToSelectedMonth } from '@/router/index'
+  import { hideAllPoppers } from 'floating-vue'
+
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
   import dropdownIcon from '@/images/dropdown.svg'
-  import { redirectToSelectedMonth } from '@/router/index'
-  import Modal from '@/components/Shared/Modal.vue'
-  import { hideAllPoppers } from 'floating-vue'
+  import addIcon from '@/images/add_white.svg'
 
   export default {
     name: 'Entries',
     components: {
       Icon,
       Modal,
+      ActionButton,
     },
     data() {
       return {
-        minusIcon,
-        cloneIcon,
-        editIcon,
-        dropdownIcon,
         redirectToSelectedMonth,
         deleteEntryModalStatus: false,
         deleteEntryCurrent: null,
         actionsShow: false,
+
+        minusIcon,
+        cloneIcon,
+        editIcon,
+        dropdownIcon,
+        addIcon,
       }
     },
     computed: {
@@ -475,6 +508,23 @@
       .tracker-entries-entry-meta {
         &:last-child {
           border-right: 1px solid var(--grey-from-bulma);
+        }
+      }
+    }
+
+    &-navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--grey-from-bulma);
+
+      .tracker-entries-navigation-dates {
+        display: flex;
+        align-items: center;
+
+        a {
+          margin-left: 0.5rem;
         }
       }
     }

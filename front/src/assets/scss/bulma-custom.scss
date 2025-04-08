@@ -6,9 +6,7 @@
   background-color: var(--blue-stronger-color);
   color: #fff;
 
-  &:hover,
-  &:active,
-  &:focus {
+  &:hover {
     background-color: var(--blue-lighter-color) !important;
   }
 }
@@ -16,9 +14,7 @@
 .button.is-info {
   background-color: var(--grey-color);
 
-  &:hover,
-  &:active,
-  &:focus {
+  &:hover {
     background-color: var(--grey-color) !important;
   }
 }

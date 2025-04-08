@@ -6,7 +6,7 @@
     @click="handleClick"
     v-bind:disabled="disabled ? true : null"
   >
-    <Icon :src="icon" :interactive="false" />
+    <Icon :src="icon" :interactive="false" v-if="icon" />
     <div>{{ buttonText }}</div>
   </component>
 </template>
