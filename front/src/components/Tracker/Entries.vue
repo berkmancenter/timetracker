@@ -19,7 +19,7 @@
         />
 
         <ActionButton
-          buttonText=""
+          :buttonText="$store.state.tracker.selectedMonth"
           :button="true"
           :icon="monthIcon"
           class="ml-2"
