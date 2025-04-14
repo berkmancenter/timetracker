@@ -1,5 +1,44 @@
 <template>
   <div class="tracker-entries">
+    <div class="tracker-entries-navigation">
+      <ActionButton
+        class="is-success mb-2"
+        :icon="addIcon"
+        buttonText="Add time entry"
+        @click="openForm()"
+        :button="true"
+      />
+
+      <div class="tracker-entries-navigation-dates">
+        <ActionButton
+          buttonText="Prev month"
+          :button="true"
+          :icon="prevIcon"
+          :disabled="!hasPreviousMonth()"
+          @click="redirectToPreviousMonth()"
+        />
+
+        <ActionButton
+          buttonText=""
+          :button="true"
+          :icon="monthIcon"
+          class="ml-2"
+          :disabled="$store.state.tracker.months.length === 0"
+          @click="openMonthsSelector()"
+        />
+
+        <ActionButton
+          buttonText="Next month"
+          :button="true"
+          :icon="nextIcon"
+          icon-position="right"
+          :disabled="!hasNextMonth()"
+          @click="redirectToNextMonth()"
+          class="ml-2"
+        />
+      </div>
+    </div>
+
     <div v-if="$store.state.shared.user.sudoMode" class="message is-warning mt-2">
       <div class="message-body">
         <div><strong>You are viewing time entries of</strong></div>
@@ -113,36 +152,67 @@
   >
     Are you sure you remove the entry?
   </Modal>
+
+  <Modal
+    v-model="selectMonthModalStatus"
+    title="Select month"
+    @cancel="selectMonthModalStatus = false"
+    :showConfirmButton="false"
+  >
+    <div
+      class="tracker-entries-months-selector-month button is-light"
+      v-for="month in $store.state.tracker.months"
+      :key="month"
+      @click="changeMonth(month)"
+    >
+      {{ month }}
+    </div>
+  </Modal>
 </template>
 
 <script>
   import Icon from '@/components/Shared/Icon.vue'
+  import ActionButton from '@/components/Shared/ActionButton.vue'
+  import Modal from '@/components/Shared/Modal.vue'
+
   import dayjs from 'dayjs'
   import utc from 'dayjs/plugin/utc'
+  import { redirectToSelectedMonth } from '@/router/index'
+  import { hideAllPoppers } from 'floating-vue'
+
   import minusIcon from '@/images/minus.svg'
   import cloneIcon from '@/images/clone.svg'
   import editIcon from '@/images/edit.svg'
   import dropdownIcon from '@/images/dropdown.svg'
-  import { redirectToSelectedMonth } from '@/router/index'
-  import Modal from '@/components/Shared/Modal.vue'
-  import { hideAllPoppers } from 'floating-vue'
+  import addIcon from '@/images/add_white.svg'
+  import prevIcon from '@/images/prev.svg'
+  import nextIcon from '@/images/next.svg'
+  import monthIcon from '@/images/month.svg'
 
   export default {
     name: 'Entries',
     components: {
       Icon,
       Modal,
+      ActionButton,
     },
     data() {
       return {
-        minusIcon,
-        cloneIcon,
-        editIcon,
-        dropdownIcon,
         redirectToSelectedMonth,
         deleteEntryModalStatus: false,
         deleteEntryCurrent: null,
         actionsShow: false,
+        monthsSelectorVisible: false,
+        selectMonthModalStatus: false,
+
+        minusIcon,
+        cloneIcon,
+        editIcon,
+        dropdownIcon,
+        addIcon,
+        prevIcon,
+        nextIcon,
+        monthIcon,
       }
     },
     computed: {
@@ -291,6 +361,73 @@
       closeMenu(entry) {
         entry.active = false
         entry.menuOpen = false
+      },
+      openForm() {
+        this.mitt.emit('addEntry')
+      },
+      hasPreviousMonth() {
+        return this.$store.state.tracker.months[0] && this.$store.state.tracker.months[0] !== this.$store.state.tracker.selectedMonth
+      },
+      hasNextMonth() {
+        return this.$store.state.tracker.months[this.$store.state.tracker.months.length - 1] && this.$store.state.tracker.months[this.$store.state.tracker.months.length - 1] !== this.$store.state.tracker.selectedMonth
+      },
+      async redirectToMonth(direction) {
+        const months = this.$store.state.tracker.months
+        const currentMonthIndex = months.indexOf(this.$store.state.tracker.selectedMonth)
+        const offset = direction === 'next' ? 1 : -1
+        const targetMonth = months[currentMonthIndex + offset]
+
+        if (!targetMonth) return
+
+        this.mitt.emit('spinnerStart')
+
+        this.$store.commit('tracker/setSelectedMonth', targetMonth)
+
+        this.$router.push({
+          name: 'tracker.index',
+          params: {
+            timesheet: this.$store.state.tracker.selectedTimesheet.uuid,
+            month: targetMonth,
+          }
+        })
+
+        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+
+        this.mitt.emit('spinnerStop')
+      },
+      async redirectToPreviousMonth() {
+        if (this.hasPreviousMonth()) {
+          await this.redirectToMonth('previous')
+        }
+      },
+      async redirectToNextMonth() {
+        if (this.hasNextMonth()) {
+          await this.redirectToMonth('next')
+        }
+      },
+      async changeMonth(targetMonth) {
+        this.$store.commit('tracker/setSelectedMonth', targetMonth)
+
+        this.mitt.emit('spinnerStart')
+
+        this.$router.push(
+          {
+            name: 'tracker.index',
+            params: {
+              timesheet: this.$store.state.tracker.selectedTimesheet.uuid,
+              month: this.$store.state.tracker.selectedMonth,
+            }
+          }
+        )
+
+        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+
+        this.mitt.emit('spinnerStop')
+
+        this.selectMonthModalStatus = false
+      },
+      openMonthsSelector() {
+        this.selectMonthModalStatus = true
       },
     }
   }
@@ -477,6 +614,39 @@
           border-right: 1px solid var(--grey-from-bulma);
         }
       }
+    }
+
+    &-navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--grey-from-bulma);
+
+      .tracker-entries-navigation-dates {
+        display: flex;
+        align-items: center;
+
+        a {
+          margin-left: 0.5rem;
+        }
+
+        &-cal {
+          position: relative;
+
+          select {
+            position: absolute;
+            top: 3rem;
+            left: 0;
+          }
+        }
+      }
+    }
+
+    &-months-selector-month {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
     }
   }
 
