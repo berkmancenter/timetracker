@@ -2,7 +2,7 @@
   <div class="tracker-entries">
     <div class="tracker-entries-navigation">
       <ActionButton
-        class="is-success mb-2"
+        class="is-success"
         :icon="addIcon"
         buttonText="Add time entry"
         @click="openForm()"
@@ -11,7 +11,7 @@
 
       <div class="tracker-entries-navigation-dates">
         <ActionButton
-          buttonText="Prev month"
+          buttonText="Previous month"
           :button="true"
           :icon="prevIcon"
           :disabled="!hasPreviousMonth()"
@@ -25,6 +25,7 @@
           class="ml-2"
           :disabled="$store.state.tracker.months.length === 0"
           @click="openMonthsSelector()"
+          title="Select month"
         />
 
         <ActionButton
@@ -435,6 +436,9 @@
 
 <style lang="scss">
   .tracker-entries {
+    container-name: tracker-entries;
+    container-type: inline-size;
+
     .tracker-entries-header,
     .tracker-entries-date-row,
     .tracker-entries-entry-decimal-time {
@@ -653,6 +657,18 @@
   .time-entries-entry-has-description {
     .tracker-entries-entry-meta {
       border-bottom: 1px solid var(--grey-from-bulma);
+    }
+  }
+
+  @container tracker-entries (width < 600px) {
+    .tracker-entries-navigation {
+      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: center;
+
+      &-dates {
+        margin-top: 1rem;
+      }
     }
   }
 

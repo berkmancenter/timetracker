@@ -135,7 +135,6 @@
           box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
           user-select: none;
           display: flex;
-          animation: fadeIn 0.4s ease-in-out forwards;
         }
 
         &-content {
@@ -170,11 +169,6 @@
         margin-top: 4rem;
       }
     }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
   }
 
   @keyframes slideUp {
