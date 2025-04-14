@@ -124,7 +124,7 @@ class TimeEntry < ActiveRecord::Base
       daily_hours[formatted_date] ||= {}
       daily_hours[formatted_date]['users'] ||= {}
       daily_hours[formatted_date]['users'][entry.email] ||= 0
-      daily_hours[formatted_date]['users'][entry.email] += entry.total_hours.to_f
+      daily_hours[formatted_date]['users'][entry.email] += entry.total_hours.to_d
     end
 
     # Return nicer keyed structure
@@ -133,7 +133,7 @@ class TimeEntry < ActiveRecord::Base
       daily_hours_record['users'].each do |email, daily_hours_user_record|
         final_daily_hours << {
           date: date,
-          total_hours: daily_hours_user_record,
+          total_hours: daily_hours_user_record.to_d,
           email: email
         }
       end
