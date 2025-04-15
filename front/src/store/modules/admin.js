@@ -19,6 +19,7 @@ const defaultTimesheetField = {
   popular: false,
   list: false,
   order: 1,
+  access_key: '',
 }
 
 const state = {

@@ -5,95 +5,107 @@
     <h4 class="is-size-4">{{ title() }}</h4>
 
     <form class="form" @submit.prevent="save">
-      <div class="field">
-        <label class="label" for="name">Name</label>
-        <div class="control">
-          <input class="input" type="text" v-model="$store.state.admin.timesheet.name" required="true" ref="name" name="name" id="name">
+      <div class="box">
+        <div class="field">
+          <label class="label" for="name">Name</label>
+          <div class="control">
+            <input class="input" type="text" v-model="$store.state.admin.timesheet.name" required="true" ref="name" name="name" id="name">
+          </div>
         </div>
       </div>
 
-      <div class="field admin-timesheets-form-fields">
-        <label class="label">Fields</label>
+      <div class="box">
+        <div class="field admin-timesheets-form-fields">
+          <label class="label">Fields</label>
 
-        <div class="notification" v-if="filteredFields.length === 0">
-          You need are least 1 field to be able to save the timesheet.
-        </div>
-
-        <div class="admin-timesheets-form-fields-field" v-for="(field, index) in filteredFields" :key="field.id || index">
-          <div class="field">
-            <label class="label" :for="`field-title-${index}`">Title</label>
-            <div class="control">
-              <input class="input" type="text" v-model="field.title" required="true" :id="`field-title-${index}`">
-            </div>
+          <div class="notification" v-if="filteredFields.length === 0">
+            You need are least 1 field to be able to save the timesheet.
           </div>
 
-          <div class="field">
-            <label class="label" :for="`field-type-${index}`">Type</label>
-            <div class="control">
-              <div class="select">
-                <select v-model="field.input_type" required="true" :id="`field-type-${index}`">
-                  <option value="text">
-                    Short text
-                  </option>
-                  <option value="long_text">
-                    Long text
-                  </option>
-                </select>
+          <div class="admin-timesheets-form-fields-field" v-for="(field, index) in filteredFields" :key="field.id || index">
+            <div class="field">
+              <label class="label" :for="`field-title-${index}`">Title</label>
+              <div class="control">
+                <input class="input" type="text" v-model="field.title" required="true" :id="`field-title-${index}`">
               </div>
             </div>
-          </div>
 
-          <div class="field">
-            <label class="label" :for="`field-popular-${index}`">Show top values in sidebar</label>
-            <div class="control">
-              <div class="select">
-                <select v-model="field.popular" required="true" :id="`field-popular-${index}`">
-                  <option value="true">
-                    Yes
-                  </option>
-                  <option value="false">
-                    No
-                  </option>
-                </select>
+            <div class="field">
+              <label class="label" :for="`field-type-${index}`">Type</label>
+              <div class="control">
+                <div class="select">
+                  <select v-model="field.input_type" required="true" :id="`field-type-${index}`">
+                    <option value="text">
+                      Short text
+                    </option>
+                    <option value="long_text">
+                      Long text
+                    </option>
+                  </select>
+                </div>
               </div>
+            </div>
+
+            <div class="field">
+              <label class="label" :for="`field-popular-${index}`">Show top values in sidebar</label>
+              <div class="control">
+                <div class="select">
+                  <select v-model="field.popular" required="true" :id="`field-popular-${index}`">
+                    <option value="true">
+                      Yes
+                    </option>
+                    <option value="false">
+                      No
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" :for="`field-list-${index}`">Show in time entries table</label>
+              <div class="control">
+                <div class="select">
+                  <select v-model="field.list" required="true" :id="`field-list-${index}`">
+                    <option value="true">
+                      Yes
+                    </option>
+                    <option value="false">
+                      No
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="access_key">Access key</label>
+
+              <div class="control">
+                <input class="input" type="text" v-model="field.access_key" ref="access_key" name="access_key" id="access_key">
+              </div>
+            </div>
+
+            <hr>
+
+            <div>
+              <a title="Remove field" @click.prevent="removeField(field)">
+                <Icon :src="minusIcon" />
+              </a>
+              <a title="Move up" @click.prevent="moveField(field, -1)" v-if="field.order > 1">
+                <Icon :src="upIcon" />
+              </a>
+              <a title="Move down" @click.prevent="moveField(field, 1)" v-if="field.order != filteredFields.length">
+                <Icon :src="downIcon" />
+              </a>
             </div>
           </div>
 
-          <div class="field">
-            <label class="label" :for="`field-list-${index}`">Show in time entries table</label>
-            <div class="control">
-              <div class="select">
-                <select v-model="field.list" required="true" :id="`field-list-${index}`">
-                  <option value="true">
-                    Yes
-                  </option>
-                  <option value="false">
-                    No
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <div>
-            <a title="Remove field" @click.prevent="removeField(field)">
-              <Icon :src="minusIcon" />
-            </a>
-            <a title="Move up" @click.prevent="moveField(field, -1)" v-if="field.order > 1">
-              <Icon :src="upIcon" />
-            </a>
-            <a title="Move down" @click.prevent="moveField(field, 1)" v-if="field.order != filteredFields.length">
-              <Icon :src="downIcon" />
+          <div class="ml-4">
+            <a class="has-text-danger admin-timesheets-form-fields-add" title="Add new field" @click.prevent="addField()">
+              <Icon :src="addIcon" />
             </a>
           </div>
-        </div>
-
-        <div class="ml-4">
-          <a class="has-text-danger admin-timesheets-form-fields-add" title="Add new field" @click.prevent="addField()">
-            <Icon :src="addIcon" />
-          </a>
         </div>
       </div>
 

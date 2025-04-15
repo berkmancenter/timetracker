@@ -8,13 +8,19 @@
     @cancel="visible = false"
   >
     <div class="tracker-entry-form">
-      <form @submit.prevent="submitForm()" ref="entryForm">
-        <template v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields" :key="field.id">
+      <form
+        @submit.prevent="submitForm()"
+        ref="entryForm"
+      >
+        <template
+          v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields"
+          :key="field.id"
+        >
           <FormField
+            v-if="field.input_type === 'text'"
             :label="field.title"
             :accessKey="field.access_key"
             :id="field.machine_name"
-            v-if="field.input_type === 'text'"
           >
             <input
               class="input ui-autocomplete-input"
@@ -23,13 +29,14 @@
               autocomplete="off"
               :ref="`${field.machine_name}Input`"
               :id="field.machine_name"
+              :accessKey="field.access_key"
             />
           </FormField>
 
           <FormField
+            v-if="field.input_type === 'long_text'"
             :label="field.title"
             :accessKey="field.access_key"
-            v-if="field.input_type === 'long_text'"
             :id="field.machine_name"
             :machineName="field.machine_name"
           >
@@ -37,19 +44,56 @@
               class="textarea"
               v-model="formValue['fields'][field.machine_name]"
               :id="field.machine_name"
+              :accessKey="field.access_key"
             ></textarea>
           </FormField>
         </template>
 
-        <FormField label="Time spent" accessKey="t" :required="true" id="time_entry_decimal_time">
-          <input class="input" type="number" min="0.25" step="0.25" max="99" v-model="formValue['decimal_time']" @keypress="isNumberKey($event)" name="decimal_time" id="time_entry_decimal_time" autocomplete="off" accesskey="t" required />
+        <FormField
+          label="Time spent"
+          accessKey="t"
+          :required="true"
+          id="time_entry_decimal_time"
+        >
+          <input
+            class="input"
+            type="number"
+            min="0.25"
+            step="0.25"
+            max="99"
+            v-model="formValue['decimal_time']"
+            @keypress="isNumberKey($event)"
+            name="decimal_time"
+            id="time_entry_decimal_time"
+            autocomplete="off"
+            accesskey="t"
+            required
+          />
         </FormField>
 
-        <FormField label="Date" accessKey="a" :required="true" id="time_entry_entry_date">
-          <date-picker v-model:value="formValue['entry_date']" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ accesskey: 'a', required: true }" name="entry_date" id="time_entry_entry_date"></date-picker>
+        <FormField
+          label="Date"
+          accessKey="a"
+          :required="true"
+          id="time_entry_entry_date"
+        >
+          <date-picker
+            v-model:value="formValue['entry_date']"
+            format="MMMM D, Y"
+            type="date"
+            value-type="format"
+            input-class="input"
+            :clearable="false"
+            :input-attr="{ accesskey: 'a', required: true }"
+            name="entry_date"
+            id="time_entry_entry_date"
+          ></date-picker>
         </FormField>
 
-        <input class="tracker-entry-form-submit-button" type="submit">
+        <input
+          class="tracker-entry-form-submit-button"
+          type="submit"
+        >
       </form>
     </div>
   </Modal>

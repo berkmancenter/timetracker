@@ -23,7 +23,7 @@
           :button="true"
           :icon="monthIcon"
           class="ml-2"
-          :disabled="$store.state.tracker.months.length === 0"
+          :disabled="$store.state.tracker.months.length < 2"
           @click="openMonthsSelector()"
           title="Select month"
         />
@@ -660,7 +660,7 @@
     }
   }
 
-  @container tracker-entries (width < 600px) {
+  @container tracker-entries (width < 650px) {
     .tracker-entries-navigation {
       flex-wrap: wrap;
       flex-direction: column;
