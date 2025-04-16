@@ -668,6 +668,16 @@
 
       &-dates {
         margin-top: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+
+        @media all and (max-width: 500px) {
+          flex-direction: column;
+
+          > * {
+            margin-top: 0.5rem;
+          }
+        }
       }
     }
   }
