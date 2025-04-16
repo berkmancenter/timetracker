@@ -6,7 +6,6 @@
     />
     <timesheet-select></timesheet-select>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
-    <tools></tools>
     <totals></totals>
     <period-totals></period-totals>
   </div>
@@ -15,7 +14,6 @@
 <script>
   import periodTotals from '@/components/Tracker/PeriodTotals.vue'
   import Totals from '@/components/Tracker/Totals.vue'
-  import Tools from '@/components/Tracker/Tools.vue'
   import TimesheetSelect from '@/components/Tracker/TimesheetSelect.vue'
   import Popular from '@/components/Tracker/Popular.vue'
   import MainMenu from '@/components/Shared/Menu.vue'
@@ -25,7 +23,6 @@
     components: {
       periodTotals,
       Totals,
-      Tools,
       TimesheetSelect,
       Popular,
       MainMenu,

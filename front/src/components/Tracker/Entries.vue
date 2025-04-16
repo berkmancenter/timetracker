@@ -37,6 +37,24 @@
           @click="redirectToNextMonth()"
           class="ml-2"
         />
+
+        <VDropdown>
+          <ActionButton
+            :button="true"
+            :icon="dropdownIcon"
+            class="ml-2"
+          />
+
+          <template #popper>
+            <a
+              class="dropdown-item"
+              @click="getCsv()"
+            >
+              <Icon :src="csvIcon" />
+              Export time entries to CSV
+            </a>
+          </template>
+        </VDropdown>
       </div>
     </div>
 
@@ -189,6 +207,7 @@
   import prevIcon from '@/images/prev.svg'
   import nextIcon from '@/images/next.svg'
   import monthIcon from '@/images/month.svg'
+  import csvIcon from '@/images/csv.svg'
 
   export default {
     name: 'Entries',
@@ -214,6 +233,9 @@
         prevIcon,
         nextIcon,
         monthIcon,
+        csvIcon,
+
+        apiUrl: import.meta.env.VITE_API_URL,
       }
     },
     computed: {
@@ -430,6 +452,9 @@
       openMonthsSelector() {
         this.selectMonthModalStatus = true
       },
+      getCsv() {
+        window.location.href = `${this.apiUrl}/time_entries/entries?csv=true&month=${this.$store.state.tracker.selectedMonth}&timesheet_uuid=${this.$store.state.tracker.selectedTimesheet.uuid}`
+      },
     }
   }
 </script>
@@ -592,8 +617,6 @@
     &-header {
       display: flex;
       font-weight: bold;
-      margin-left: 1rem;
-      margin-right: 1rem;
       margin-bottom: 0.5rem;
       border-bottom: 1px solid var(--grey-from-bulma);
 
@@ -660,7 +683,7 @@
     }
   }
 
-  @container tracker-entries (width < 650px) {
+  @container tracker-entries (width < 750px) {
     .tracker-entries-navigation {
       flex-wrap: wrap;
       flex-direction: column;

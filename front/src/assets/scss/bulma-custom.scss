@@ -2,6 +2,10 @@
   --bulma-dropdown-divider-background-color: hsl(0, 0%, 93%);
 }
 
+.dropdown-item:hover {
+  background-color: var(--super-light-color);
+}
+
 .button.is-success {
   background-color: var(--blue-stronger-color);
   color: #fff;
