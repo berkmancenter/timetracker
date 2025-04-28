@@ -32,6 +32,7 @@
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Should have now</th>
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance</th>
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance percentage</th>
+          <th class="admin-periods-stats-table-narrow-cell">Last entry date</th>
         </tr>
       </thead>
       <tbody>
@@ -42,6 +43,11 @@
           <td class="no-break">{{ periodStat.should_hours }}</td>
           <td class="admin-periods-stats-period-balance no-break" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance }}</td>
           <td class="no-break">{{ periodStat.balance_percent }}</td>
+          <td class="no-break">
+            <div class="is-hidden">{{ periodStat.last_entry_date }}</div>
+
+            {{ formatIsoDateTimeToLocaleString(periodStat.last_entry_date) }}
+          </td>
         </tr>
         <tr v-if="filteredItems.length === 0">
           <td colspan="7">No records found.</td>
@@ -58,6 +64,8 @@
   import downloadIcon from '@/images/download_main.svg'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
+  import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
+
   export default {
     name: 'AdminPeriodsStats',
     components: {
@@ -71,6 +79,7 @@
         filteredItems: [],
         apiUrl: import.meta.env.VITE_API_URL,
         downloadIcon,
+        formatIsoDateTimeToLocaleString,
       }
     },
     computed: {
