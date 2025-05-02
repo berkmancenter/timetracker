@@ -170,11 +170,13 @@
       width: 32em;
       max-width: 100%;
       margin: 0 auto;
+      position: relative;
 
       &-wrapper {
         padding: 1rem;
         max-height: calc(100vh - 6.5rem);
         overflow-y: scroll;
+        padding-bottom: 6rem;
       }
 
       > * + * {
@@ -188,6 +190,13 @@
 
     &-buttons {
       border-top: 1px solid var(--grey-from-bulma);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #ffffff;
+      height: 5.5rem;
+      padding: 1rem;
 
       &-confirm {
         &.button.is-success {
