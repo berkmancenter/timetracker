@@ -14,6 +14,7 @@ const defaultEntry = {
 
 const state = {
   timesheets: [],
+  timesheetUsers: [],
   months: [],
   entries: [],
   entriesBeforeChange: false,
@@ -93,6 +94,9 @@ const mutations = {
   setPeriodTotalsMode(state, mode) {
     state.periodTotalsMode = mode
   },
+  setUsers(state, timesheetUsers) {
+    state.timesheetUsers = timesheetUsers
+  },
 }
 
 const actions = {
@@ -163,6 +167,12 @@ const actions = {
       methodName: 'fetchAutoComplete',
     })
   },
+  async fetchUsers(context) {
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/timesheets/${context.state.selectedTimesheet.id}/users`,
+      methodName: 'fetchUsers',
+    })
+  },
   async submitEntryForm(context) {
     const response = await fetchIt(`${apiUrl}/time_entries/edit`, {
       method: 'POST',
@@ -211,6 +221,9 @@ const actions = {
   },
   setMonths(context, months) {
     context.commit('setMonths', months)
+  },
+  setUsers(context, timesheetUsers) {
+    context.commit('setUsers', timesheetUsers)
   },
   setSelectedMonthFromRoute(context) {
     const currentMonthParam = router.currentRoute._value.params?.month
@@ -277,6 +290,53 @@ const actions = {
   setPeriodTotalsMode(context, mode) {
     context.commit('setPeriodTotalsMode', mode)
     context.dispatch('reloadViewData', ['periodTotals'])
+  },
+  updateAllTimesheetUserSelection(context, isSelected) {
+    context.commit('setUsers', context.state.timesheetUsers.map(user => ({
+      ...user,
+      selected: isSelected,
+    })))
+  },
+  selectAllTimesheetUsers(context) {
+    context.dispatch('updateAllTimesheetUserSelection', true)
+  },
+  deselectAllTimesheetUsers(context) {
+    context.dispatch('updateAllTimesheetUserSelection', false)
+  },
+  selectTimesheetUsers(context, userIds) {
+    context.commit('setUsers', context.state.timesheetUsers.map(user => ({
+      ...user,
+      selected: userIds.includes(user.id),
+    })))
+  },
+  async sudoUsersTimesheet(context, data) {
+    const response = await fetchIt(`${apiUrl}/users/sudo`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        users: data.users,
+        timesheet_id: data.timesheetId,
+      }),
+    })
+
+    return response
+  },
+  async unsudoUsersTimesheet(context, users) {
+    const response = await fetchIt(`${apiUrl}/users/unsudo`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        users: [],
+      }),
+    })
+
+    return response
   },
 }
 

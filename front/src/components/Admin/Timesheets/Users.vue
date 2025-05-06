@@ -7,14 +7,6 @@
     <p>Manage users for <span class="tag is-black is-medium">{{ timesheet.name }}</span> timesheet.</p>
 
     <form class="form">
-      <div class="mb-4">
-        <ActionButton
-          :icon="listIcon"
-          buttonText="View selected users timesheets"
-          @click="sudoUsers()"
-        />
-      </div>
-
       <super-admin-filter :users="users" @change="superAdminFilterChanged" />
 
       <admin-table :tableClasses="['admin-timesheet-users-table']">
@@ -208,45 +200,6 @@
         this.mitt.emit('spinnerStop')
 
         this.removeUserFromTimesheetModalStatus = false
-      },
-      async sudoUsers() {
-        const usersIds = this.filteredItems
-              .filter(user => user.selected)
-              .map(user => user.id)
-
-        if (usersIds.length === 0) {
-          this.awn.warning('No users selected.')
-
-          return
-        }
-
-        this.mitt.emit('spinnerStart')
-
-        const response = await this.$store.dispatch('admin/sudoUsersTimesheet', {
-          users: usersIds,
-          timesheetId: this.timesheetId,
-        })
-
-        if (response.ok) {
-          const user = await this.$store.dispatch('shared/fetchUser')
-
-          this.$store.dispatch('shared/setUser', user)
-          this.awn.success('You can now see timesheets of selected users.')
-
-          this.$router.push(
-            {
-              name: 'tracker.index',
-              params: {
-                timesheet: this.timesheet.uuid,
-                month: null,
-              }
-            }
-          )
-        } else {
-          this.awn.warning('Something went wrong, try again.')
-        }
-
-        this.mitt.emit('spinnerStop')
       },
       toggleAll() {
         const newStatus = this.$refs.toggleAllCheckbox.checked

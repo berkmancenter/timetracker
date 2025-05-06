@@ -29,7 +29,7 @@ class UsersController < ApplicationController
       username: current_user.email,
       user_id: current_user.id,
       is_superadmin: current_user.superadmin,
-      sudo_users: sudo_users_emails
+      sudo_users: active_user_ids,
     }, status: :ok
   end
 
@@ -42,14 +42,6 @@ class UsersController < ApplicationController
   end
 
   private
-
-  def sudo_users
-    active_user_ids.map { |id| User.find_by(id: id) }.compact
-  end
-
-  def sudo_users_emails
-    sudo_users.map { |u| User.where(id: u).first&.email }.compact
-  end
 
   def active_user_ids
     session["#{current_user.id}_active_users"] || []

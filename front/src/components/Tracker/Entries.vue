@@ -38,6 +38,16 @@
           class="ml-2"
         />
 
+        <ActionButton
+          v-if="$store.state.shared.user.is_superadmin"
+          buttonText=""
+          :button="true"
+          :icon="peopleIcon"
+          @click="openUsersSelector()"
+          class="ml-2"
+          title="View time entries of other users"
+        />
+
         <VDropdown>
           <ActionButton
             :button="true"
@@ -60,8 +70,7 @@
 
     <div v-if="$store.state.shared.user.sudoMode" class="message is-warning mt-2">
       <div class="message-body">
-        <div><strong>You are viewing time entries of</strong></div>
-        {{ activeUsersString }}
+        <div>You are viewing time entries of other users.</div>
         <div>
           <a class="button mt-2" @click="unSudo()">Show only my entries</a>
         </div>
@@ -187,6 +196,42 @@
       {{ month }}
     </div>
   </Modal>
+
+  <Modal
+    v-model="selectUsersModalStatus"
+    title="Select users"
+    @confirm="setTimesheetUsers()"
+    @cancel="selectUsersModalStatus = false"
+  >
+    <div class="mb-2">Time entries of selected users will be shown in the list of time entries.</div>
+
+    <div class="mb-2">
+      <ActionButton
+        buttonText="Select all"
+        :button="true"
+        @click="selectAllUsers()"
+        class="mb-2"
+      />
+
+      <ActionButton
+        buttonText="Deselect all"
+        :button="true"
+        @click="deselectAllUsers()"
+        class="ml-2"
+      />
+    </div>
+
+    <div
+      class="tracker-entries-months-selector-user button is-light"
+      v-for="user in timesheetUsers"
+      :key="user.id"
+      :order="user.email"
+      @click="selectTimesheetUser(user)"
+    >
+      <input type="checkbox" v-model="user.selected">
+      <span>{{ user.email || user.username }}</span>
+    </div>
+  </Modal>
 </template>
 
 <script>
@@ -208,6 +253,7 @@
   import nextIcon from '@/images/next.svg'
   import monthIcon from '@/images/month.svg'
   import csvIcon from '@/images/csv.svg'
+  import peopleIcon from '@/images/people.svg'
 
   export default {
     name: 'Entries',
@@ -224,6 +270,7 @@
         actionsShow: false,
         monthsSelectorVisible: false,
         selectMonthModalStatus: false,
+        selectUsersModalStatus: false,
 
         minusIcon,
         cloneIcon,
@@ -234,6 +281,7 @@
         nextIcon,
         monthIcon,
         csvIcon,
+        peopleIcon,
 
         apiUrl: import.meta.env.VITE_API_URL,
       }
@@ -262,9 +310,14 @@
 
         return entriesByDate
       },
-      activeUsersString() {
-        return this.$store.state.shared.user.sudo_users.join(', ')
-      }
+      timesheetUsers() {
+        return [...this.$store.state.tracker.timesheetUsers].sort((a, b) => {
+          const nameA = a.email?.toLowerCase() || a.username.toLowerCase()
+          const nameB = b.email?.toLowerCase() || b.username.toLowerCase()
+
+          return nameA.localeCompare(nameB)
+        })
+      },
     },
     methods: {
       isNewDay(date) {
@@ -444,9 +497,7 @@
         )
 
         await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
-
         this.mitt.emit('spinnerStop')
-
         this.selectMonthModalStatus = false
       },
       openMonthsSelector() {
@@ -454,6 +505,52 @@
       },
       getCsv() {
         window.location.href = `${this.apiUrl}/time_entries/entries?csv=true&month=${this.$store.state.tracker.selectedMonth}&timesheet_uuid=${this.$store.state.tracker.selectedTimesheet.uuid}`
+      },
+      selectTimesheetUser(user) {
+        user.selected = !user.selected
+      },
+      async setTimesheetUsers() {
+        const usersIds = this.$store.state.tracker.timesheetUsers
+              .filter(user => user.selected)
+              .map(user => user.id)
+
+        if (usersIds.length === 0) {
+          this.awn.warning('No users selected.')
+
+          return
+        }
+
+        this.mitt.emit('spinnerStart')
+
+        const response = await this.$store.dispatch('tracker/sudoUsersTimesheet', {
+          users: usersIds,
+          timesheetId: this.$store.state.tracker.selectedTimesheet.id,
+        })
+
+        if (response.ok) {
+          const user = await this.$store.dispatch('shared/fetchUser')
+          this.$store.dispatch('shared/setUser', user)
+        } else {
+          this.awn.warning('Something went wrong, try again.')
+        }
+
+        await this.$store.dispatch('tracker/reloadViewData', ['months'])
+        if (this.$store.state.tracker.months[0]) {
+          this.changeMonth(this.$store.state.tracker.months[0])
+        }
+
+        this.mitt.emit('spinnerStop')
+        this.selectUsersModalStatus = false
+      },
+      selectAllUsers() {
+        this.$store.dispatch('tracker/selectAllTimesheetUsers')
+      },
+      deselectAllUsers() {
+        this.$store.dispatch('tracker/deselectAllTimesheetUsers')
+      },
+      openUsersSelector() {
+        this.$store.dispatch('tracker/selectTimesheetUsers', this.$store.state.shared.user.sudo_users)
+        this.selectUsersModalStatus = true
       },
     }
   }
@@ -670,10 +767,24 @@
       }
     }
 
-    &-months-selector-month {
+    &-months-selector-month,
+    &-months-selector-user {
       padding: 0.5rem;
       margin-bottom: 0.5rem;
       display: block;
+      display: flex;
+
+      input[type="checkbox"] {
+        margin-right: 0.75rem;
+        cursor: pointer;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: block;
+      }
+    }
+
+    &-months-selector-user {
+      justify-content: start;
     }
   }
 
