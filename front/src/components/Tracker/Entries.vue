@@ -39,7 +39,7 @@
         />
 
         <ActionButton
-          v-if="$store.state.shared.user.is_superadmin"
+          v-if="adminInTimesheet($store.state.tracker.selectedTimesheet)"
           buttonText=""
           :button="true"
           :icon="peopleIcon"
@@ -551,6 +551,9 @@
       openUsersSelector() {
         this.$store.dispatch('tracker/selectTimesheetUsers', this.$store.state.shared.user.sudo_users)
         this.selectUsersModalStatus = true
+      },
+      adminInTimesheet(timesheet) {
+        return timesheet.roles.includes('admin')
       },
     }
   }
