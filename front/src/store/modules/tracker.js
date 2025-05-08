@@ -324,7 +324,7 @@ const actions = {
 
     return response
   },
-  async unsudoUsersTimesheet(context, users) {
+  async unsudoUsersTimesheet(context) {
     const response = await fetchIt(`${apiUrl}/users/unsudo`, {
       method: 'POST',
       headers: {

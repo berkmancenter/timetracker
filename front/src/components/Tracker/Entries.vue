@@ -379,7 +379,7 @@
       async unSudo() {
         this.mitt.emit('spinnerStart')
 
-        const response = await this.$store.dispatch('admin/unsudoUsersTimesheet')
+        const response = await this.$store.dispatch('tracker/unsudoUsersTimesheet')
 
         if (response.ok) {
           const months = await this.$store.dispatch('tracker/fetchMonths')
