@@ -179,35 +179,6 @@ const actions = {
   setTimesheetInvitations(context, invitations) {
     context.commit('setTimesheetInvitations', invitations)
   },
-  async sudoUsersTimesheet(context, data) {
-    const response = await fetchIt(`${apiUrl}/users/sudo`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        users: data.users,
-        timesheet_id: data.timesheetId,
-      }),
-    })
-
-    return response
-  },
-  async unsudoUsersTimesheet(context, users) {
-    const response = await fetchIt(`${apiUrl}/users/unsudo`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        users: [],
-      }),
-    })
-
-    return response
-  },
   async savePeriod(context, data) {
     const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/upsert`, {
       method: 'POST',
