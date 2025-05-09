@@ -514,12 +514,6 @@
               .filter(user => user.selected)
               .map(user => user.id)
 
-        if (usersIds.length === 0) {
-          this.awn.warning('No users selected.')
-
-          return
-        }
-
         this.mitt.emit('spinnerStart')
 
         const response = await this.$store.dispatch('tracker/sudoUsersTimesheet', {
@@ -537,6 +531,8 @@
         await this.$store.dispatch('tracker/reloadViewData', ['months'])
         if (this.$store.state.tracker.months[0]) {
           this.changeMonth(this.$store.state.tracker.months[0])
+        } else {
+          this.changeMonth('all')
         }
 
         this.mitt.emit('spinnerStop')
