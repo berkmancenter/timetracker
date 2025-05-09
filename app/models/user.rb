@@ -36,11 +36,18 @@ class User < ActiveRecord::Base
 
   def cas_extra_attributes=(extra_attributes)
     extra_attributes.each do |name, value|
-      case name.to_sym
-      when :mail
+      case name.to_s.downcase
+      when 'mail'
         self.email = value
+      when 'displayname'
+        # Split displayName into first and last names
+        name_parts = value.to_s.strip.split
+        self.first_name = name_parts.first
+        self.last_name = name_parts.last
       end
     end
+
+    self.save if self.changed?
   end
 
   def superadmin?
