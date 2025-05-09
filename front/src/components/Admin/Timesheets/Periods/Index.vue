@@ -29,7 +29,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="period in orderedPeriods" :key="period.id">
+          <tr
+            v-for="period in orderedPeriods"
+            :key="period.id"
+            class="admin-periods-table-row"
+            @click.middle="goToPeriodStats(period.id, $event)"
+            @click="goToPeriodStats(period.id, $event)"
+          >
             <td>{{ period.name }}</td>
             <td class="no-break">{{ period.from }}</td>
             <td class="no-break">{{ period.to }}</td>
@@ -187,6 +193,35 @@
 
         this.mitt.emit('spinnerStop')
       },
+      goToPeriodStats(id, event) {
+        if (event.target.closest('.admin-table-actions')) {
+          return
+        }
+
+        const url = `/admin/timesheets/${this.$route.params.timesheet_id}/periods/${id}/stats`
+
+        if (event.button === 1) {
+          // Middle click: open in new tab
+          window.open(url, '_blank')
+        } else if (event.button === 0) {
+          // Left click: navigate in current tab
+          this.$router.push(url)
+        }
+      },
     },
   }
 </script>
+
+<style lang="scss">
+  .admin-periods {
+    &-table {
+      &-row {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .admin-table-actions {
+    cursor: default;
+  }
+</style>
