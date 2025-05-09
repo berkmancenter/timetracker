@@ -35,6 +35,7 @@
             class="admin-periods-table-row"
             @click.middle="goToPeriodStats(period.id, $event)"
             @click="goToPeriodStats(period.id, $event)"
+            title="Click to view period stats"
           >
             <td>{{ period.name }}</td>
             <td class="no-break">{{ period.from }}</td>
@@ -52,9 +53,6 @@
                 </a>
                 <router-link title="Set period hours" :to="`/admin/timesheets/${this.$route.params.timesheet_id}/periods/${period.id}/credits`">
                   <Icon :src="hoursIcon" />
-                </router-link>
-                <router-link title="Period statistics" :to="`/admin/timesheets/${this.$route.params.timesheet_id}/periods/${period.id}/stats`">
-                  <Icon :src="statsIcon" />
                 </router-link>
               </div>
             </td>
