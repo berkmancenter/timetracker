@@ -26,7 +26,7 @@
     <admin-table :tableClasses="['admin-periods-stats-table']">
       <thead>
         <tr class="no-select">
-          <th class="admin-periods-stats-table-email">Email</th>
+          <th class="admin-periods-stats-table-email">Identifier</th>
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Hours</th>
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Total hours</th>
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Should have now</th>
@@ -37,7 +37,7 @@
       </thead>
       <tbody>
         <tr v-for="periodStat in filteredItems">
-          <td>{{ periodStat.email }}</td>
+          <td>{{ getUserIdentifier(periodStat) }}</td>
           <td class="no-break">{{ periodStat.credits }}</td>
           <td class="no-break">{{ periodStat.total_hours }}</td>
           <td class="no-break">{{ periodStat.should_hours }}</td>
@@ -140,6 +140,17 @@
           .join(',')
 
         window.location.href = `${this.apiUrl}/timesheets/${this.$route.params.timesheet_id}/periods/${this.$route.params.id}/stats?csv=true&user_ids=${usersIds}`
+      },
+      getUserIdentifier(periodStat) {
+        if (periodStat.first_name && periodStat.last_name) {
+          return `${periodStat.first_name} ${periodStat.last_name}`
+        }
+
+        if (periodStat.email) {
+          return periodStat.email
+        }
+
+        return ''
       },
     },
   }
