@@ -46,7 +46,7 @@
           <td class="no-break">
             <div class="is-hidden">{{ periodStat.last_entry_date }}</div>
 
-            {{ formatIsoDateTimeToLocaleString(periodStat.last_entry_date) }}
+            {{ formatLastEntryDate(periodStat.last_entry_date) }}
           </td>
         </tr>
         <tr v-if="filteredItems.length === 0">
@@ -151,6 +151,16 @@
         }
 
         return ''
+      },
+      formatLastEntryDate(inputDate) {
+        if (!inputDate) {
+          return ''
+        }
+
+        const [year, month, day] = inputDate.split('-')
+        const outputDate = `${month}/${day}/${year}`
+
+        return outputDate
       },
     },
   }
