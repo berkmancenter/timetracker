@@ -38,7 +38,7 @@
           <th data-sort-method="none" class="no-sort">
             <input type="checkbox" ref="toggleAllCheckbox" @click="toggleAll()">
           </th>
-          <th>Email</th>
+          <th>Identifier</th>
           <th data-sort-method="none" class="no-sort">Hours</th>
         </tr>
       </thead>
@@ -47,7 +47,7 @@
           <td class="admin-table-selector">
             <input type="checkbox" v-model="periodCredit.selected">
           </td>
-          <td class="no-break">{{ periodCredit.email }}</td>
+          <td class="no-break">{{ getUserIdentifier(periodCredit) }}</td>
           <td class="no-break admin-periods-credits-table-hours">
             <input class="input" type="number" v-model="periodCredit.credit_amount">
           </td>
@@ -216,6 +216,17 @@
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users
+      },
+      getUserIdentifier(userCredit) {
+        if (userCredit.first_name && userCredit.last_name) {
+          return `${userCredit.first_name} ${userCredit.last_name}`
+        }
+
+        if (userCredit.email) {
+          return userCredit.email
+        }
+
+        return ''
       },
     },
   }

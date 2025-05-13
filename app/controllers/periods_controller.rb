@@ -153,6 +153,8 @@ class PeriodsController < ApplicationController
     timesheet.users.select('
       users.id,
       users.email,
+      users.first_name,
+      users.last_name,
       users.username,
       users.superadmin,
       ARRAY_AGG(users_timesheets.role) AS roles
@@ -166,6 +168,8 @@ class PeriodsController < ApplicationController
         username: user.username,
         admin: period.timesheet.admin?(user),
         email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
         roles: user.roles,
         credit_amount: Credit.where(user: user, period: period).first&.amount || 0.00
       }
