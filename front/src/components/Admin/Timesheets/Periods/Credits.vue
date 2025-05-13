@@ -80,6 +80,8 @@
   import saveSelectedIcon from '@/images/selected_main.svg'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
+  import { getUserIdentifier } from '@/lib/user.js'
+
   export default {
     name: 'AdminPeriodsCredits',
     components: {
@@ -98,6 +100,7 @@
         saveSelectedIcon,
         saveSelectedDisabled: false,
         saveAllDisabled: false,
+        getUserIdentifier,
       }
     },
     computed: {
@@ -216,17 +219,6 @@
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users
-      },
-      getUserIdentifier(userCredit) {
-        if (userCredit.first_name && userCredit.last_name) {
-          return `${userCredit.first_name} ${userCredit.last_name}`
-        }
-
-        if (userCredit.email) {
-          return userCredit.email
-        }
-
-        return ''
       },
     },
   }

@@ -65,6 +65,7 @@
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
+  import { getUserIdentifier } from '@/lib/user.js'
 
   export default {
     name: 'AdminPeriodsStats',
@@ -80,6 +81,7 @@
         apiUrl: import.meta.env.VITE_API_URL,
         downloadIcon,
         formatIsoDateTimeToLocaleString,
+        getUserIdentifier,
       }
     },
     computed: {
@@ -140,17 +142,6 @@
           .join(',')
 
         window.location.href = `${this.apiUrl}/timesheets/${this.$route.params.timesheet_id}/periods/${this.$route.params.id}/stats?csv=true&user_ids=${usersIds}`
-      },
-      getUserIdentifier(periodStat) {
-        if (periodStat.first_name && periodStat.last_name) {
-          return `${periodStat.first_name} ${periodStat.last_name}`
-        }
-
-        if (periodStat.email) {
-          return periodStat.email
-        }
-
-        return ''
       },
       formatLastEntryDate(inputDate) {
         if (!inputDate) {
