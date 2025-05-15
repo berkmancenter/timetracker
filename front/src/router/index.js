@@ -23,6 +23,14 @@ const router = createRouter({
           name: 'tracker.index',
         },
         {
+          path: ':timesheet/period/:period_id/user/:user_id',
+          components: {
+            default: () => import('@/components/Tracker/Period.vue'),
+            Sidebar: () => import('@/components/Tracker/PeriodSidebar.vue'),
+          },
+          name: 'tracker.period.user',
+        },
+        {
           path: 'admin/timesheets',
           components: {
             default: () => import('@/components/Admin/Timesheets/Index.vue'),

@@ -54,17 +54,17 @@
         this.mitt.emit('spinnerStop')
       },
     },
-    watch: { 
-    '$route.params': {
-      handler: async function (to, from) {
-        if (Object.keys(from).length > 0) {
-          this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
-          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals', 'users'])
-        }
-      },
-      deep: true,
+    watch: {
+      '$route.params': {
+        handler: async function (to, from) {
+          if (Object.keys(from).length > 0) {
+            this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
+            this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+            await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals', 'users'])
+          }
+        },
+        deep: true,
+      }
     }
-  }
   }
 </script>

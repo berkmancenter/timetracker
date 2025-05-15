@@ -36,7 +36,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="periodStat in filteredItems">
+        <tr v-for="periodStat in filteredItems" @click="openPeriodUserInTracker(periodStat)">
           <td>{{ getUserIdentifier(periodStat) }}</td>
           <td class="no-break">{{ periodStat.credits }}</td>
           <td class="no-break">{{ periodStat.total_hours }}</td>
@@ -153,6 +153,16 @@
 
         return outputDate
       },
+      openPeriodUserInTracker(periodStat) {
+        this.$router.push({
+          name: 'tracker.period.user',
+          params: {
+            period_id: this.$route.params.id,
+            timesheet: this.$store.state.admin?.timesheet?.uuid,
+            user_id: periodStat.user_id,
+          },
+        })
+      },
     },
   }
 </script>
@@ -180,6 +190,12 @@
 
       &-email {
         min-width: 10rem;
+      }
+
+      tbody {
+        tr {
+          cursor: pointer;
+        }
       }
     }
   }

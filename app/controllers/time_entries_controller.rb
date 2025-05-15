@@ -11,8 +11,20 @@ class TimeEntriesController < ApplicationController
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
     render_entries_csv and return if params[:csv]
 
+    if params[:period].present?
+      period = Period.find(params[:period])
+      from_date = period.from
+      to_date = period.to
+    end
+
     month = params[:month]
-    render json: TimeEntry.my_entries_by_month(active_users, month, month == 'all', @timesheet), status: :ok
+    render json: TimeEntry.fetch_time_entries(active_users, {
+      timesheet: @timesheet,
+      month: month,
+      alltime: (month == 'all'),
+      from_date: from_date,
+      to_date: to_date,
+    }), status: :ok
   end
 
   # POST /time_entries
@@ -63,11 +75,22 @@ class TimeEntriesController < ApplicationController
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
 
-    entries = if params[:mode] == 'weeks'
-                TimeEntry.total_hours_by_month_week(active_users, params[:month], @timesheet)
-              else
-                TimeEntry.total_hours_by_month_day(active_users, params[:month], @timesheet)
-              end
+    if params[:period].present?
+      period = Period.find_by(id: params[:period])
+      return render_bad_request unless period
+
+      from_date = period.from
+      to_date = period.to
+    end
+
+    entries = TimeEntry.fetch_time_entries(active_users, {
+      timesheet: @timesheet,
+      month: params[:month],
+      group_by: params[:mode] == 'weeks' ? 'week' : 'day',
+      from_date: from_date,
+      to_date: to_date,
+      alltime: (params[:month] == 'all')
+    })
 
     render json: entries, status: :ok
   end
@@ -78,7 +101,20 @@ class TimeEntriesController < ApplicationController
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
 
-    render json: TimeEntry.entry_list_by_month(active_users, @timesheet)
+    if params[:period].present?
+      period = Period.find_by(id: params[:period])
+      return render_bad_request unless period
+
+      from_date = period.from
+      to_date = period.to
+    end
+
+    render json: TimeEntry.entry_list_by_month(
+      active_users,
+      @timesheet,
+      from_date: from_date,
+      to_date: to_date
+    )
   end
 
   # GET /time_entries/totals
@@ -122,11 +158,22 @@ class TimeEntriesController < ApplicationController
   end
 
   def active_users
-    unless session["#{current_user.id}_active_users"].blank?
+    # Check for user_id in params first
+    if params[:user].present?
+      user = User.find_by(id: params[:user])
+      # Verify current user has permission to view this user's data
+      if user && (user_can_manage_timesheet?(@timesheet) || user.id == current_user.id)
+        return [user]
+      else
+        render_unauthorized and return
+      end
+    # Then check for session-stored active users
+    elsif !session["#{current_user.id}_active_users"].blank?
       render_unauthorized and return unless user_can_use_timesheet?(@timesheet)
-      session["#{current_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
+      return session["#{current_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
+    # Default to current user
     else
-      [current_user]
+      return [current_user]
     end
   end
 
@@ -138,7 +185,11 @@ class TimeEntriesController < ApplicationController
   end
 
   def fetch_entries_for_csv
-    TimeEntry.my_entries_by_month(active_users, current_month, current_month == 'all', @timesheet)
+    TimeEntry.fetch_time_entries(active_users, {
+      timesheet: @timesheet,
+      month: current_month,
+      alltime: (current_month == 'all')
+    })
   end
 
   def format_entries_for_csv(entries, columns)

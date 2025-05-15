@@ -28,6 +28,9 @@ const state = {
   totalCurrentTimesheet: 0,
   totalCurrentMonth: 0,
   abortControllers: {},
+  isPeriodView: false,
+  period: {},
+  periodUser: {},
 }
 
 const mutations = {
@@ -97,6 +100,15 @@ const mutations = {
   setUsers(state, timesheetUsers) {
     state.timesheetUsers = timesheetUsers
   },
+  setPeriodView(state, isPeriodView) {
+    state.isPeriodView = isPeriodView
+  },
+  setPeriod(state, period) {
+    state.period = period
+  },
+  setPeriodUser(state, user) {
+    state.periodUser = user
+  },
 }
 
 const actions = {
@@ -138,8 +150,14 @@ const actions = {
     })
   },
   async fetchEntries(context) {
+    let url = `${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`
+    if (context.state.isPeriodView) {
+      url += `&period=${context.state.period.id}`
+      url += `&user=${context.state.periodUser.id}`
+    }
+
     return await context.dispatch('fetchGet', {
-      url: `${apiUrl}/time_entries/entries?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
+      url,
       methodName: 'fetchEntries',
     })
   },
@@ -150,14 +168,26 @@ const actions = {
     })
   },
   async fetchPeriodTotals(context) {
+    let url = `${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}&mode=${context.state.periodTotalsMode}`
+    if (context.state.isPeriodView) {
+      url += `&period=${context.state.period.id}`
+      url += `&user=${context.state.periodUser.id}`
+    }
+
     return await context.dispatch('fetchGet', {
-      url: `${apiUrl}/time_entries/days?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}&mode=${context.state.periodTotalsMode}`,
+      url,
       methodName: 'fetchPeriodTotals',
     })
   },
   async fetchTotals(context) {
+    let url = `${apiUrl}/time_entries/totals?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`
+    if (context.state.isPeriodView) {
+      url += `&period=${context.state.period.id}`
+      url += `&user=${context.state.periodUser.id}`
+    }
+
     return await context.dispatch('fetchGet', {
-      url: `${apiUrl}/time_entries/totals?month=${context.state.selectedMonth}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
+      url,
       methodName: 'fetchTotals',
     })
   },
@@ -171,6 +201,12 @@ const actions = {
     return await context.dispatch('fetchGet', {
       url: `${apiUrl}/timesheets/${context.state.selectedTimesheet.id}/users`,
       methodName: 'fetchUsers',
+    })
+  },
+  async fetchUser(context, userId) {
+    return await context.dispatch('fetchGet', {
+      url: `${apiUrl}/timesheets/${context.state.selectedTimesheet.id}/users/${userId}`,
+      methodName: 'fetchTimesheets',
     })
   },
   async submitEntryForm(context) {
@@ -224,6 +260,9 @@ const actions = {
   },
   setUsers(context, timesheetUsers) {
     context.commit('setUsers', timesheetUsers)
+  },
+  setPeriodUser(context, user) {
+    context.commit('setPeriodUser', user)
   },
   setSelectedMonthFromRoute(context) {
     const currentMonthParam = router.currentRoute._value.params?.month
@@ -337,6 +376,12 @@ const actions = {
     })
 
     return response
+  },
+  setPeriodView(context, isPeriodView) {
+    context.commit('setPeriodView', isPeriodView)
+  },
+  setPeriod(context, period) {
+    context.commit('setPeriod', period)
   },
 }
 

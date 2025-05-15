@@ -41,6 +41,7 @@ Rails.application.routes.draw do
       post :send_invitations
       get :leave
       get :users
+      get 'users/:user_id', to: 'timesheets#user'
       post :delete_users
       post :change_users_role
     end

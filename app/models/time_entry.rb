@@ -60,25 +60,83 @@ class TimeEntry < ActiveRecord::Base
     popular_values
   end
 
-  def self.my_entries_by_month(users, month = "#{Time.now.year}-#{Time.now.month}", alltime = false, timesheet)
-    return [] unless users.present?
-    return [] if month.nil?
-    return [] if timesheet.nil?
+  def self.fetch_time_entries(users = nil, options = {})
+    # Initialize default options
+    options = {
+      timesheet: nil,
+      month: nil,
+      from_date: nil,
+      to_date: nil,
+      alltime: false,
+      group_by: nil,
+      aggregate: nil,
+    }.merge(options)
 
-    user_ids = users.map(&:id)
-    month ||= "#{Time.now.year}-#{Time.now.month}"
+    # Basic validation
+    return options[:aggregate] == 'sum_hours' ? 0 : [] if options[:timesheet].nil?
 
-    entries = TimeEntry
-              .select('time_entries.*, users.email, users.id AS user_id')
-              .includes(timesheet_field_data_items: :timesheet_field)
-              .joins(:user)
-              .where(users: { id: user_ids })
-              .where(timesheet: timesheet)
-              .order(entry_date: :desc, id: :desc)
+    # Start building the query
+    query = TimeEntry
+            .joins(:user)
+            .where(timesheet: options[:timesheet])
 
-    entries = entries.where("#{year_month_entry_sql} = ?", month) unless alltime
+    # Set select fields based on aggregation
+    if options[:aggregate] == 'sum_hours'
+      query = query.select('SUM(decimal_time) AS total_hours')
+    else
+      query = query.select('time_entries.*, users.email, users.id AS user_id')
+      query = query.order(entry_date: :desc, id: :desc)
+      # Add includes if we're fetching individual entries
+      query = query.includes(timesheet_field_data_items: :timesheet_field) if options[:group_by].nil?
+    end
 
-    entries.map do |entry|
+    # Filter by users if provided
+    if users.present?
+      user_ids = users.respond_to?(:map) ? users.map(&:id) : [users.id]
+      query = query.where(users: { id: user_ids })
+    end
+
+    # Apply date filtering
+    if options[:from_date].present? && options[:to_date].present?
+      query = query.where(entry_date: options[:from_date]..options[:to_date])
+    elsif options[:month].present? && !options[:alltime] && options[:month] != 'all'
+      query = query.where("#{year_month_entry_sql} = ?", options[:month])
+    elsif options[:month] == 'all'
+      # Just so you know, this is a special case for the 'all' month
+    elsif !options[:alltime] && options[:from_date].blank? && options[:to_date].blank?
+      # Default to current month
+      current_month = "#{Time.now.year}-#{Time.now.month.to_s.rjust(2, '0')}"
+      query = query.where("#{year_month_entry_sql} = ?", current_month)
+    end
+    # Handle special case for 'all' with time limitation
+    if options[:month] == 'all'
+      if options[:group_by] == 'day'
+        query = query.where("entry_date > CURRENT_DATE - INTERVAL '26 days'")
+      elsif options[:group_by] == 'week'
+        query = query.where("entry_date > CURRENT_DATE - INTERVAL '26 weeks'")
+      end
+    end
+
+    # Handle aggregation requests specially
+    if options[:aggregate] == 'sum_hours'
+      result = query.to_a.first
+      return result&.total_hours.to_f
+    end
+
+    # Process the results based on grouping
+    case options[:group_by]
+    when 'day'
+      return process_daily_totals(query)
+    when 'week'
+      return process_weekly_totals(query, options[:month])
+    else
+      return process_individual_entries(query)
+    end
+  end
+
+  # Helper methods to process different types of results
+  def self.process_individual_entries(query)
+    query.map do |entry|
       # Extract associated data items and map them
       field_data = entry.timesheet_field_data_items.map do |field_data|
         [field_data.timesheet_field.machine_name, field_data.value]
@@ -91,28 +149,14 @@ class TimeEntry < ActiveRecord::Base
     end
   end
 
-  def self.total_hours_by_month_day(users, month, timesheet)
-    return [] unless users.present?
-    return [] if month.nil?
-    return [] if timesheet.nil?
-
-    user_ids = users.map(&:id)
+  def self.process_daily_totals(query)
+    # Start with a fresh query that includes same conditions
     total_hours = TimeEntry
-      .select("users.email, entry_date AS date, SUM(decimal_time) AS total_hours")
+      .select('users.email, entry_date AS date, SUM(decimal_time) AS total_hours')
       .joins(:user)
-      .where(user_id: user_ids)
-      .where(timesheet: timesheet)
-
-    if (month == 'all')
-      total_hours = total_hours
-        .where("entry_date > CURRENT_DATE - INTERVAL '26 days'")
-    else
-      total_hours = total_hours.where("#{year_month_entry_sql} = ?", month)
-    end
-
-    total_hours = total_hours
+      .merge(query.except(:select, :includes, :order))
       .group(:email, :entry_date)
-      .order(date: :desc)
+      .order('date DESC')
 
     # Initialize a hash to store daily hours
     daily_hours = {}
@@ -142,26 +186,11 @@ class TimeEntry < ActiveRecord::Base
     final_daily_hours
   end
 
-  def self.total_hours_by_month_week(users, month, timesheet)
-    return [] unless users.present?
-    return [] if month.nil?
-    return [] if timesheet.nil?
-
-    user_ids = users.map(&:id)
+  def self.process_weekly_totals(query, month = nil)
     total_hours = TimeEntry
       .select("users.email, DATE_TRUNC('week', entry_date) AS date, SUM(decimal_time) AS total_hours")
       .joins(:user)
-      .where(user_id: user_ids)
-      .where(timesheet: timesheet)
-
-    if (month == 'all')
-      total_hours = total_hours
-        .where("entry_date > CURRENT_DATE - INTERVAL '26 weeks'")
-    else
-      total_hours = total_hours.where("#{year_month_entry_sql} = ?", month)
-    end
-
-    total_hours = total_hours
+      .merge(query.except(:select, :includes, :order))
       .group(:email, :date)
 
     # Initialize a hash to store weekly hours
@@ -172,7 +201,7 @@ class TimeEntry < ActiveRecord::Base
       week_start_object = entry.date.beginning_of_week(start_day = :sunday)
       week_start = week_start_object.strftime('%Y-%m-%d')
 
-      if month != 'all'
+      if month.present? && month != 'all'
         week_start = "#{month}-01" if week_start_object.strftime('%Y-%m') != month
       end
 
@@ -197,15 +226,20 @@ class TimeEntry < ActiveRecord::Base
     final_weekly_hours.reverse
   end
 
-  def self.entry_list_by_month(users, timesheet)
+  def self.entry_list_by_month(users, timesheet, from_date: nil, to_date: nil)
     return [] unless users.present?
     return [] if timesheet.nil?
 
     user_ids = users.map(&:id)
-    TimeEntry
-      .select(year_month_entry_sql_as)
-      .where(user_id: user_ids)
-      .where(timesheet: timesheet)
+
+    scope = TimeEntry
+              .select(year_month_entry_sql_as)
+              .where(user_id: user_ids)
+              .where(timesheet: timesheet)
+
+    scope = scope.where(entry_date: from_date..to_date) if from_date && to_date
+
+    scope
       .group('year_month_entry')
       .order('year_month_entry desc')
       .map(&:year_month_entry)
@@ -216,35 +250,26 @@ class TimeEntry < ActiveRecord::Base
   end
 
   def self.total_hours_by_month(users, month, timesheet)
-    return [] unless users.present?
-    return [] if month.nil?
-    return [] if timesheet.nil?
+    return 0 unless users.present?
+    return 0 if month.nil?
+    return 0 if timesheet.nil?
 
-    user_ids = users.map(&:id)
-    TimeEntry
-      .select('SUM(decimal_time) AS total_hours')
-      .joins(:user)
-      .where("#{year_month_entry_sql} = ?", month)
-      .where(user_id: user_ids)
-      .where(timesheet: timesheet)
-      .to_a
-      .map(&:total_hours)
-      .first || 0
+    fetch_time_entries(users, {
+      timesheet: timesheet,
+      month: month,
+      aggregate: 'sum_hours'
+    })
   end
 
   def self.total_hours_by_timesheet(users, timesheet)
-    return [] unless users.present?
-    return [] if timesheet.nil?
+    return 0 unless users.present?
+    return 0 if timesheet.nil?
 
-    user_ids = users.map(&:id)
-    TimeEntry
-      .select('SUM(decimal_time) AS total_hours')
-      .joins(:user)
-      .where(user_id: user_ids)
-      .where(timesheet: timesheet)
-      .to_a
-      .map(&:total_hours)
-      .first || 0
+    fetch_time_entries(users, {
+      timesheet: timesheet,
+      alltime: true,
+      aggregate: 'sum_hours'
+    })
   end
 
   # Override the as_json method to include custom fields
@@ -255,7 +280,7 @@ class TimeEntry < ActiveRecord::Base
   private
 
   def self.year_month_entry_sql
-    "EXTRACT(year FROM entry_date) || '-' || LPAD(EXTRACT(month FROM entry_date)::text, 2, '0')"
+    Arel.sql("TO_CHAR(entry_date, 'YYYY-MM')")
   end
 
   def self.year_month_entry_sql_as

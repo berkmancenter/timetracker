@@ -1,6 +1,6 @@
 <template>
   <div class="tracker-entries">
-    <div class="tracker-entries-navigation">
+    <div class="tracker-entries-navigation" v-if="!periodsView">
       <ActionButton
         class="is-success"
         :icon="addIcon"
@@ -156,6 +156,7 @@
                           title="Clone entry"
                           @click="cloneEntry(entry)"
                           v-close-popper
+                          v-if="!$store.state.tracker.isPeriodView"
                         >
                           <Icon :src="cloneIcon" /> Clone entry
                         </a>
@@ -261,6 +262,12 @@
       Icon,
       Modal,
       ActionButton,
+    },
+    props: {
+      periodsView: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {

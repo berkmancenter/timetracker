@@ -1,5 +1,5 @@
 class TimesheetsController < ApplicationController
-  before_action :set_timesheet, only: %i[show send_invitations leave users delete_users change_users_role]
+  before_action :set_timesheet, only: %i[show send_invitations leave users user delete_users change_users_role]
   before_action :authenticate_user_json!
 
   # GET /timesheets
@@ -105,6 +105,33 @@ class TimesheetsController < ApplicationController
     return unless authorize_user_for_timesheet!(@timesheet)
 
     render json: @timesheet.all_users, status: :ok
+  end
+
+  # GET /timesheets/:id/users/:id
+  # Returns a specific user for a timesheet
+  def user
+    return unless authorize_user_for_timesheet!(@timesheet)
+
+    user = User.find_by(id: params[:user_id])
+
+    render json: user.as_json(only: %i[id email first_name last_name]), status: :ok
+  end
+
+  # POST /timesheets/:id/users
+  # Adds users to a timesheet
+  def add_users
+    return unless authorize_user_for_timesheet!(@timesheet)
+
+    emails = extract_emails(params[:emails])
+    role = params[:role]
+
+    unless Invitation::VALID_ROLES.include?(role)
+      return render_unprocessable_entity('Invalid role provided')
+    end
+
+    invitations = create_invitations(emails, role)
+    deliver_invitations(invitations)
+    render json: { message: 'ok' }, status: :ok
   end
 
   # POST /timesheets/:id/delete_users

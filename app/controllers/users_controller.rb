@@ -33,6 +33,16 @@ class UsersController < ApplicationController
     }, status: :ok
   end
 
+  # GET /users
+  # Returns a list of users with their roles in the given timesheet
+  def index
+    timesheet = Timesheet.find_by(id: params[:timesheet_id])
+    render_bad_request and return if timesheet.nil?
+
+    users = timesheet.users.select(:id, :email, :first_name, :last_name)
+    render json: { users: users }, status: :ok
+  end
+
   # GET /cas_logout
   # Logs out the current user and redirects to the CAS server logout page
   def cas_logout

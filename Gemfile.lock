@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/berkmancenter/devise_cas_authenticatable.git
+  revision: 80416e81944fb9b7f876a0e3c24a4a325e1c173b
+  specs:
+    devise_cas_authenticatable (2.0.2)
+      devise (>= 4.0.0)
+      rack-cas
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -141,9 +149,6 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
-    devise_cas_authenticatable (2.0.2)
-      devise (>= 4.0.0)
-      rack-cas
     diff-lcs (1.6.1)
     docile (1.4.1)
     domain_name (0.6.20240107)
@@ -180,7 +185,6 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json_pure (2.8.1)
-    libv8-node (23.6.1.0)
     logger (1.7.0)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -199,8 +203,6 @@ GEM
     mime-types-data (3.2025.0507)
     mini_mime (1.1.5)
     mini_portile2 (2.8.8)
-    mini_racer (0.18.1)
-      libv8-node (~> 23.6.1.0)
     minitest (5.25.5)
     msgpack (1.8.0)
     multi_json (1.15.0)
@@ -362,8 +364,6 @@ GEM
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
-    sqlite3 (2.6.0)
-      mini_portile2 (~> 2.8.0)
     stringio (3.1.7)
     terser (1.2.5)
       execjs (>= 0.3.0, < 3)
@@ -414,7 +414,7 @@ DEPENDENCIES
   dartsass-sprockets
   database_cleaner
   devise
-  devise_cas_authenticatable
+  devise_cas_authenticatable!
   domain_name
   dotenv-rails
   factory_bot_rails
@@ -423,7 +423,6 @@ DEPENDENCIES
   i18n
   json_pure
   mime-types
-  mini_racer
   multi_json
   netrc
   parallel_tests
@@ -450,7 +449,6 @@ DEPENDENCIES
   shoulda-matchers
   simplecov
   sprockets-rails
-  sqlite3
   terser
   test-prof
   timecop
