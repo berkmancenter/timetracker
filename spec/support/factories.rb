@@ -83,9 +83,9 @@ FactoryBot.define do
   end
 
   factory :custom_field_data_item do
-    association :time_entry
-    association :custom_field, factory: :custom_field
+    custom_field
     value { Faker::Lorem.word }
+    item_id { create(:time_entry).id }
   end
 
   factory :user do

@@ -1,8 +1,8 @@
 class CustomField < ActiveRecord::Base
   belongs_to :customizable, polymorphic: true
-  has_many :custom_field_data_items, foreign_key: 'custom_field_id', dependent: :destroy
+  has_many :custom_field_data_items, dependent: :destroy
 
-  validates :machine_name, presence: true, uniqueness: { scope: :customizable }
+  validates :machine_name, presence: true, uniqueness: { scope: :customizable_id }
 
   before_validation :set_machine_name
 

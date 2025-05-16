@@ -134,8 +134,11 @@ class TimeEntriesController < ApplicationController
   def auto_complete
     return render_bad_request if params[:field].nil? || params[:term].nil?
 
-    field_obj = CustomField.joins(:timesheet)
-                              .find_by(machine_name: params[:field], timesheets: { uuid: params[:timesheet_uuid] })
+    field_obj = CustomField
+                  .where(machine_name: params[:field], customizable_type: "Timesheet")
+                  .joins("INNER JOIN timesheets ON timesheets.id = custom_fields.customizable_id")
+                  .find_by("timesheets.uuid = ?", params[:timesheet_uuid])
+
     return render_bad_request unless field_obj.present?
 
     values = TimeEntry.where(user: current_user)
@@ -246,10 +249,10 @@ class TimeEntriesController < ApplicationController
 
   def update_custom_fields(time_entry, custom_fields)
     custom_fields.each do |machine_name, value|
-      custom_field = CustomField.find_by(machine_name: machine_name, timesheet: @timesheet)
+      custom_field = CustomField.find_by(machine_name: machine_name, customizable: @timesheet)
       next unless custom_field
 
-      field_data_item = CustomFieldDataItem.find_or_initialize_by(custom_field_id: custom_field.id, time_entry_id: time_entry.id)
+      field_data_item = CustomFieldDataItem.find_or_initialize_by(custom_field_id: custom_field.id, item_id: time_entry.id)
       if value.blank?
         field_data_item.destroy if field_data_item.persisted?
       else

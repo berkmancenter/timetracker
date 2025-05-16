@@ -1,7 +1,7 @@
 class TimeEntry < ActiveRecord::Base
   belongs_to :user
   belongs_to :timesheet
-  has_many :custom_field_data_items, foreign_key: 'time_entry_id', dependent: :destroy
+  has_many :custom_field_data_items, foreign_key: 'item_id', dependent: :destroy
 
   attribute :username
 
@@ -42,8 +42,7 @@ class TimeEntry < ActiveRecord::Base
       data_items = CustomFieldDataItem
         .joins(:time_entry)
         .where(custom_field_id: field.id, time_entries: { user_id: user.id })
-        .where.not(value: nil)
-        .where.not(value: '')
+        .where.not(value: [nil, ''])
         .group(:value)
         .order(Arel.sql('COUNT(*) DESC'))
         .limit(20)

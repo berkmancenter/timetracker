@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_16_110625) do
+ActiveRecord::Schema[7.2].define(version: 2025_05_16_132753) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -26,13 +26,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_16_110625) do
 
   create_table "custom_field_data_items", force: :cascade do |t|
     t.bigint "custom_field_id", null: false
-    t.integer "time_entry_id", null: false
+    t.integer "item_id", null: false
     t.text "value"
     t.jsonb "value_json", default: [], null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["custom_field_id"], name: "index_custom_field_data_items_on_custom_field_id"
-    t.index ["time_entry_id"], name: "index_custom_field_data_items_on_time_entry_id"
+    t.index ["item_id"], name: "index_custom_field_data_items_on_item_id"
   end
 
   create_table "custom_fields", force: :cascade do |t|
