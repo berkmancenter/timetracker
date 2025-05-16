@@ -27,7 +27,7 @@
     },
     computed: {
       filteredFields() {
-        const timesheetFields = this.$store.state.tracker?.selectedTimesheet?.timesheet_fields || []
+        const timesheetFields = this.$store.state.tracker?.selectedTimesheet?.custom_fields || []
         return timesheetFields.filter(field => field.popular)
       },
       popularItems() {

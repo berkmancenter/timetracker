@@ -10,10 +10,10 @@ const defaultPeriod = {
 
 const defaultTimesheet = {
   name: '',
-  timesheet_fields: [],
+  custom_fields: [],
 }
 
-const defaultTimesheetField = {
+const defaultCustomField = {
   title: '',
   input_type: 'text',
   popular: false,
@@ -62,12 +62,12 @@ const mutations = {
   setPeriodCredits(state, periodCredits) {
     state.periodCredits = periodCredits
   },
-  addTimesheetField(state) {
-    let field = JSON.parse(JSON.stringify(defaultTimesheetField))
-    field.order = state.timesheet.timesheet_fields.length + 1
-    state.timesheet.timesheet_fields.push(field)
+  addCustomField(state) {
+    let field = JSON.parse(JSON.stringify(defaultCustomField))
+    field.order = state.timesheet.custom_fields.length + 1
+    state.timesheet.custom_fields.push(field)
   },
-  removeTimesheetField(state, field) {
+  removeCustomField(state, field) {
     field._destroy = 1
   },
 }
@@ -208,8 +208,8 @@ const actions = {
     return response
   },
   async saveTimesheet(context, timesheet) {
-    // To make Rails (backend) happy we need to rename timesheet_fields to timesheet_fields_attributes
-    timesheet.timesheet_fields_attributes = timesheet.timesheet_fields
+    // To make Rails (backend) happy we need to rename custom_fields to custom_fields_attributes
+    timesheet.custom_fields_attributes = timesheet.custom_fields
 
     const response = await fetchIt(`${apiUrl}/timesheets/upsert`, {
       method: 'POST',
@@ -305,11 +305,11 @@ const actions = {
 
     return response
   },
-  addTimesheetField(context) {
-    context.commit('addTimesheetField')
+  addCustomField(context) {
+    context.commit('addCustomField')
   },
-  removeTimesheetField(context, field) {
-    context.commit('removeTimesheetField', field)
+  removeCustomField(context, field) {
+    context.commit('removeCustomField', field)
   },
 }
 

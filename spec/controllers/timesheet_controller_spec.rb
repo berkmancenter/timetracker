@@ -18,8 +18,8 @@ RSpec.describe TimesheetsController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)).to match_array([
-        { 'id' => timesheet1.id, 'name' => 'Timesheet 1', 'uuid' => timesheet1.uuid, 'roles' => ['admin'], 'created_at' => timesheet1.created_at.as_json, 'timesheet_fields' => [] },
-        { 'id' => timesheet2.id, 'name' => 'Timesheet 2', 'uuid' => timesheet2.uuid, 'roles' => ['user'], 'created_at' => timesheet2.created_at.as_json, 'timesheet_fields' => [] }
+        { 'id' => timesheet1.id, 'name' => 'Timesheet 1', 'uuid' => timesheet1.uuid, 'roles' => ['admin'], 'created_at' => timesheet1.created_at.as_json, 'custom_fields' => [] },
+        { 'id' => timesheet2.id, 'name' => 'Timesheet 2', 'uuid' => timesheet2.uuid, 'roles' => ['user'], 'created_at' => timesheet2.created_at.as_json, 'custom_fields' => [] }
       ])
     end
 
@@ -45,7 +45,7 @@ RSpec.describe TimesheetsController, type: :controller do
         post :upsert, params: {
           timesheet: {
             name: 'New Timesheet',
-            timesheet_fields_attributes: [
+            custom_fields_attributes: [
               {
                 title: 'Category',
                 input_type: 'text'
@@ -67,7 +67,7 @@ RSpec.describe TimesheetsController, type: :controller do
         timesheet: {
           id: existing_timesheet.id,
           name: 'Updated Timesheet',
-          timesheet_fields_attributes: [
+          custom_fields_attributes: [
             {
               title: 'Category 123',
               input_type: 'text'

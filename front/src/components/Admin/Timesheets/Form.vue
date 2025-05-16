@@ -145,7 +145,7 @@
     },
     computed: {
       filteredFields() {
-        let timesheetFields = this.$store.state.admin?.timesheet?.timesheet_fields
+        let timesheetFields = this.$store.state.admin?.timesheet?.custom_fields
         timesheetFields = orderBy(timesheetFields, ['order'], ['asc'])
         return (timesheetFields || []).filter(field => !field._destroy)
       },
@@ -196,7 +196,7 @@
         }
       },
       async save() {
-        if (this.$store.state.admin.timesheet.timesheet_fields.length === 0) {
+        if (this.$store.state.admin.timesheet.custom_fields.length === 0) {
           this.awn.warning('You need at least 1 field to be able to save the timesheet.')
           return
         }
@@ -219,10 +219,10 @@
         this.$refs.submitButton.disabled = false
       },
       addField() {
-        this.$store.dispatch('admin/addTimesheetField')
+        this.$store.dispatch('admin/addCustomField')
       },
       removeField(field) {
-        this.$store.dispatch('admin/removeTimesheetField', field)
+        this.$store.dispatch('admin/removeCustomField', field)
       },
       moveField(field, direction) {
         const previousField = this.filteredFields.find(f => f.order === field.order + direction)

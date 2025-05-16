@@ -66,12 +66,12 @@ cd front
 ./deploy.sh
 cd /app
 
-# Migrate or setup the database.
-if rails db:migrate 2>/dev/null; then
-  echo "Migrations ran successfully."
+echo "📦 [Rails] Preparing database for environment: $APP_ENV"
+if bundle exec rails db:prepare RAILS_ENV=$APP_ENV; then
+  echo "✅ [Rails] Database ready and migrated."
 else
-  echo "Migrations failed, setting up the database..."
-  rails db:setup && rails db:migrate
+  echo "❌ [Rails] Database setup failed. Check the logs above for error detail."
+  exit 1
 fi
 
 # Execute the main process.

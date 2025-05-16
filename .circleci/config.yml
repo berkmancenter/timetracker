@@ -21,7 +21,7 @@ jobs:
           command: |
             echo "Waiting for migrations to complete..."
             bash -c '
-            until docker compose -f docker/docker-compose.test.yml logs app | grep "Migrations ran successfully."; do
+            until docker compose -f docker/docker-compose.test.yml logs app | grep "Database ready and migrated"; do
               echo "Waiting for migrations..."
               sleep 2
             done

@@ -134,19 +134,19 @@ class TimeEntriesController < ApplicationController
   def auto_complete
     return render_bad_request if params[:field].nil? || params[:term].nil?
 
-    field_obj = TimesheetField.joins(:timesheet)
+    field_obj = CustomField.joins(:timesheet)
                               .find_by(machine_name: params[:field], timesheets: { uuid: params[:timesheet_uuid] })
     return render_bad_request unless field_obj.present?
 
     values = TimeEntry.where(user: current_user)
-                      .joins(:timesheet_field_data_items)
-                      .where(timesheet_field_data_items: { field_id: field_obj.id })
-                      .where('timesheet_field_data_items.value ILIKE ?', "%#{params[:term]}%")
-                      .where.not('timesheet_field_data_items.value' => [nil, ''])
-                      .group('timesheet_field_data_items.value')
+                      .joins(:custom_field_data_items)
+                      .where(custom_field_data_items: { custom_field_id: field_obj.id })
+                      .where('custom_field_data_items.value ILIKE ?', "%#{params[:term]}%")
+                      .where.not('custom_field_data_items.value' => [nil, ''])
+                      .group('custom_field_data_items.value')
                       .order(Arel.sql('COUNT(*) DESC'))
                       .limit(5)
-                      .pluck('timesheet_field_data_items.value')
+                      .pluck('custom_field_data_items.value')
 
     render json: values
   end
@@ -178,7 +178,7 @@ class TimeEntriesController < ApplicationController
   end
 
   def render_entries_csv
-    columns = %w[username entry_date decimal_time] + @timesheet.timesheet_fields.map(&:machine_name)
+    columns = %w[username entry_date decimal_time] + @timesheet.custom_fields.map(&:machine_name)
     entries = fetch_entries_for_csv
 
     render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: format_entries_for_csv(entries, columns), columns: columns)
@@ -246,10 +246,10 @@ class TimeEntriesController < ApplicationController
 
   def update_custom_fields(time_entry, custom_fields)
     custom_fields.each do |machine_name, value|
-      timesheet_field = TimesheetField.find_by(machine_name: machine_name, timesheet: @timesheet)
-      next unless timesheet_field
+      custom_field = CustomField.find_by(machine_name: machine_name, timesheet: @timesheet)
+      next unless custom_field
 
-      field_data_item = TimesheetFieldDataItem.find_or_initialize_by(field_id: timesheet_field.id, time_entry_id: time_entry.id)
+      field_data_item = CustomFieldDataItem.find_or_initialize_by(custom_field_id: custom_field.id, time_entry_id: time_entry.id)
       if value.blank?
         field_data_item.destroy if field_data_item.persisted?
       else

@@ -79,7 +79,7 @@
 
     <div class="tracker-entries-wrapper" :class="{ 'tracker-entries-sudo': $store.state.shared.user.sudoMode }">
       <div class="tracker-entries-header">
-        <div v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
+        <div v-for="field in $store.state.tracker.selectedTimesheet.custom_fields.filter(field => field.list)">
           {{ field.title }}
         </div>
         <div v-if="$store.state.shared.user.sudoMode">Email</div>
@@ -104,7 +104,7 @@
                     @click="openMenu(entry, $event)"
                   >
                     <div class="tracker-entries-entry-meta">
-                      <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.list)">
+                      <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.custom_fields.filter(field => field.list)">
                         {{ entry.fields[field.machine_name] }}
                       </div>
 

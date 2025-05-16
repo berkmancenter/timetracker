@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_09_152914) do
+ActiveRecord::Schema[7.2].define(version: 2025_05_16_110625) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -22,6 +22,36 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_09_152914) do
     t.datetime "updated_at", null: false
     t.index ["period_id"], name: "index_credits_on_period_id"
     t.index ["user_id"], name: "index_credits_on_user_id"
+  end
+
+  create_table "custom_field_data_items", force: :cascade do |t|
+    t.bigint "custom_field_id", null: false
+    t.integer "time_entry_id", null: false
+    t.text "value"
+    t.jsonb "value_json", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["custom_field_id"], name: "index_custom_field_data_items_on_custom_field_id"
+    t.index ["time_entry_id"], name: "index_custom_field_data_items_on_time_entry_id"
+  end
+
+  create_table "custom_fields", force: :cascade do |t|
+    t.string "input_type", limit: 50, null: false
+    t.string "machine_name", limit: 500, null: false
+    t.string "customizable_type", null: false
+    t.bigint "customizable_id", null: false
+    t.integer "order", default: 1, null: false
+    t.string "title", limit: 500, null: false
+    t.text "description"
+    t.jsonb "metadata", default: {}, null: false
+    t.boolean "popular", default: false, null: false
+    t.boolean "list", default: false, null: false
+    t.boolean "required", default: false, null: false
+    t.string "access_key", limit: 1
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customizable_type", "customizable_id"], name: "index_custom_fields_on_customizable"
+    t.index ["machine_name"], name: "index_custom_fields_on_machine_name"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -72,35 +102,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_09_152914) do
     t.index ["timesheet_id"], name: "index_time_entries_on_timesheet_id"
   end
 
-  create_table "timesheet_field_data_items", force: :cascade do |t|
-    t.integer "field_id", null: false
-    t.integer "time_entry_id", null: false
-    t.text "value"
-    t.jsonb "value_json", default: [], null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["field_id"], name: "timesheet_fields_data_item_field_id"
-    t.index ["time_entry_id"], name: "custom_field_data_time_entry_id"
-  end
-
-  create_table "timesheet_fields", force: :cascade do |t|
-    t.string "input_type", limit: 50, null: false
-    t.string "machine_name", limit: 500, null: false
-    t.integer "timesheet_id"
-    t.integer "order", default: 1, null: false
-    t.string "title", limit: 500, null: false
-    t.text "description"
-    t.jsonb "metadata", default: {}, null: false
-    t.boolean "popular", default: false, null: false
-    t.boolean "list", default: false, null: false
-    t.boolean "required", default: false, null: false
-    t.string "access_key", limit: 1
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["machine_name"], name: "timesheet_fields_machine_name"
-    t.index ["timesheet_id"], name: "timesheet_fields_timesheet_id"
-  end
-
   create_table "timesheets", force: :cascade do |t|
     t.string "name"
     t.string "public_code"
@@ -142,12 +143,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_09_152914) do
     t.index ["user_id"], name: "index_users_timesheets_on_user_id"
   end
 
+  add_foreign_key "custom_field_data_items", "custom_fields"
   add_foreign_key "invitations", "timesheets"
   add_foreign_key "invitations", "users", column: "sender_id"
   add_foreign_key "invitations", "users", column: "used_by_id"
   add_foreign_key "periods", "timesheets"
   add_foreign_key "time_entries", "timesheets"
-  add_foreign_key "timesheet_field_data_items", "timesheet_fields", column: "field_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "users_timesheets", "timesheets"
   add_foreign_key "users_timesheets", "users"
 end

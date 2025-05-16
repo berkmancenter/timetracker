@@ -15,30 +15,30 @@ RSpec.describe TimeEntry, type: :model do
   describe 'popular' do
     let(:user) { create(:user) }
     let(:timesheet) { create(:timesheet) }
-    let(:category_field) { create(:timesheet_field, machine_name: 'category', timesheet: timesheet, popular: true) }
-    let(:project_field) { create(:timesheet_field, machine_name: 'project', timesheet: timesheet, popular: true) }
+    let(:category_field) { create(:custom_field, machine_name: 'category', timesheet: timesheet, popular: true) }
+    let(:project_field) { create(:custom_field, machine_name: 'project', timesheet: timesheet, popular: true) }
 
     before do
       # Create time entries with custom category field data
       create_list(:time_entry, 5, user: user, timesheet: timesheet).each do |entry|
-        create(:timesheet_field_data_item, time_entry: entry, field_id: category_field.id, value: 'Category A')
+        create(:custom_field_data_item, time_entry: entry, custom_field_id: category_field.id, value: 'Category A')
       end
       create_list(:time_entry, 3, user: user, timesheet: timesheet).each do |entry|
-        create(:timesheet_field_data_item, time_entry: entry, field_id: category_field.id, value: 'Category B')
+        create(:custom_field_data_item, time_entry: entry, custom_field_id: category_field.id, value: 'Category B')
       end
       create_list(:time_entry, 2, user: user, timesheet: timesheet).each do |entry|
-        create(:timesheet_field_data_item, time_entry: entry, field_id: category_field.id, value: 'Category C')
+        create(:custom_field_data_item, time_entry: entry, custom_field_id: category_field.id, value: 'Category C')
       end
 
       # Create time entries with custom project field data
       create_list(:time_entry, 5, user: user, timesheet: timesheet).each do |entry|
-        create(:timesheet_field_data_item, time_entry: entry, field_id: project_field.id, value: 'Project X')
+        create(:custom_field_data_item, time_entry: entry, custom_field_id: project_field.id, value: 'Project X')
       end
       create_list(:time_entry, 3, user: user, timesheet: timesheet).each do |entry|
-        create(:timesheet_field_data_item, time_entry: entry, field_id: project_field.id, value: 'Project Y')
+        create(:custom_field_data_item, time_entry: entry, custom_field_id: project_field.id, value: 'Project Y')
       end
       create_list(:time_entry, 2, user: user, timesheet: timesheet).each do |entry|
-        create(:timesheet_field_data_item, time_entry: entry, field_id: project_field.id, value: 'Project Z')
+        create(:custom_field_data_item, time_entry: entry, custom_field_id: project_field.id, value: 'Project Z')
       end
     end
 

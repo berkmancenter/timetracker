@@ -43,12 +43,16 @@ FactoryBot.define do
     public_code { Faker::Alphanumeric.alpha(number: 10) }
 
     trait :with_fields do
-      timesheet_fields { [build(:timesheet_field, :category), build(:timesheet_field, :project), build(:timesheet_field, :description)] }
+      after(:build) do |timesheet|
+        timesheet.custom_fields << build(:custom_field, :category, customizable: timesheet)
+        timesheet.custom_fields << build(:custom_field, :project, customizable: timesheet)
+        timesheet.custom_fields << build(:custom_field, :description, customizable: timesheet)
+      end
     end
   end
 
-  factory :timesheet_field do
-    timesheet
+  factory :custom_field do
+    customizable { nil }
     input_type { 'text' }
     machine_name { Faker::Lorem.word }
     title { Faker::Lorem.word }
@@ -78,9 +82,9 @@ FactoryBot.define do
     end
   end
 
-  factory :timesheet_field_data_item do
+  factory :custom_field_data_item do
     association :time_entry
-    association :timesheet_field, factory: :timesheet_field
+    association :custom_field, factory: :custom_field
     value { Faker::Lorem.word }
   end
 

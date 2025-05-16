@@ -13,7 +13,7 @@
         ref="entryForm"
       >
         <template
-          v-for="field in $store.state.tracker.selectedTimesheet.timesheet_fields"
+          v-for="field in $store.state.tracker.selectedTimesheet.custom_fields"
           :key="field.id"
         >
           <FormField
@@ -194,7 +194,7 @@
       initAutoComplete() {
         const that = this
 
-        this.$store.state.tracker.selectedTimesheet.timesheet_fields.forEach(field => {
+        this.$store.state.tracker.selectedTimesheet.custom_fields.forEach(field => {
           if (field.input_type !== 'text') {
             return
           }
@@ -292,7 +292,7 @@
         })
       },
       getTextFields() {
-        return this.$store.state.tracker.selectedTimesheet.timesheet_fields.filter(field => field.input_type === 'text')
+        return this.$store.state.tracker.selectedTimesheet.custom_fields.filter(field => field.input_type === 'text')
       },
     },
   }

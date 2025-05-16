@@ -1,7 +1,7 @@
 class TimeEntry < ActiveRecord::Base
   belongs_to :user
   belongs_to :timesheet
-  has_many :timesheet_field_data_items, foreign_key: 'time_entry_id', dependent: :destroy
+  has_many :custom_field_data_items, foreign_key: 'time_entry_id', dependent: :destroy
 
   attribute :username
 
@@ -15,15 +15,15 @@ class TimeEntry < ActiveRecord::Base
 
     entry = TimeEntry
             .select('time_entries.*, users.email, users.id AS user_id')
-            .includes(timesheet_field_data_items: :timesheet_field)
+            .includes(custom_field_data_items: :custom_field)
             .joins(:user)
             .find_by(id: id)
 
     return nil unless entry
 
     # Extract associated data items and map them
-    field_data = entry.timesheet_field_data_items.map do |field_data|
-      [field_data.timesheet_field.machine_name, field_data.value]
+    field_data = entry.custom_field_data_items.map do |field_data|
+      [field_data.custom_field.machine_name, field_data.value]
     end.to_h
 
     # Merge field data into entry attributes
@@ -35,13 +35,13 @@ class TimeEntry < ActiveRecord::Base
   def self.popular(user)
     return {} unless user.present?
 
-    popular_fields = TimesheetField.where(popular: true)
+    popular_fields = CustomField.where(popular: true)
     popular_values = {}
 
     popular_fields.each do |field|
-      data_items = TimesheetFieldDataItem
+      data_items = CustomFieldDataItem
         .joins(:time_entry)
-        .where(field_id: field.id, time_entries: { user_id: user.id })
+        .where(custom_field_id: field.id, time_entries: { user_id: user.id })
         .where.not(value: nil)
         .where.not(value: '')
         .group(:value)
@@ -87,7 +87,7 @@ class TimeEntry < ActiveRecord::Base
       query = query.select('time_entries.*, users.email, users.id AS user_id')
       query = query.order(entry_date: :desc, id: :desc)
       # Add includes if we're fetching individual entries
-      query = query.includes(timesheet_field_data_items: :timesheet_field) if options[:group_by].nil?
+      query = query.includes(custom_field_data_items: :custom_field) if options[:group_by].nil?
     end
 
     # Filter by users if provided
@@ -138,8 +138,8 @@ class TimeEntry < ActiveRecord::Base
   def self.process_individual_entries(query)
     query.map do |entry|
       # Extract associated data items and map them
-      field_data = entry.timesheet_field_data_items.map do |field_data|
-        [field_data.timesheet_field.machine_name, field_data.value]
+      field_data = entry.custom_field_data_items.map do |field_data|
+        [field_data.custom_field.machine_name, field_data.value]
       end.to_h
 
       # Merge field data into entry attributes

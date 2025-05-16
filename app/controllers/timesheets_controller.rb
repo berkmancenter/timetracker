@@ -32,7 +32,7 @@ class TimesheetsController < ApplicationController
     return unless authorize_user_for_timesheet!(timesheet) if timesheet.persisted?
 
     # Check if there's at least one non-destroyed timesheet field
-    has_valid_fields = timesheet_params[:timesheet_fields_attributes]&.any? do |field|
+    has_valid_fields = timesheet_params[:custom_fields_attributes]&.any? do |field|
       field[:_destroy].nil? || field[:_destroy].to_s != 'true'
     end
 
@@ -165,18 +165,18 @@ class TimesheetsController < ApplicationController
   private
 
   def set_timesheet
-    @timesheet = Timesheet.includes(:timesheet_fields).find_by(id: params[:id])
+    @timesheet = Timesheet.includes(:custom_fields).find_by(id: params[:id])
   end
 
   def timesheet_params
-    params.require(:timesheet).permit(:id, :name, timesheet_fields_attributes: %i[id title access_key input_type popular list order _destroy])
+    params.require(:timesheet).permit(:id, :name, custom_fields_attributes: %i[id title access_key input_type popular list order _destroy])
   end
 
   def timesheet_json_params
     {
       only: %i[id name uuid roles created_at],
       include: {
-        timesheet_fields: {
+        custom_fields: {
           only: %i[id machine_name title order input_type popular list access_key access_value]
         }
       }
