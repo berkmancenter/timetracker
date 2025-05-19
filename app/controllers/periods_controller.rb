@@ -5,7 +5,10 @@ class PeriodsController < ApplicationController
   PERIOD_PUBLIC_FIELDS = {
     only: %i[id timesheet_id name from to],
     include: {
-      timesheet: { only: %i[id name] }
+      timesheet: { only: %i[id name] },
+      custom_fields: {
+        only: %i[id machine_name title order input_type popular list access_key access_value]
+      }
     }
   }.freeze
 
@@ -47,7 +50,7 @@ class PeriodsController < ApplicationController
     periods_ids = params[:periods]
 
     return render_bad_request('No periods selected.') unless periods_ids&.any?
-    return render_unauthorize if unauthorized_periods?(periods_ids) && !superadmin?
+    return render_unauthorized if unauthorized_periods?(periods_ids) && !superadmin?
 
     Period.where(id: periods_ids).destroy_all
     render json: { message: 'ok' }, status: :ok
@@ -67,7 +70,7 @@ class PeriodsController < ApplicationController
     }, status: :ok
   end
 
-  # POST /timesheets/:timesheet_id/periods/:id/credits
+  # POST /timesheets/:timesheet_id/periods/:id/set_credits
   # Sets the credits for a period
   def set_credits
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
@@ -110,11 +113,14 @@ class PeriodsController < ApplicationController
   private
 
   def set_period
-    @period = Period.find(params[:id])
+    @period = Period.includes(:custom_fields).find(params[:id])
   end
 
   def period_params
-    params.require(:period).permit(:id, :name, :timesheet_id, :from, :to)
+    params.require(:period).permit(
+      :id, :name, :timesheet_id, :from, :to,
+      custom_fields_attributes: %i[id title access_key input_type popular list order _destroy]
+    )
   end
 
   def render_stats_csv(stats)
@@ -216,6 +222,9 @@ class PeriodsController < ApplicationController
     original_period.dup.tap do |cloned_period|
       cloned_period.name = "#{original_period.name} clone"
       cloned_period.credits = original_period.credits.map(&:dup)
+      if original_period.custom_fields.any?
+        cloned_period.custom_fields = original_period.custom_fields.map(&:dup)
+      end
     end
   end
 end

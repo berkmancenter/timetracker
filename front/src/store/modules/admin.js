@@ -6,6 +6,7 @@ const defaultPeriod = {
   name: '',
   from: '',
   to: '',
+  custom_fields: [],
 }
 
 const defaultTimesheet = {
@@ -62,10 +63,15 @@ const mutations = {
   setPeriodCredits(state, periodCredits) {
     state.periodCredits = periodCredits
   },
-  addCustomField(state) {
+  addCustomField(state, modelName) {
     let field = JSON.parse(JSON.stringify(defaultCustomField))
-    field.order = state.timesheet.custom_fields.length + 1
-    state.timesheet.custom_fields.push(field)
+
+    if (typeof state[modelName].custom_fields === 'undefined') {
+      state[modelName].custom_fields = []
+    }
+
+    field.order = state[modelName].custom_fields.length + 1
+    state[modelName].custom_fields.push(field)
   },
   removeCustomField(state, field) {
     field._destroy = 1
@@ -180,6 +186,9 @@ const actions = {
     context.commit('setTimesheetInvitations', invitations)
   },
   async savePeriod(context, data) {
+    // To make Rails (backend) happy we need to rename custom_fields to custom_fields_attributes
+    data.period.custom_fields_attributes = data.period.custom_fields
+
     const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/upsert`, {
       method: 'POST',
       headers: {
@@ -305,8 +314,8 @@ const actions = {
 
     return response
   },
-  addCustomField(context) {
-    context.commit('addCustomField')
+  addCustomField(context, modelName) {
+    context.commit('addCustomField', modelName)
   },
   removeCustomField(context, field) {
     context.commit('removeCustomField', field)

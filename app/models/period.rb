@@ -5,7 +5,10 @@ class Period < ActiveRecord::Base
   validates :timesheet, presence: true
 
   has_many :credits, dependent: :destroy, autosave: true
+  has_many :custom_fields, -> { order(:order) }, as: :customizable, dependent: :destroy
   belongs_to :timesheet
+
+  accepts_nested_attributes_for :custom_fields, allow_destroy: true
 
   def get_stats
     total_num_of_days = (self.to - self.from).to_f

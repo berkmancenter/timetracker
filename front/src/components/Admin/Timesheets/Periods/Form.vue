@@ -26,6 +26,10 @@
         </div>
       </div>
 
+      <div class="box">
+        <CustomFields :fields="$store.state.admin.period.custom_fields" model-name="period" />
+      </div>
+
       <div class="field is-grouped">
         <div class="control">
           <button class="button is-success" ref="submitButton">Save</button>
@@ -38,12 +42,14 @@
 <script>
   import Icon from '@/components/Shared/Icon.vue'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
+  import CustomFields from '@/components/Shared/CustomFields.vue'
 
   export default {
     name: 'AdminPeriodsForm',
     components: {
       Icon,
       Breadcrumbs,
+      CustomFields,
     },
     data() {
       return {
