@@ -30,9 +30,9 @@
       />
     </div>
 
-    <super-admin-filter :users="$store.state.admin.periodCredits?.credits" @change="superAdminFilterChanged" />
+    <SuperAdminFilter :users="$store.state.admin.periodCredits?.credits" @change="superAdminFilterChanged" />
 
-    <admin-table :tableClasses="['admin-periods-credits-table']">
+    <AdminTable :tableClasses="['admin-periods-credits-table']">
       <thead>
         <tr class="no-select">
           <th data-sort-method="none" class="no-sort">
@@ -40,10 +40,13 @@
           </th>
           <th>Identifier</th>
           <th data-sort-method="none" class="no-sort">Hours</th>
+          <th v-for="field in customFields" :key="field.id" data-sort-method="none" class="no-sort">
+            {{ field.title }}
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="periodCredit in filteredItems">
+        <tr v-for="periodCredit in filteredItems" :key="periodCredit.user_id">
           <td class="admin-table-selector">
             <input type="checkbox" v-model="periodCredit.selected">
           </td>
@@ -51,12 +54,20 @@
           <td class="no-break admin-periods-credits-table-hours">
             <input class="input" type="number" v-model="periodCredit.credit_amount">
           </td>
+          <td v-for="field in customFields" :key="`${periodCredit.user_id}-${field.id}`" class="custom-field-cell">
+            <input 
+              class="input" 
+              :type="getInputType(field)" 
+              :value="periodCredit[`custom_field_${field.id}`] || ''"
+              @input="updateCustomFieldValue(periodCredit, field, $event.target.value)"
+            >
+          </td>
         </tr>
         <tr v-if="filteredItems.length === 0">
-          <td colspan="7">No records found.</td>
+          <td :colspan="3 + customFields.length">No records found.</td>
         </tr>
       </tbody>
-    </admin-table>
+    </AdminTable>
   </div>
 
   <Modal
@@ -131,6 +142,9 @@
 
         return breadcrumbs
       },
+      customFields() {
+        return this.$store.state.admin.periodCredits?.period?.custom_fields || []
+      }
     },
     created() {
       this.initialDataLoad()
@@ -150,7 +164,35 @@
         this.$store.dispatch('admin/setTimesheet', timesheet)
         this.$store.dispatch('admin/setPeriodCredits', periodCredits)
 
+        // Initialize custom field properties on credits objects
+        this.initializeCustomFieldProperties()
+
         this.mitt.emit('spinnerStop')
+      },
+      initializeCustomFieldProperties() {
+        const credits = this.$store.state.admin.periodCredits?.credits || []
+        const fields = this.$store.state.admin.periodCredits?.period?.custom_fields || []
+        
+        credits.forEach(credit => {
+          fields.forEach(field => {
+            // Initialize custom field property if not exists
+            if (!credit.hasOwnProperty(`custom_field_${field.id}`)) {
+              credit[`custom_field_${field.id}`] = ''
+            }
+          })
+        })
+      },
+      getInputType(field) {
+        // Map field input types to HTML input types
+        switch (field.input_type) {
+          case 'number':
+            return 'number'
+          default:
+            return 'text'
+        }
+      },
+      updateCustomFieldValue(credit, field, value) {
+        credit[`custom_field_${field.id}`] = value
       },
       toggleAll() {
         const newStatus = this.$refs.toggleAllCheckbox.checked
@@ -186,7 +228,6 @@
 
         if (selected.length === 0) {
           this.awn.warning('No records selected.')
-
           return
         }
 
@@ -198,8 +239,9 @@
         this.mitt.emit('spinnerStart')
         this.saveSelectedDisabled = true
 
-        selected
-          .map(credit => credit.credit_amount = this.creditHours)
+        selected.forEach(credit => {
+          credit.credit_amount = this.creditHours
+        })
 
         const response = await this.$store.dispatch('admin/savePeriodCredits', {
           periodId: this.$route.params.id,

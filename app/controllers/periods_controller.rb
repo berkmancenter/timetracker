@@ -78,6 +78,10 @@ class PeriodsController < ApplicationController
 
     new_credits = build_new_credits(params[:credits], @period)
     @period.credits = new_credits.compact
+
+    # Process custom field values
+    save_custom_field_data(params[:credits], @period)
+
     @period.save
 
     render json: @period.credits, status: :ok
@@ -92,7 +96,7 @@ class PeriodsController < ApplicationController
     return render_stats_csv(stats) if params[:csv]
 
     render json: {
-      period: @period,
+      period: @period.as_json(PERIOD_PUBLIC_FIELDS),
       stats: stats
     }, status: :ok
   end
@@ -167,8 +171,60 @@ class PeriodsController < ApplicationController
     ').group(:id).order(:username)
   end
 
+  def save_custom_field_data(credits_params, period)
+    return unless period.custom_fields.any?
+
+    custom_field_ids = period.custom_fields.pluck(:id)
+
+    credits_params.each do |credit_data|
+      user_id = credit_data['user_id'].to_i
+
+      # Extract custom field values
+      custom_field_ids.each do |field_id|
+        field_key = "custom_field_#{field_id}"
+        next unless credit_data.key?(field_key)
+
+        value = credit_data[field_key]
+
+        # Find or initialize the custom field data item
+        data_item = CustomFieldDataItem.find_or_initialize_by(
+          custom_field_id: field_id,
+          item_id: user_id
+        )
+
+        # Update the value
+        data_item.value = value
+        data_item.save
+      end
+    end
+  end
+
   def build_credits(users, period)
+    custom_field_data = {}
+
+    if period.custom_fields.any?
+      # Fetch all custom field data for the period's custom fields and users
+      field_ids = period.custom_fields.pluck(:id)
+      user_ids = users.pluck(:id)
+
+      # Group custom field data by item_id (user_id)
+      CustomFieldDataItem.where(custom_field_id: field_ids, item_id: user_ids)
+        .each do |item|
+          custom_field_data[item.item_id] ||= {}
+          custom_field_data[item.item_id][item.custom_field_id] = item.value
+        end
+    end
+
     users.map do |user|
+      user_custom_fields = {}
+
+      # Add custom field data if it exists
+      if period.custom_fields.any? && custom_field_data[user.id]
+        period.custom_fields.each do |field|
+          user_custom_fields["custom_field_#{field.id}"] = custom_field_data[user.id][field.id] || ''
+        end
+      end
+
       {
         user_id: user.id,
         username: user.username,
@@ -178,7 +234,7 @@ class PeriodsController < ApplicationController
         last_name: user.last_name,
         roles: user.roles,
         credit_amount: Credit.where(user: user, period: period).first&.amount || 0.00
-      }
+      }.merge(user_custom_fields)
     end
   end
 
@@ -222,8 +278,12 @@ class PeriodsController < ApplicationController
     original_period.dup.tap do |cloned_period|
       cloned_period.name = "#{original_period.name} clone"
       cloned_period.credits = original_period.credits.map(&:dup)
+
       if original_period.custom_fields.any?
         cloned_period.custom_fields = original_period.custom_fields.map(&:dup)
+        cloned_period.custom_fields.each_with_index do |custom_field, index|
+          custom_field.machine_name = "#{custom_field.machine_name}_clone_#{original_period.id}_#{index}"
+        end
       end
     end
   end

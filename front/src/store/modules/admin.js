@@ -186,7 +186,7 @@ const actions = {
     context.commit('setTimesheetInvitations', invitations)
   },
   async savePeriod(context, data) {
-    // To make Rails (backend) happy we need to rename custom_fields to custom_fields_attributes
+    // To make Rails (API) happy we need to rename custom_fields to custom_fields_attributes
     data.period.custom_fields_attributes = data.period.custom_fields
 
     const response = await fetchIt(`${apiUrl}/timesheets/${data.timesheetId}/periods/upsert`, {

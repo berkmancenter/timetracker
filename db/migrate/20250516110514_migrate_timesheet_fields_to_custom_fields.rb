@@ -1,8 +1,8 @@
-class MigrateCustomFieldsToCustomFields < ActiveRecord::Migration[7.2]
+class MigrateTimesheetFieldsToCustomFields < ActiveRecord::Migration[7.2]
   def up
-    custom_fields = execute("SELECT * FROM custom_fields")
+    timesheet_fields = execute("SELECT * FROM timesheet_fields")
 
-    custom_fields.each do |field|
+    timesheet_fields.each do |field|
       # Insert into custom_fields
       execute <<-SQL.squish
         INSERT INTO custom_fields (
@@ -30,7 +30,7 @@ class MigrateCustomFieldsToCustomFields < ActiveRecord::Migration[7.2]
 
     # Map old field IDs to new ones
     field_id_map = {}
-    old_fields = execute("SELECT id, machine_name, timesheet_id FROM custom_fields")
+    old_fields = execute("SELECT id, machine_name, timesheet_id FROM timesheet_fields")
     new_fields = execute("SELECT id, machine_name, customizable_id FROM custom_fields WHERE customizable_type = 'Timesheet'")
     old_fields.each do |old|
       new = new_fields.find { |n| n['machine_name'] == old['machine_name'] && n['customizable_id'] == old['timesheet_id'] }
@@ -38,7 +38,7 @@ class MigrateCustomFieldsToCustomFields < ActiveRecord::Migration[7.2]
     end
 
     # Migrate field data
-    data_items = execute("SELECT * FROM custom_field_data_items")
+    data_items = execute("SELECT * FROM timesheet_field_data_items")
     data_items.each do |item|
       new_field_id = field_id_map[item['field_id']]
       next unless new_field_id
@@ -56,9 +56,5 @@ class MigrateCustomFieldsToCustomFields < ActiveRecord::Migration[7.2]
         )
       SQL
     end
-  end
-
-  def down
-    # Optional: implement if you need rollback
   end
 end

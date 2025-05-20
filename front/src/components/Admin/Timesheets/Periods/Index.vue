@@ -19,7 +19,7 @@
 
       </div>
 
-      <admin-table :tableClasses="['admin-periods-table']">
+      <AdminTable :tableClasses="['admin-periods-table']">
         <thead>
           <tr class="no-select">
             <th>Name</th>
@@ -61,7 +61,7 @@
             <td colspan="7">No periods found.</td>
           </tr>
         </tbody>
-      </admin-table>
+      </AdminTable>
     </form>
   </div>
 

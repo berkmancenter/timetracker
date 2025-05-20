@@ -23,6 +23,16 @@
         required: false,
         default: [],
       },
+      forceSortingRefresh: {
+        type: Array,
+        required: false,
+        default: [],
+      },
+    },
+    data() {
+      return {
+        tablesort: null,
+      }
     },
     mounted() {
       this.initTableSorting()
@@ -30,10 +40,7 @@
     methods: {
       initTableSorting() {
         this.initNumberSorting()
-
-        new Tablesort(this.$refs[this.tableRefName], {
-          descending: true,
-        })
+        this.initTableSort()
       },
       initNumberSorting() {
         // Copied from tablesort.number.js as it doesn't work with ES6 modules
@@ -62,6 +69,33 @@
 
           return compareNumber(b, a)
         })
+      },
+      initTableSort() {
+        // Check if tablesort is already initialized and remove previous
+        // listeners to avoid duplicate sorting. The library doesn't
+        // support re-initialization ¯\_(ツ)_/¯.
+        if (this.tablesort) {
+          const ths = this.$refs[this.tableRefName].querySelectorAll('th')
+          ths.forEach(th => {
+            // Remove click listeners added by tablesort
+            const clone = th.cloneNode(true)
+            th.parentNode.replaceChild(clone, th)
+          })
+        }
+
+        this.tablesort = new Tablesort(this.$refs[this.tableRefName], {
+          descending: true,
+        })
+      },
+    },
+    watch: {
+      forceSortingRefresh: {
+        handler() {
+          this.$nextTick(() => {
+            this.initTableSort()
+          })
+        },
+        deep: true,
       },
     },
   }

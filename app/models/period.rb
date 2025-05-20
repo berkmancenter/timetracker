@@ -28,7 +28,13 @@ class Period < ActiveRecord::Base
               ARRAY_AGG(DISTINCT(users_timesheets.role)) AS roles,
               COALESCE(MAX(time_entries.entry_date), NULL) AS last_entry_date
             ')
-            .joins("LEFT JOIN time_entries ON time_entries.user_id = users.id AND (time_entries.entry_date >= '#{self.from}' AND time_entries.entry_date <= '#{self.to}')")
+            .joins("
+              LEFT JOIN
+                time_entries ON
+                  time_entries.user_id = users.id
+                  AND
+                  (time_entries.entry_date >= '#{self.from}' AND time_entries.entry_date <= '#{self.to}')"
+            )
             .joins(:credits)
             .joins(:users_timesheets)
             .where('time_entries.timesheet_id = ?', self.timesheet_id)
@@ -37,7 +43,7 @@ class Period < ActiveRecord::Base
             .group('users.username, users.email, users.id, credits.amount')
             .order('users.username')
 
-    query.map do |record|
+    results = query.map do |record|
       record = record.attributes
       record['admin'] = self.timesheet.admin?(User.find(record['user_id']))
       record['should_hours'] = current_passed * record['credits']
@@ -48,6 +54,38 @@ class Period < ActiveRecord::Base
       record['credits'] = format('%.2f', record['credits'])
       record
     end
+
+    # Add custom field values if any custom fields exist
+    if custom_fields.any?
+      # Get all user IDs from the results
+      user_ids = results.map { |r| r['user_id'] }
+
+      # Fetch all custom field data for these users in one query
+      custom_field_data = {}
+      CustomFieldDataItem.where(
+        custom_field_id: custom_fields.pluck(:id),
+        item_id: user_ids
+      ).each do |item|
+        custom_field_data[item.item_id] ||= {}
+        custom_field_data[item.item_id][item.custom_field_id] = item.value
+      end
+
+      # Add custom field data to each result
+      results.each do |record|
+        user_id = record['user_id']
+        if custom_field_data[user_id]
+          custom_fields.each do |field|
+            record["custom_field_#{field.id}"] = custom_field_data[user_id][field.id] || ''
+          end
+        else
+          custom_fields.each do |field|
+            record["custom_field_#{field.id}"] = ''
+          end
+        end
+      end
+    end
+
+    results
   end
 
   def self.user_periods(user)

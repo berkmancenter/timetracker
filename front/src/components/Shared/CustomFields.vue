@@ -7,6 +7,7 @@
     </div>
 
     <div class="custom-fields-field" v-for="(field, index) in filteredFields" :key="field.id || index">
+      <!-- Core field: title (always shown) -->
       <div class="field">
         <label class="label" :for="`field-title-${index}`">Title</label>
         <div class="control">
@@ -14,60 +15,22 @@
         </div>
       </div>
 
-      <div class="field">
+      <!-- Core field: type (only shown if more than one type is available) -->
+      <div class="field" v-if="allowedTypes.length > 1">
         <label class="label" :for="`field-type-${index}`">Type</label>
         <div class="control">
           <div class="select">
             <select v-model="field.input_type" required="true" :id="`field-type-${index}`">
-              <option value="text">
-                Short text
-              </option>
-              <option value="long_text">
-                Long text
+              <option v-for="type in allowedTypes" :key="type.value" :value="type.value">
+                {{ type.label }}
               </option>
             </select>
           </div>
         </div>
       </div>
 
-      <div class="field">
-        <label class="label" :for="`field-popular-${index}`">Show top values in sidebar</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="field.popular" required="true" :id="`field-popular-${index}`">
-              <option :value="true">
-                Yes
-              </option>
-              <option :value="false">
-                No
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label" :for="`field-list-${index}`">Show in table</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="field.list" required="true" :id="`field-list-${index}`">
-              <option :value="true">
-                Yes
-              </option>
-              <option :value="false">
-                No
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label" :for="`field-access-key-${index}`">Access key</label>
-        <div class="control">
-          <input class="input" type="text" v-model="field.access_key" :id="`field-access-key-${index}`">
-        </div>
-      </div>
+      <!-- Slot for additional fields -->
+      <slot name="additional-fields" :field="field" :index="index"></slot>
 
       <hr>
 
@@ -93,74 +56,94 @@
 </template>
 
 <script>
-import Icon from '@/components/Shared/Icon.vue'
-import minusIcon from '@/images/minus_main.svg'
-import addIcon from '@/images/add_main.svg'
-import upIcon from '@/images/up_main.svg'
-import downIcon from '@/images/down_main.svg'
-import orderBy from 'lodash/orderBy'
+  import Icon from '@/components/Shared/Icon.vue'
+  import minusIcon from '@/images/minus_main.svg'
+  import addIcon from '@/images/add_main.svg'
+  import upIcon from '@/images/up_main.svg'
+  import downIcon from '@/images/down_main.svg'
+  import orderBy from 'lodash/orderBy'
 
-export default {
-  name: 'CustomFields',
-  components: {
-    Icon,
-  },
-  props: {
-    fields: {
-      type: Array,
-      required: true,
-      default: () => [],
+  export default {
+    name: 'CustomFields',
+    components: {
+      Icon,
     },
-    modelName: {
-      type: String,
-      default: 'timesheet',
+    props: {
+      fields: {
+        type: Array,
+        required: true,
+        default: () => [],
+      },
+      modelName: {
+        type: String,
+        default: 'timesheet',
+      },
+      minRequiredFields: {
+        type: Number,
+        default: 0,
+      },
+      types: {
+        type: Array,
+        default: () => [
+          { value: 'text', label: 'Short text' },
+          { value: 'long_text', label: 'Long text' }
+        ],
+      },
     },
-    minRequiredFields: {
-      type: Number,
-      default: 0,
-    }
-  },
-  data() {
-    return {
-      minusIcon,
-      addIcon,
-      upIcon,
-      downIcon,
-    }
-  },
-  computed: {
-    filteredFields() {
-      let customFields = [...this.fields]
-      customFields = orderBy(customFields, ['order'], ['asc'])
-
-      return customFields.filter(field => !field._destroy)
-    },
-  },
-  methods: {
-    addField() {
-      this.$store.dispatch('admin/addCustomField', this.modelName)
-    },
-    removeField(field) {
-      this.$store.dispatch('admin/removeCustomField', { field, modelName: this.modelName })
-    },
-    moveField(field, direction) {
-      const previousField = this.filteredFields.find(f => f.order === field.order + direction)
-      if (previousField) {
-        previousField.order = field.order
+    data() {
+      return {
+        minusIcon,
+        addIcon,
+        upIcon,
+        downIcon,
       }
-
-      field.order += direction
-
-      const nextField = this.filteredFields.find(f => f.order === field.order - direction)
-      if (nextField) {
-        nextField.order = field.order - direction
-      }
-
-      // Emit an event to notify parent component fields have been reordered
-      this.$emit('fields-reordered', this.filteredFields)
     },
-  },
-}
+    computed: {
+      filteredFields() {
+        let customFields = [...this.fields]
+        customFields = orderBy(customFields, ['order'], ['asc'])
+
+        return customFields.filter(field => !field._destroy)
+      },
+      allowedTypes() {
+        // If there's only one type defined, we'll set it as default
+        if (this.types.length === 1) {
+          // Ensure each field has the default type
+          this.filteredFields.forEach(field => {
+            if (!field.input_type) {
+              field.input_type = this.types[0].value;
+            }
+          });
+        }
+        
+        return this.types;
+      }
+    },
+    methods: {
+      addField() {
+        this.$store.dispatch('admin/addCustomField', this.modelName);
+      },
+      removeField(field) {
+        this.$store.dispatch('admin/removeCustomField', { field, modelName: this.modelName });
+      },
+      moveField(field, direction) {
+        const previousField = this.filteredFields.find(f => f.order === field.order + direction)
+        if (previousField) {
+          previousField.order = field.order
+        }
+
+        field.order += direction
+
+        const nextField = this.filteredFields.find(f => f.order === field.order - direction)
+        if (nextField) {
+          nextField.order = field.order - direction
+        }
+
+        // Emit an event to notify parent component fields have been reordered
+        this.$emit('fields-reordered', this.filteredFields)
+      },
+    },
+  }
 </script>
 
 <style lang="scss">

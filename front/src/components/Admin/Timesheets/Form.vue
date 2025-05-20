@@ -15,7 +15,47 @@
       </div>
 
       <div class="box">
-        <CustomFields :fields="$store.state.admin.timesheet.custom_fields" model-name="timesheet" />
+        <CustomFields
+          :fields="$store.state.admin.timesheet.custom_fields"
+          model-name="timesheet"
+          :min-required-fields="1"
+        >
+        <template #additional-fields="{ field, index }">
+          <!-- Popular field -->
+          <div class="field">
+            <label class="label" :for="`field-popular-${index}`">Show top values in sidebar</label>
+            <div class="control">
+              <div class="select">
+                <select v-model="field.popular" required="true" :id="`field-popular-${index}`">
+                  <option :value="true">Yes</option>
+                  <option :value="false">No</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- List field -->
+          <div class="field">
+            <label class="label" :for="`field-list-${index}`">Show in table</label>
+            <div class="control">
+              <div class="select">
+                <select v-model="field.list" required="true" :id="`field-list-${index}`">
+                  <option :value="true">Yes</option>
+                  <option :value="false">No</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Access key field -->
+          <div class="field">
+            <label class="label" :for="`field-access-key-${index}`">Access key</label>
+            <div class="control">
+              <input class="input" type="text" v-model="field.access_key" :id="`field-access-key-${index}`">
+            </div>
+          </div>
+        </template>
+        </CustomFields>
       </div>
 
       <hr>

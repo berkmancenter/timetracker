@@ -7,9 +7,9 @@
     <p>Manage users for <span class="tag is-black is-medium">{{ timesheet.name }}</span> timesheet.</p>
 
     <form class="form">
-      <super-admin-filter :users="users" @change="superAdminFilterChanged" />
+      <SuperAdminFilter :users="users" @change="superAdminFilterChanged" />
 
-      <admin-table :tableClasses="['admin-timesheet-users-table']">
+      <AdminTable :tableClasses="['admin-timesheet-users-table']">
         <thead>
           <tr class="no-select">
             <th data-sort-method="none" class="no-sort">
@@ -42,7 +42,7 @@
             <td colspan="4">No users found.</td>
           </tr>
         </tbody>
-      </admin-table>
+      </AdminTable>
     </form>
   </div>
 

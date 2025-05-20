@@ -16,7 +16,7 @@
         </router-link>
       </div>
 
-      <admin-table :tableClasses="['admin-timesheets-table']">
+      <AdminTable :tableClasses="['admin-timesheets-table']">
         <thead>
           <tr class="no-select">
             <th>Name</th>
@@ -55,7 +55,7 @@
             <td colspan="2">No timesheets found.</td>
           </tr>
         </tbody>
-      </admin-table>
+      </AdminTable>
     </form>
   </div>
 

@@ -21,9 +21,9 @@
       />
     </div>
 
-    <super-admin-filter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
+    <SuperAdminFilter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
 
-    <admin-table :tableClasses="['admin-periods-stats-table']">
+    <AdminTable :tableClasses="['admin-periods-stats-table']" :forceSortingRefresh="$store.state.admin.periodStats?.period?.custom_fields">
       <thead>
         <tr class="no-select">
           <th class="admin-periods-stats-table-email">Identifier</th>
@@ -33,6 +33,12 @@
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance</th>
           <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance percentage</th>
           <th class="admin-periods-stats-table-narrow-cell">Last entry date</th>
+          <th v-for="field in customFields"
+              :key="field.id"
+              class="admin-periods-stats-table-custom-field"
+          >
+            {{ field.title }}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -45,15 +51,20 @@
           <td class="no-break">{{ periodStat.balance_percent }}</td>
           <td class="no-break">
             <div class="is-hidden">{{ periodStat.last_entry_date }}</div>
-
             {{ formatLastEntryDate(periodStat.last_entry_date) }}
+          </td>
+          <td v-for="field in customFields"
+              :key="`${periodStat.user_id}-${field.id}`"
+              class="no-break"
+          >
+            {{ getCustomFieldValue(periodStat, field) }}
           </td>
         </tr>
         <tr v-if="filteredItems.length === 0">
-          <td colspan="7">No records found.</td>
+          <td :colspan="7 + customFields.length">No records found.</td>
         </tr>
       </tbody>
-    </admin-table>
+    </AdminTable>
   </div>
 </template>
 
@@ -112,6 +123,9 @@
 
         return breadcrumbs
       },
+      customFields() {
+        return this.$store.state.admin.periodStats?.period?.custom_fields || []
+      }
     },
     created() {
       this.initialDataLoad()
@@ -153,6 +167,10 @@
 
         return outputDate
       },
+      getCustomFieldValue(periodStat, field) {
+        // Return custom field value using the naming convention
+        return periodStat[`custom_field_${field.id}`] || ''
+      },
       openPeriodUserInTracker(periodStat) {
         this.$router.push({
           name: 'tracker.period.user',
@@ -174,8 +192,8 @@
     }
 
     &-period-negative-balance {
-        color: #db0404;
-      }
+      color: #db0404;
+    }
 
     &-info {
       span {
@@ -190,6 +208,10 @@
 
       &-email {
         min-width: 10rem;
+      }
+
+      &-custom-field {
+        min-width: 8rem;
       }
 
       tbody {

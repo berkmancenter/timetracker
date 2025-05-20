@@ -27,7 +27,13 @@
       </div>
 
       <div class="box">
-        <CustomFields :fields="$store.state.admin.period.custom_fields" model-name="period" />
+        <CustomFields
+          :fields="$store.state.admin.period.custom_fields"
+          model-name="period"
+          :types="[
+            { value: 'text', label: 'Short text' },
+          ]"
+        ></CustomFields>
       </div>
 
       <div class="field is-grouped">
