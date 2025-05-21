@@ -128,12 +128,31 @@ class PeriodsController < ApplicationController
   end
 
   def render_stats_csv(stats)
+    # Start with standard columns
     columns = ['username', 'email', 'credits', 'total_hours', 'should_hours', 'balance', 'balance_percent']
 
+    # Add custom field columns if they exist
+    if @period.custom_fields.any?
+      @period.custom_fields.each do |field|
+        columns << "custom_field_#{field.id}"
+      end
+    end
+
     csv_string = CSV.generate do |csv|
-      csv << columns
+      # Create a header row with appropriate titles for custom fields
+      header_row = columns.map do |col|
+        if col.start_with?('custom_field_')
+          field_id = col.gsub('custom_field_', '').to_i
+          @period.custom_fields.find { |f| f.id == field_id }&.title || col
+        else
+          col
+        end
+      end
+      csv << header_row
+
+      # Add data rows
       stats.each do |record|
-        line = columns.collect { |col| record[col].to_s.chomp }
+        line = columns.map { |col| record[col].to_s.chomp }
         csv << line
       end
     end
@@ -143,16 +162,6 @@ class PeriodsController < ApplicationController
       type: 'application/octet-stream',
       filename: "#{@period.name.parameterize}-statistics-#{Time.now.to_formatted_s(:number)}.csv"
     )
-  end
-
-  def find_or_initialize_period
-    if period_params[:id]
-      Period.find(period_params[:id]).tap do |period|
-        period.assign_attributes(period_params)
-      end
-    else
-      Period.new(period_params)
-    end
   end
 
   def unauthorized_periods?(periods_ids)
