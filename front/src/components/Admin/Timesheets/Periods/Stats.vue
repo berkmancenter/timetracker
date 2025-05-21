@@ -19,6 +19,13 @@
         buttonText="Download CSV"
         @click="getCsv()"
       />
+
+      <ActionButton
+        class="ml-2"
+        :icon="filterIcon"
+        buttonText="Filter list"
+        @click="openFilterModal()"
+      />
     </div>
 
     <SuperAdminFilter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
@@ -66,14 +73,24 @@
       </tbody>
     </AdminTable>
   </div>
+
+  <FilterModal
+    v-model="showFilterModal"
+    :customFields="customFields"
+    :periodStats="$store.state.admin.periodStats?.stats || []"
+    @filter-applied="applyFilters"
+  ></FilterModal>
 </template>
 
 <script>
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
   import ActionButton from '@/components/Shared/ActionButton.vue'
-  import downloadIcon from '@/images/download_main.svg'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
+  import FilterModal from '@/components/Admin/Timesheets/Periods/StatsFilters.vue'
+
+  import filterIcon from '@/images/filters.svg'
+  import downloadIcon from '@/images/download_main.svg'
 
   import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
   import { getUserIdentifier } from '@/lib/user.js'
@@ -85,12 +102,15 @@
       SuperAdminFilter,
       ActionButton,
       Breadcrumbs,
+      FilterModal,
     },
     data() {
       return {
         filteredItems: [],
         apiUrl: import.meta.env.VITE_API_URL,
+        showFilterModal: false,
         downloadIcon,
+        filterIcon,
         formatIsoDateTimeToLocaleString,
         getUserIdentifier,
       }
@@ -181,6 +201,12 @@
           },
         })
       },
+      openFilterModal() {
+        this.showFilterModal = true
+      },
+      applyFilters(filteredData) {
+        this.filteredItems = filteredData
+      }
     },
   }
 </script>
