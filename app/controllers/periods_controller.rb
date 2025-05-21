@@ -127,6 +127,16 @@ class PeriodsController < ApplicationController
     )
   end
 
+  def find_or_initialize_period
+    if period_params[:id]
+      Period.find(period_params[:id]).tap do |period|
+        period.assign_attributes(period_params)
+      end
+    else
+      Period.new(period_params)
+    end
+  end
+
   def render_stats_csv(stats)
     # Start with standard columns
     columns = ['username', 'email', 'credits', 'total_hours', 'should_hours', 'balance', 'balance_percent']
