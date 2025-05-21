@@ -10,7 +10,7 @@ class Period < ActiveRecord::Base
 
   accepts_nested_attributes_for :custom_fields, allow_destroy: true
 
-  def get_stats
+  def get_stats(user_ids = nil)
     total_num_of_days = (self.to - self.from).to_f
     current_num_of_days = (Date.today - self.from).to_f
     current_passed = current_num_of_days / total_num_of_days
@@ -40,8 +40,15 @@ class Period < ActiveRecord::Base
             .where('time_entries.timesheet_id = ?', self.timesheet_id)
             .where('users_timesheets.timesheet_id = ?', self.timesheet_id)
             .where('credits.period_id = ?', self.id)
-            .group('users.username, users.email, users.id, credits.amount')
-            .order('users.username')
+
+    # Filter by specific user_ids if provided
+    if user_ids.present?
+      user_id_array = user_ids.split(',').map(&:to_i)
+      query = query.where('users.id IN (?)', user_id_array)
+    end
+
+    query = query.group('users.username, users.email, users.id, credits.amount')
+                 .order('users.username')
 
     results = query.map do |record|
       record = record.attributes
@@ -58,13 +65,13 @@ class Period < ActiveRecord::Base
     # Add custom field values if any custom fields exist
     if custom_fields.any?
       # Get all user IDs from the results
-      user_ids = results.map { |r| r['user_id'] }
+      user_ids_from_results = results.map { |r| r['user_id'] }
 
       # Fetch all custom field data for these users in one query
       custom_field_data = {}
       CustomFieldDataItem.where(
         custom_field_id: custom_fields.pluck(:id),
-        item_id: user_ids
+        item_id: user_ids_from_results
       ).each do |item|
         custom_field_data[item.item_id] ||= {}
         custom_field_data[item.item_id][item.custom_field_id] = item.value

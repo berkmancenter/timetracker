@@ -92,7 +92,7 @@ class PeriodsController < ApplicationController
   def stats
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
 
-    stats = @period.get_stats
+    stats = @period.get_stats(params[:user_ids])
     return render_stats_csv(stats) if params[:csv]
 
     render json: {
