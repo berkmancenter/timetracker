@@ -1,6 +1,6 @@
 # This Dockerfile supports multiple environments
 
-ARG RUBY_VERSION=3.3.7
+ARG RUBY_VERSION=3.4.9
 
 FROM ruby:${RUBY_VERSION}
 
