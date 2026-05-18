@@ -40,5 +40,6 @@ Capybara.javascript_driver = :headless
 Capybara.server = :puma
 
 Capybara.configure do |config|
-  config.server_port = 9887
+  front_uri = URI.parse(ENV.fetch('VITE_API_URL', 'http://127.0.0.1:9887'))
+  config.server_port = front_uri.port
 end
