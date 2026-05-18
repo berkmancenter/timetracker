@@ -18,4 +18,9 @@ export default defineConfig({
   build: {
     assetsDir: 'front_assets',
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    css: true,
+  },
 })

@@ -28,6 +28,10 @@ jobs:
             echo "Migrations completed successfully!"
             '
       - run:
-          name: Tests
+          name: Backend tests
           command: 
             docker compose -f docker/docker-compose.test.yml exec app bash -c "bundle exec rspec"
+      - run:
+          name: Frontend tests
+          command:
+            docker compose -f docker/docker-compose.test.yml exec app bash -ic "cd /app/front && yarn test"
