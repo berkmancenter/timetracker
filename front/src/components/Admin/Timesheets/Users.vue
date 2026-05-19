@@ -173,10 +173,14 @@
       async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
-        this.users = await this.$store.dispatch('admin/fetchTimesheetUsers', this.timesheetId)
+        await this.loadUsers()
         this.timesheet = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.id)
 
         this.mitt.emit('spinnerStop')
+      },
+      async loadUsers() {
+        this.users = await this.$store.dispatch('admin/fetchTimesheetUsers', this.timesheetId)
+        this.filteredItems = this.users
       },
       removeFromTimesheetConfirm(user) {
         this.removeUserFromTimesheetCurrent = user
