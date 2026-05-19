@@ -2,8 +2,7 @@ default: &default
   adapter: postgresql
   encoding: utf8
   min_messages: warning
-  pool: 5
-  timeout: 5000
+  pool: <%= (ENV['DATABASE_POOL'] || ENV['RAILS_MAX_THREADS'] || 5).to_i %>
   username: <%= ENV['DATABASE_USERNAME'] %>
   password: <%= ENV['DATABASE_PASSWORD'] %>
   database: <%= ENV['DATABASE_DB_NAME'] %>
