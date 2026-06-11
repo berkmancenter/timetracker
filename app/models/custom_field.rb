@@ -3,6 +3,7 @@ class CustomField < ActiveRecord::Base
   has_many :custom_field_data_items, dependent: :destroy
 
   validates :machine_name, presence: true, uniqueness: { scope: :customizable_id }
+  validates :access_key, length: { maximum: 1, message: 'can be up to one character long.' }, allow_blank: true
 
   before_validation :set_machine_name
 
