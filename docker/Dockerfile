@@ -1,11 +1,11 @@
 # This Dockerfile supports multiple environments
 
-ARG RUBY_VERSION=3.3.7
+ARG RUBY_VERSION=3.4.9
 
 FROM ruby:${RUBY_VERSION}
 
 ARG APP_ENV=production
-ARG APP_VERSION=2.3.9
+ARG APP_VERSION=2.4.4
 ARG BUILD_IMAGE
 ARG USERNAME=timetracker
 ARG USER_UID=1000
@@ -30,9 +30,11 @@ RUN apt-get update && apt-get install -y \
     tzdata git build-essential patch ruby-dev zlib1g-dev liblzma-dev default-jre \
     sudo vim nano tmux wget
 
-# Install Chrome
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt-get install -y ./google-chrome-stable_current_amd64.deb;
+# Install Chromium (ARM-compatible)
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -45,6 +47,9 @@ RUN if [ "$BUILD_IMAGE" = "true" ]; then \
       && rm ${APP_VERSION}.tar.gz; \
     fi
 
+# Root context
+RUN npm install --global yarn
+
 # Create a user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
@@ -56,7 +61,6 @@ USER $USERNAME
 RUN sudo chown -R $USERNAME:$USERNAME /app
 
 # Install node modules
-RUN npm install --global yarn
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
