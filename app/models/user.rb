@@ -11,6 +11,11 @@ class User < ActiveRecord::Base
     before_validation :match_existing_user
   end
 
+  if Rails.application.config.devise_auth_type == 'saml'
+    devise :saml_authenticatable, :rememberable
+    before_validation :match_existing_user
+  end
+
   if Rails.application.config.devise_auth_type == 'db'
     devise_modules = [:database_authenticatable, :registerable, :recoverable, :rememberable, :validatable]
     devise_modules << :confirmable if ENV['DEVISE_CONFIRMABLE'] == 'true'
@@ -48,6 +53,24 @@ class User < ActiveRecord::Base
     end
   end
 
+  def apply_saml_response(saml_response, auth_value)
+    assign_external_attributes(
+      email: saml_value(saml_response, :email) || auth_value,
+      first_name: saml_value(saml_response, :first_name),
+      last_name: saml_value(saml_response, :last_name),
+      display_name: saml_value(saml_response, :display_name)
+    )
+  end
+
+  def saml_extra_attributes=(extra_attributes)
+    assign_external_attributes(
+      email: external_attribute_value(extra_attributes, :email, :mail),
+      first_name: external_attribute_value(extra_attributes, :first_name, :given_name, :givenName),
+      last_name: external_attribute_value(extra_attributes, :last_name, :surname, :sn),
+      display_name: external_attribute_value(extra_attributes, :display_name, :displayName, :name)
+    )
+  end
+
   def superadmin?
     superadmin
   end
@@ -56,6 +79,39 @@ class User < ActiveRecord::Base
 
   def match_existing_user
     self.password = SecureRandom.base64(15) unless self.password.present?
+  end
+
+  def assign_external_attributes(email: nil, first_name: nil, last_name: nil, display_name: nil)
+    self.email = email if email.present?
+    self.first_name = first_name if first_name.present?
+    self.last_name = last_name if last_name.present?
+    assign_display_name(display_name)
+  end
+
+  def assign_display_name(display_name)
+    return if display_name.blank? || (first_name.present? && last_name.present?)
+
+    name_parts = display_name.to_s.strip.split
+    self.first_name = name_parts.first if first_name.blank?
+    self.last_name = name_parts.last if last_name.blank?
+  end
+
+  def saml_value(saml_response, key)
+    normalize_external_value(saml_response.attribute_value_by_resource_key(key))
+  end
+
+  def external_attribute_value(attributes, *keys)
+    keys.each do |key|
+      value = normalize_external_value(attributes[key] || attributes[key.to_s])
+      return value if value.present?
+    end
+
+    nil
+  end
+
+  def normalize_external_value(value)
+    value = value.first if value.respond_to?(:first) && !value.is_a?(String)
+    value.to_s.presence
   end
 
   def root_path
