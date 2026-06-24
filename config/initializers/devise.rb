@@ -338,6 +338,12 @@ Devise.setup do |config|
       user.save!
     end
 
+    if ENV['DEVISE_SAML_REQUIRED_MEMBER_OF'].present?
+      config.saml_resource_validator_hook = lambda do |_user, saml_response, _auth_value|
+        Timetracker::SamlMemberOfValidator.new(saml_response).valid?
+      end
+    end
+
     config.saml_configure do |settings|
       settings.assertion_consumer_service_url = ENV.fetch(
         'DEVISE_SAML_ASSERTION_CONSUMER_SERVICE_URL',

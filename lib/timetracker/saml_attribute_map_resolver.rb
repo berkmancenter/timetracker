@@ -25,6 +25,9 @@ module Timetracker
       'cn' => 'display_name',
       'urn:mace:dir:attribute-def:displayName' => 'display_name',
       'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name' => 'display_name',
+      'memberOf' => 'member_of',
+      'member_of' => 'member_of',
+      'urn:mace:dir:attribute-def:memberOf' => 'member_of',
     }.freeze
 
     ENV_ATTRIBUTE_MAP = {
@@ -32,6 +35,7 @@ module Timetracker
       'DEVISE_SAML_FIRST_NAME_ATTRIBUTE' => 'first_name',
       'DEVISE_SAML_LAST_NAME_ATTRIBUTE' => 'last_name',
       'DEVISE_SAML_DISPLAY_NAME_ATTRIBUTE' => 'display_name',
+      'DEVISE_SAML_MEMBER_OF_ATTRIBUTE' => 'member_of',
     }.freeze
 
     def initialize(_saml_response)
