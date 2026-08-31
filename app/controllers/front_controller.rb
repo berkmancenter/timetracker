@@ -12,10 +12,4 @@ class FrontController < ApplicationController
   def ping
     render plain: 'pong'
   end
-
-  def authenticate_user!
-    return super if current_user.present?
-
-    redirect_to new_user_session_path
-  end
 end

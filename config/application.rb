@@ -92,7 +92,7 @@ module Timetracker
     config.return_path = ENV['RETURN_PATH'] || 'user@example.com'
     config.front_url = ENV['FRONT_URL'] || 'https://example.com'
 
-    # Devise authentication type
+    # Devise authentication type (db, cas, saml, or headers)
     config.devise_auth_type = ENV['DEVISE_AUTH_TYPE'] || 'db'
 
     # External Devise authentication configuration

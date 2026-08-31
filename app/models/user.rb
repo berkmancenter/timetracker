@@ -16,6 +16,8 @@ class User < ActiveRecord::Base
     before_validation :match_existing_user
   end
 
+  devise :rememberable if Rails.application.config.devise_auth_type == 'headers'
+
   if Rails.application.config.devise_auth_type == 'db'
     devise_modules = [:database_authenticatable, :registerable, :recoverable, :rememberable, :validatable]
     devise_modules << :confirmable if ENV['DEVISE_CONFIRMABLE'] == 'true'
@@ -73,6 +75,26 @@ class User < ActiveRecord::Base
 
   def superadmin?
     superadmin
+  end
+
+  def self.from_auth_headers(email:, name:)
+    normalized_email = email.strip.downcase
+    name_parts = name.strip.split
+    user = where('LOWER(email) = ?', normalized_email).first_or_initialize
+    user.email = normalized_email
+    user.first_name = name_parts.first
+    user.last_name = name_parts.last
+    user.set_random_password
+    user.save!
+    user
+  end
+
+  def set_random_password
+    return if encrypted_password.present?
+
+    random_password = SecureRandom.base64(15)
+    self.password = random_password if respond_to?(:password=)
+    self.encrypted_password = random_password if encrypted_password.blank?
   end
 
   private

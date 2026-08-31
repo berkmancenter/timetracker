@@ -8,6 +8,13 @@ class ApplicationController < ActionController::Base
     render plain: 'pong'
   end
 
+  def authenticate_user!(options = {})
+    return super unless header_authentication?
+    return if authenticate_user_from_headers
+
+    render 'users/no_auth', status: :unauthorized
+  end
+
   protected
 
   def superadmin?
@@ -29,9 +36,29 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user_json!
+    if header_authentication?
+      return if authenticate_user_from_headers
+
+      render_unauthorized
+      return false
+    end
     return if current_user.present?
 
     render json: { message: 'Unauthorized' }, status: :unauthorized and return false
+  end
+
+  def authenticate_user_from_headers
+    email = request.headers['X-Auth-Email'].to_s.strip
+    name = request.headers['X-Auth-Name'].to_s.strip
+    return false unless email.present? && name.present?
+
+    user = User.from_auth_headers(email: email, name: name)
+    request.env.fetch('warden').set_user(user, scope: :user, store: false)
+    true
+  end
+
+  def header_authentication?
+    Rails.application.config.devise_auth_type == 'headers'
   end
 
   def user_can_manage_timesheet?(timesheet)
