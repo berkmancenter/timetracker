@@ -44,6 +44,10 @@ const actions = {
         window.location = `${apiUrl}/users/cas_logout`
 
         break
+      case 'saml':
+        submitLogoutForm()
+
+        break
       default:
         await fetchIt(`${apiUrl}/users/sign_out`, {
           method: 'DELETE',
@@ -76,6 +80,22 @@ function initLocalStorage() {
 }
 
 initLocalStorage()
+
+function submitLogoutForm() {
+  const form = document.createElement('form')
+  const methodInput = document.createElement('input')
+
+  form.method = 'POST'
+  form.action = `${apiUrl}/users/sign_out`
+
+  methodInput.type = 'hidden'
+  methodInput.name = '_method'
+  methodInput.value = 'delete'
+
+  form.appendChild(methodInput)
+  document.body.appendChild(form)
+  form.submit()
+}
 
 export default {
   namespaced: true,

@@ -8,6 +8,7 @@ gem 'couchrest'
 gem 'csv'
 gem 'devise'
 gem 'devise_cas_authenticatable', require: false, git: 'https://github.com/berkmancenter/devise_cas_authenticatable.git'
+gem 'devise_saml_authenticatable', require: false
 gem 'domain_name'
 gem 'dotenv-rails'
 gem 'http-cookie'
