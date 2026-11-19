@@ -98,4 +98,69 @@ feature 'Timesheets' do
     expect(page).to have_selector '.tracker-entries-entry', text: 'World-takeover machine', count: 2
     expect(page).to have_selector '.tracker-entries-entry-decimal-time', text: '5.0', count: 2
   end
+
+  scenario 'switching months shows entries from the selected month', js: true do
+    membership = signed_in_user_with_timesheet
+    timesheet = membership.timesheet
+    project_field = timesheet.custom_fields.find_by!(machine_name: 'project')
+    october_entry = create(
+      :time_entry,
+      user: membership.user,
+      timesheet: timesheet,
+      entry_date: Date.new(2026, 10, 5),
+      decimal_time: 3
+    )
+    november_entry = create(
+      :time_entry,
+      user: membership.user,
+      timesheet: timesheet,
+      entry_date: Date.new(2026, 11, 6),
+      decimal_time: 4
+    )
+    create(:custom_field_data_item, custom_field: project_field, item_id: october_entry.id, value: 'October project')
+    create(:custom_field_data_item, custom_field: project_field, item_id: november_entry.id, value: 'November project')
+
+    visit front_path("#{timesheet.uuid}/2026-11")
+
+    expect(page).to have_selector('.tracker-entries-entry', text: 'November project')
+    expect(page).not_to have_selector('.tracker-entries-entry', text: 'October project')
+
+    find('[title="Select month"]').click
+    find('.tracker-entries-months-selector-month', text: '2026-10').click
+
+    expect(page).to have_current_path(%r{/#{timesheet.uuid}/2026-10})
+    expect(page).to have_selector('.tracker-entries-entry', text: 'October project')
+    expect(page).not_to have_selector('.tracker-entries-entry', text: 'November project')
+  end
+
+  scenario 'an admin views another member entries and returns to their own entries', js: true do
+    admin_membership = signed_in_user_with_timesheet
+    timesheet = admin_membership.timesheet
+    member = create(:user, email: 'tracked-member@example.com')
+    create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+    project_field = timesheet.custom_fields.find_by!(machine_name: 'project')
+    entry = create(
+      :time_entry,
+      user: member,
+      timesheet: timesheet,
+      entry_date: Date.new(2026, 11, 7),
+      decimal_time: 6
+    )
+    create(:custom_field_data_item, custom_field: project_field, item_id: entry.id, value: 'Member project')
+
+    visit front_path("#{timesheet.uuid}/2026-11")
+
+    find('[title="View time entries of other users"]').click
+    find('.tracker-entries-months-selector-user', text: member.email).click
+    click_on 'Confirm'
+
+    expect(page).to have_content('You are viewing time entries of other users.')
+    expect(page).to have_selector('.tracker-entries-entry', text: 'Member project')
+    expect(page).to have_selector('.tracker-entries-entry-email', text: member.email)
+
+    find('a', text: 'Show only my entries').click
+
+    expect(page).not_to have_content('You are viewing time entries of other users.')
+    expect(page).not_to have_selector('.tracker-entries-entry', text: 'Member project')
+  end
 end

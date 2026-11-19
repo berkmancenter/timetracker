@@ -105,6 +105,20 @@ describe('CustomFields', () => {
     expect(wrapper.emitted('fields-reordered')[0][0].map((field) => field.id)).toEqual([2, 1, 3])
   })
 
+  it('moves a field upward and keeps sequential order values', async () => {
+    const fields = [
+      { id: 1, title: 'First', order: 1 },
+      { id: 2, title: 'Second', order: 2 },
+      { id: 3, title: 'Third', order: 3 },
+    ]
+    const { wrapper } = mountCustomFields({ props: { fields } })
+
+    await wrapper.findAll('[title="Move up"]')[1].trigger('click')
+
+    expect(fields.map(field => field.order)).toEqual([1, 3, 2])
+    expect(wrapper.emitted('fields-reordered')[0][0].map(field => field.id)).toEqual([1, 3, 2])
+  })
+
   it('renders the additional fields slot for each visible field', () => {
     const { wrapper } = mountCustomFields({
       props: {

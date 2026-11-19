@@ -1,5 +1,7 @@
-import AWN from 'awesome-notifications'
+import * as AWNModule from 'awesome-notifications'
 import 'awesome-notifications/dist/style.css'
+
+const AWN = AWNModule.default?.default || AWNModule.default || AWNModule
 
 const options = {
   position: 'top-right',

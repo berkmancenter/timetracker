@@ -63,4 +63,18 @@ feature 'Timesheets' do
 
     expect(page).not_to have_content('Test timesheet')
   end
+
+  scenario 'switching the active timesheet updates the tracker route', js: true do
+    membership = signed_in_user_with_timesheet
+    second_timesheet = create(:timesheet, :with_fields, name: 'Another timesheet')
+    create(:users_timesheet, user: membership.user, timesheet: second_timesheet, role: 'user')
+
+    visit front_path
+
+    find('.side-menu-toggler').click
+    find('.tracker-timesheets select').select('Another timesheet')
+
+    expect(page).to have_current_path(%r{/#{second_timesheet.uuid}/})
+    expect(find('.tracker-timesheets select').value).to eq(second_timesheet.id.to_s)
+  end
 end

@@ -149,6 +149,43 @@ RSpec.describe TimeEntriesController, type: :controller do
     end
   end
 
+  describe 'GET #totals' do
+    let(:timesheet) { create(:timesheet) }
+
+    before do
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
+    end
+
+    it 'returns totals for the selected month and the whole timesheet' do
+      current_month = Date.current.strftime('%Y-%m')
+      create(:time_entry, user: user, timesheet: timesheet, entry_date: Date.current, decimal_time: 2.5)
+      create(:time_entry, user: user, timesheet: timesheet, entry_date: Date.current, decimal_time: 1.5)
+      create(:time_entry, user: user, timesheet: timesheet, entry_date: 2.months.ago, decimal_time: 8)
+
+      get :totals, params: { month: current_month, timesheet_uuid: timesheet.uuid }
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to eq(
+        'total_hours_current_month' => 4.0,
+        'total_hours_current_timesheet' => 12.0
+      )
+    end
+
+    it 'returns a bad request when the timesheet does not exist' do
+      get :totals, params: { month: Date.current.strftime('%Y-%m'), timesheet_uuid: 'missing' }
+
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'returns unauthorized when the user cannot access the timesheet' do
+      inaccessible_timesheet = create(:timesheet)
+
+      get :totals, params: { month: Date.current.strftime('%Y-%m'), timesheet_uuid: inaccessible_timesheet.uuid }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
   describe 'GET #auto_complete' do
     it 'returns auto-complete suggestions for category or project' do
       timesheet = create(:timesheet, :with_fields)

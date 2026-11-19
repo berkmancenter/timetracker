@@ -15,6 +15,7 @@ end
 require 'rubygems'
 require 'rspec/rails'
 require 'rspec/mocks'
+require 'selenium-webdriver'
 require 'webmock/rspec'
 
 Selenium::WebDriver::Chrome::Service.driver_path = '/usr/bin/chromedriver'

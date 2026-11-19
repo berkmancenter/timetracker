@@ -140,7 +140,7 @@
         }
 
         // Emit an event to notify parent component fields have been reordered
-        this.$emit('fields-reordered', this.filteredFields)
+        this.$emit('fields-reordered', orderBy(this.filteredFields, ['order'], ['asc']))
       },
     },
   }
