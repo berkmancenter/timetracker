@@ -9,6 +9,7 @@ describe('fetchIt', () => {
     vi.resetModules()
     vi.stubGlobal('fetch', vi.fn())
     vi.stubEnv('VITE_ENVIRONMENT', 'test')
+    vi.stubGlobal('document', { cookie: '' })
     fetchIt = (await import('../fetch-it')).default
   })
 
@@ -42,6 +43,26 @@ describe('fetchIt', () => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+      },
+    })
+  })
+
+  it('adds the CSRF token to unsafe requests and preserves caller headers', async () => {
+    document.cookie = 'CSRF-TOKEN=masked%2Btoken'
+    fetch.mockResolvedValue({ ok: true })
+
+    await fetchIt('/entries', {
+      method: 'PATCH',
+      headers: { 'X-Request-ID': 'request-1' },
+    })
+
+    expect(fetch).toHaveBeenCalledWith('/entries', {
+      method: 'PATCH',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Request-ID': 'request-1',
+        'X-CSRF-Token': 'masked+token',
       },
     })
   })

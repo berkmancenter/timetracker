@@ -46,4 +46,15 @@ RSpec.describe ApplicationController, type: :controller do
       expect(JSON.parse(response.body)).to eq({ 'message' => 'Unauthorized' })
     end
   end
+
+  describe 'CSV formula neutralization' do
+    it 'neutralizes formula-like strings' do
+      expect(controller.send(:csv_safe_cell, '=1+1')).to eq("'=1+1")
+      expect(controller.send(:csv_safe_cell, ' -cmd')).to eq("' -cmd")
+    end
+
+    it 'keeps strict negative numeric values as numbers' do
+      expect(controller.send(:csv_safe_cell, '-12.50')).to eq('-12.50')
+    end
+  end
 end

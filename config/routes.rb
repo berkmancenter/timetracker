@@ -16,7 +16,7 @@ Rails.application.routes.draw do
       patch :edit
     end
     member do
-      get :delete
+      delete :delete
     end
   end
 
@@ -26,7 +26,7 @@ Rails.application.routes.draw do
       post :sudo
       post :unsudo
       post :toggle_admin
-      get :cas_logout
+      delete :cas_logout
     end
   end
 
@@ -34,12 +34,12 @@ Rails.application.routes.draw do
     collection do
       post :upsert
       post :delete
-      get 'join/:code', action: :join
+      post 'join/:code', action: :join
       get :index_admin
     end
     member do
       post :send_invitations
-      get :leave
+      delete :leave
       get :users
       get 'users/:user_id', to: 'timesheets#user'
       post :delete_users

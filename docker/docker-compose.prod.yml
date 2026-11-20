@@ -24,7 +24,6 @@ services:
     ports:
       - '6868:3000'
       - '6767:5173'
-      - '8517:1080' # Mailcatcher
     volumes:
       - '.:/app'
     restart: always

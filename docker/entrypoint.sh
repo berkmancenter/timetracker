@@ -26,13 +26,13 @@ for ENV_FILE in "$MAIN_ENV_FILE"; do
   if ! grep -Fxq "$INCLUDE_LINE" "$BASHRC_FILE"; then
     echo "$INCLUDE_LINE" >> "$BASHRC_FILE"
     echo "✅ Added $ENV_FILE to $BASHRC_FILE"
-
-    set -o allexport
-    . "$ENV_FILE"
-    set +o allexport
   else
     echo "✅ $ENV_FILE is already included in $BASHRC_FILE"
   fi
+
+  set -o allexport
+  . "$ENV_FILE"
+  set +o allexport
 done
 
 # Extract VITE_ variables and write them to front/.env
@@ -43,8 +43,14 @@ echo "✅ VITE_ variables copied to $FRONT_ENV_FILE"
 
 echo "🚀 Starting Rails app in $APP_ENV environment"
 
-# Check if SMTP_ADDRESS is set, otherwise default to Mailcatcher.
+# Production email must use an explicitly configured SMTP server. Mailcatcher is
+# only a local-development fallback because its web UI has no authentication.
 if [ -z "$SMTP_ADDRESS" ]; then
+  if [ "$APP_ENV" = "production" ]; then
+    echo "SMTP_ADDRESS must be configured in production."
+    exit 1
+  fi
+
   echo "SMTP_ADDRESS not set. Using Mailcatcher..."
   export SMTP_ADDRESS="localhost"
   export SMTP_PORT="1025"

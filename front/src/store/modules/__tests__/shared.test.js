@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => {
   return { fetchIt: vi.fn(), store2, values }
 })
 
-vi.mock('@/lib/fetch-it', () => ({ default: mocks.fetchIt }))
+vi.mock('@/lib/fetch-it', () => ({ default: mocks.fetchIt, csrfToken: vi.fn() }))
 vi.mock('store2', () => ({ default: mocks.store2 }))
 
 import shared from '../shared'

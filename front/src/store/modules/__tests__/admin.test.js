@@ -73,4 +73,16 @@ describe('admin store', () => {
     await expect(admin.actions.fetchTimesheet({}, 8)).resolves.toEqual(data)
     expect(fetchIt).toHaveBeenCalledWith(expect.stringMatching(/\/timesheets\/8$/))
   })
+
+  it('uses DELETE when leaving a timesheet', async () => {
+    const response = { ok: true }
+    fetchIt.mockResolvedValue(response)
+
+    await expect(admin.actions.leaveTimesheet({}, { id: 8 })).resolves.toBe(response)
+
+    expect(fetchIt).toHaveBeenCalledWith(
+      expect.stringMatching(/\/timesheets\/8\/leave$/),
+      expect.objectContaining({ method: 'DELETE' }),
+    )
+  })
 })

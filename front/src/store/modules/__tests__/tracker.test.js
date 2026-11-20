@@ -88,6 +88,26 @@ describe('tracker store', () => {
     expect(error).toHaveBeenCalledWith('network unavailable /entries')
   })
 
+  it('uses non-GET methods for deletion and invitation redemption', async () => {
+    const response = { ok: true }
+    const commit = vi.fn()
+    mocks.fetchIt.mockResolvedValue(response)
+
+    await tracker.actions.deleteEntry({ commit }, { id: 12 })
+    await tracker.actions.joinTimesheet({}, 'invite-code')
+
+    expect(mocks.fetchIt).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(/\/time_entries\/12\/delete$/),
+      { method: 'DELETE' },
+    )
+    expect(mocks.fetchIt).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/\/timesheets\/join\/invite-code$/),
+      { method: 'POST' },
+    )
+  })
+
   it('selects a valid route month and falls back to the newest available month', () => {
     const dispatch = vi.fn()
     const state = freshState({ months: ['2026-11', '2026-10'] })

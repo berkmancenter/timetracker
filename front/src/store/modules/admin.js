@@ -289,7 +289,7 @@ const actions = {
   },
   async leaveTimesheet(context, timesheet) {
     const response = await fetchIt(`${apiUrl}/timesheets/${timesheet.id}/leave`, {
-      method: 'GET',
+      method: 'DELETE',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

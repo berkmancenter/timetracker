@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
-  skip_before_action :verify_authenticity_token
+  skip_before_action :verify_authenticity_token, if: :header_authentication?
+  after_action :set_csrf_cookie, unless: :header_authentication?
 
   # GET /ping
   # Used by the front-end to check if the server is up and user is authenticated
@@ -22,6 +23,9 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  CSV_FORMULA_PREFIX = /\A[[:space:]]*(?:[=+\-@]|[\t\r])/.freeze
+  CSV_NUMERIC_LITERAL = /\A[+\-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?\z/i.freeze
 
   def render_unauthorized(message = 'Unauthorized')
     render json: { message: message }, status: :unauthorized
@@ -59,6 +63,22 @@ class ApplicationController < ActionController::Base
 
   def header_authentication?
     Rails.application.config.devise_auth_type == 'headers'
+  end
+
+  def set_csrf_cookie
+    cookies['CSRF-TOKEN'] = {
+      value: form_authenticity_token,
+      path: '/',
+      same_site: :lax,
+      secure: request.ssl?
+    }
+  end
+
+  def csv_safe_cell(value)
+    cell = value.to_s.chomp
+    return cell if cell.match?(CSV_NUMERIC_LITERAL)
+
+    cell.match?(CSV_FORMULA_PREFIX) ? "'#{cell}" : cell
   end
 
   def user_can_manage_timesheet?(timesheet)

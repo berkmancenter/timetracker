@@ -222,7 +222,9 @@ const actions = {
     return data
   },
   async deleteEntry(context, entry) {
-    const response = await fetchIt(`${apiUrl}/time_entries/${entry.id}/delete`)
+    const response = await fetchIt(`${apiUrl}/time_entries/${entry.id}/delete`, {
+      method: 'DELETE',
+    })
 
     if (response.ok) {
       context.commit('deleteEntry', entry)
@@ -322,7 +324,9 @@ const actions = {
     return await Promise.all(promises)
   },
   async joinTimesheet(context, code) {
-    const response = await fetchIt(`${apiUrl}/timesheets/join/${code}`)
+    const response = await fetchIt(`${apiUrl}/timesheets/join/${code}`, {
+      method: 'POST',
+    })
 
     return response
   },

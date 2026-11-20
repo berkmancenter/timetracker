@@ -1,4 +1,4 @@
-import fetchIt from '@/lib/fetch-it'
+import fetchIt, { csrfToken } from '@/lib/fetch-it'
 import store2 from 'store2'
 
 const apiUrl = import.meta.env.VITE_API_URL
@@ -41,7 +41,7 @@ const actions = {
   async logout(context) {
     switch (authType) {
       case 'cas':
-        window.location = `${apiUrl}/users/cas_logout`
+        submitLogoutForm(`${apiUrl}/users/cas_logout`)
 
         break
       case 'saml':
@@ -81,18 +81,24 @@ function initLocalStorage() {
 
 initLocalStorage()
 
-function submitLogoutForm() {
+function submitLogoutForm(action = `${apiUrl}/users/sign_out`) {
   const form = document.createElement('form')
   const methodInput = document.createElement('input')
+  const tokenInput = document.createElement('input')
 
   form.method = 'POST'
-  form.action = `${apiUrl}/users/sign_out`
+  form.action = action
 
   methodInput.type = 'hidden'
   methodInput.name = '_method'
   methodInput.value = 'delete'
 
+  tokenInput.type = 'hidden'
+  tokenInput.name = 'authenticity_token'
+  tokenInput.value = csrfToken() || ''
+
   form.appendChild(methodInput)
+  form.appendChild(tokenInput)
   document.body.appendChild(form)
   form.submit()
 }

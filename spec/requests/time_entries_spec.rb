@@ -51,7 +51,7 @@ RSpec.describe 'Time entries API', type: :request do
     expect(response.parsed_body.pluck('id')).to include(entry.id)
 
     expect do
-      get delete_time_entry_path(entry), headers: headers
+      delete delete_time_entry_path(entry), headers: headers
     end.to change(TimeEntry, :count).by(-1)
 
     expect(response).to have_http_status(:ok)
