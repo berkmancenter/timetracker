@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_20_143931) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_143931) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "credits", force: :cascade do |t|
     t.decimal "amount", precision: 6, scale: 2
@@ -31,8 +31,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_20_143931) do
     t.jsonb "value_json", default: [], null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["custom_field_id"], name: "index_custom_field_data_items_on_custom_field_id"
     t.string "owner_type", null: false
+    t.index ["custom_field_id"], name: "index_custom_field_data_items_on_custom_field_id"
     t.index ["owner_type", "owner_id"], name: "index_custom_field_data_items_on_owner_type_and_owner_id"
   end
 
@@ -143,7 +143,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_20_143931) do
     t.index ["timesheet_id"], name: "index_users_timesheets_on_timesheet_id"
     t.index ["user_id", "timesheet_id"], name: "unique_user_timesheet", unique: true
     t.index ["user_id"], name: "index_users_timesheets_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'user'::character varying]::text[])", name: "users_timesheets_valid_role"
+    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying::text, 'user'::character varying::text])", name: "users_timesheets_valid_role"
   end
 
   add_foreign_key "custom_field_data_items", "custom_fields"
