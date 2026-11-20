@@ -30,13 +30,19 @@ class TimeEntriesController < ApplicationController
   # POST /time_entries
   # Creates or updates a time entry
   def edit
-    time_entry_params = params.require(:time_entry).permit(:id, :decimal_time, :entry_date)
+    time_entry_params = params.require(:time_entry).permit(:decimal_time, :entry_date)
     custom_fields = params[:time_entry][:fields] || {}
 
-    time_entry = TimeEntry.find_or_initialize_by(id: params[:time_entry][:id]) do |entry|
-      entry.entry_date = Time.now
-      entry.decimal_time = 0
+    time_entry = if params[:time_entry][:id].present?
+      TimeEntry.find_by(id: params[:time_entry][:id])
+    else
+      TimeEntry.new do |entry|
+        entry.entry_date = Time.current
+        entry.decimal_time = 0
+      end
     end
+
+    return render_bad_request if time_entry.nil?
 
     return render_bad_request unless request.post? || request.patch?
     return render_unauthorized if time_entry.persisted? && !time_entry_owned_by_current_user?(time_entry)
@@ -50,7 +56,7 @@ class TimeEntriesController < ApplicationController
     end
   end
 
-  # GET /time_entries/:id/delete
+  # DELETE /time_entries/:id/delete
   # Deletes a time entry
   def delete
     time_entry = TimeEntry.find(params[:id])
@@ -171,13 +177,35 @@ class TimeEntriesController < ApplicationController
         render_unauthorized and return
       end
     # Then check for session-stored active users
-    elsif !session["#{current_user.id}_active_users"].blank?
-      render_unauthorized and return unless user_can_use_timesheet?(@timesheet)
-      return session["#{current_user.id}_active_users"].map { |uid| User.where(id: uid).first }.compact
+    elsif active_user_selection.present?
+      selection = active_user_selection
+      unless selection_timesheet_id(selection) == @timesheet.id && user_can_manage_timesheet?(@timesheet)
+        session.delete(active_users_session_key)
+        return [current_user]
+      end
+
+      return @timesheet.users.where(id: selection_user_ids(selection)).to_a
     # Default to current user
     else
       return [current_user]
     end
+  end
+
+  def active_user_selection
+    selection = session[active_users_session_key]
+    selection if selection.is_a?(Hash) && selection_user_ids(selection).any?
+  end
+
+  def active_users_session_key
+    "#{current_user.id}_active_users"
+  end
+
+  def selection_timesheet_id(selection)
+    (selection['timesheet_id'] || selection[:timesheet_id]).to_i
+  end
+
+  def selection_user_ids(selection)
+    Array(selection['user_ids'] || selection[:user_ids]).map(&:to_i)
   end
 
   def render_entries_csv
@@ -217,9 +245,9 @@ class TimeEntriesController < ApplicationController
     param[:columns] ||= param[:model].columns.collect(&:name)
 
     csv_string = CSV.generate do |csv|
-      csv << param[:columns]
+      csv << param[:columns].map { |value| csv_safe_cell(value) }
       param[:objects].each do |record|
-        csv << param[:columns].map { |col| record[col].to_s.chomp }
+        csv << param[:columns].map { |col| csv_safe_cell(record[col]) }
       end
     end
 
@@ -252,7 +280,7 @@ class TimeEntriesController < ApplicationController
       custom_field = CustomField.find_by(machine_name: machine_name, customizable: @timesheet)
       next unless custom_field
 
-      field_data_item = CustomFieldDataItem.find_or_initialize_by(custom_field_id: custom_field.id, item_id: time_entry.id)
+      field_data_item = CustomFieldDataItem.find_or_initialize_by(custom_field: custom_field, owner: time_entry)
       if value.blank?
         field_data_item.destroy if field_data_item.persisted?
       else

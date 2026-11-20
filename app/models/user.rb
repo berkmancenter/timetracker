@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
   has_many :credits, dependent: :destroy
   has_many :users_timesheets, dependent: :destroy
   has_many :timesheets, through: :users_timesheets
+  has_many :custom_field_data_items, as: :owner, dependent: :destroy
 
   if Rails.application.config.devise_auth_type == 'cas'
     devise :cas_authenticatable, :rememberable

@@ -117,8 +117,8 @@ feature 'Timesheets' do
       entry_date: Date.new(2026, 11, 6),
       decimal_time: 4
     )
-    create(:custom_field_data_item, custom_field: project_field, item_id: october_entry.id, value: 'October project')
-    create(:custom_field_data_item, custom_field: project_field, item_id: november_entry.id, value: 'November project')
+    create(:custom_field_data_item, custom_field: project_field, owner: october_entry, value: 'October project')
+    create(:custom_field_data_item, custom_field: project_field, owner: november_entry, value: 'November project')
 
     visit front_path("#{timesheet.uuid}/2026-11")
 
@@ -146,7 +146,7 @@ feature 'Timesheets' do
       entry_date: Date.new(2026, 11, 7),
       decimal_time: 6
     )
-    create(:custom_field_data_item, custom_field: project_field, item_id: entry.id, value: 'Member project')
+    create(:custom_field_data_item, custom_field: project_field, owner: entry, value: 'Member project')
 
     visit front_path("#{timesheet.uuid}/2026-11")
 

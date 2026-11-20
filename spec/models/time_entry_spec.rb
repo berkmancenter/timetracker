@@ -21,24 +21,24 @@ RSpec.describe TimeEntry, type: :model do
     before do
       # Create time entries with custom category field data
       create_list(:time_entry, 5, user: user, timesheet: timesheet).each do |entry|
-        create(:custom_field_data_item, item_id: entry.id, custom_field_id: category_field.id, value: 'Category A')
+        create(:custom_field_data_item, owner: entry, custom_field_id: category_field.id, value: 'Category A')
       end
       create_list(:time_entry, 3, user: user, timesheet: timesheet).each do |entry|
-        create(:custom_field_data_item, item_id: entry.id, custom_field_id: category_field.id, value: 'Category B')
+        create(:custom_field_data_item, owner: entry, custom_field_id: category_field.id, value: 'Category B')
       end
       create_list(:time_entry, 2, user: user, timesheet: timesheet).each do |entry|
-        create(:custom_field_data_item, item_id: entry.id, custom_field_id: category_field.id, value: 'Category C')
+        create(:custom_field_data_item, owner: entry, custom_field_id: category_field.id, value: 'Category C')
       end
 
       # Create time entries with custom project field data
       create_list(:time_entry, 5, user: user, timesheet: timesheet).each do |entry|
-        create(:custom_field_data_item, item_id: entry.id, custom_field_id: project_field.id, value: 'Project X')
+        create(:custom_field_data_item, owner: entry, custom_field_id: project_field.id, value: 'Project X')
       end
       create_list(:time_entry, 3, user: user, timesheet: timesheet).each do |entry|
-        create(:custom_field_data_item, item_id: entry.id, custom_field_id: project_field.id, value: 'Project Y')
+        create(:custom_field_data_item, owner: entry, custom_field_id: project_field.id, value: 'Project Y')
       end
       create_list(:time_entry, 2, user: user, timesheet: timesheet).each do |entry|
-        create(:custom_field_data_item, item_id: entry.id, custom_field_id: project_field.id, value: 'Project Z')
+        create(:custom_field_data_item, owner: entry, custom_field_id: project_field.id, value: 'Project Z')
       end
     end
 

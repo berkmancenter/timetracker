@@ -6,7 +6,7 @@ FactoryBot.define do
   end
 
   factory :invitation do
-    code { Faker::Lorem.word }
+    code { SecureRandom.urlsafe_base64(nil, false) }
     email { Faker::Internet.email }
     expiration { Faker::Time.forward(days: 30) }
     used { false }
@@ -85,7 +85,7 @@ FactoryBot.define do
   factory :custom_field_data_item do
     custom_field
     value { Faker::Lorem.word }
-    item_id { create(:time_entry).id }
+    owner { create(:time_entry) }
   end
 
   factory :user do

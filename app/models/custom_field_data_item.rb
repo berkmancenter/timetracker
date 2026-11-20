@@ -1,6 +1,6 @@
 class CustomFieldDataItem < ActiveRecord::Base
   belongs_to :custom_field
-  belongs_to :time_entry, class_name: 'TimeEntry', foreign_key: :item_id
+  belongs_to :owner, polymorphic: true
 
-  validates :item_id, presence: true
+  validates :owner_id, :owner_type, presence: true
 end

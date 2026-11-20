@@ -37,14 +37,21 @@ RSpec.describe TimeEntriesController, type: :controller do
 
     it 'returns time entries as CSV if csv param is present' do
       timesheet = create(:timesheet, :with_fields)
-      create(:time_entry, user: user, timesheet: timesheet)
+      entry = create(:time_entry, user: user, timesheet: timesheet, entry_date: Date.current)
       create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
+      create(
+        :custom_field_data_item,
+        custom_field: timesheet.custom_fields.find_by!(machine_name: 'project'),
+        owner: entry,
+        value: '=HYPERLINK("https://example.test")'
+      )
 
       get :entries, params: { timesheet_uuid: timesheet.uuid, csv: true }
 
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to eq('application/octet-stream')
       expect(response.headers['Content-Disposition']).to match(/time-entries/)
+      expect(CSV.parse(response.body).flatten).to include(%q{'=HYPERLINK("https://example.test")})
     end
   end
 
@@ -72,6 +79,21 @@ RSpec.describe TimeEntriesController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(TimeEntry.single(TimeEntry.last.id).fields['description']).to eq(new_description)
+    end
+
+    it 'does not create an entry with a client-selected id' do
+      timesheet = create(:timesheet, :with_fields)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
+
+      expect do
+        post :edit, params: {
+          time_entry: { id: 9_999_999, decimal_time: 1, entry_date: Date.current },
+          timesheet_uuid: timesheet.uuid
+        }
+      end.not_to change(TimeEntry, :count)
+
+      expect(response).to have_http_status(:bad_request)
+      expect(TimeEntry.exists?(9_999_999)).to be(false)
     end
 
     it 'returns a bad request if timesheet is not found' do
@@ -183,6 +205,31 @@ RSpec.describe TimeEntriesController, type: :controller do
       get :totals, params: { month: Date.current.strftime('%Y-%m'), timesheet_uuid: inaccessible_timesheet.uuid }
 
       expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'does not reuse a sudo selection from another timesheet' do
+      first_timesheet = create(:timesheet)
+      selected_user = create(:user)
+      create(:users_timesheet, user: user, timesheet: first_timesheet, role: 'admin')
+      create(:users_timesheet, user: selected_user, timesheet: first_timesheet, role: 'user')
+      create(:users_timesheet, user: selected_user, timesheet: timesheet, role: 'user')
+      selected_entry = create(
+        :time_entry,
+        user: selected_user,
+        timesheet: timesheet,
+        entry_date: Date.current,
+        decimal_time: 8
+      )
+      session["#{user.id}_active_users"] = {
+        'timesheet_id' => first_timesheet.id,
+        'user_ids' => [selected_user.id]
+      }
+
+      get :entries, params: { timesheet_uuid: timesheet.uuid, month: 'all' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.pluck('id')).not_to include(selected_entry.id)
+      expect(session["#{user.id}_active_users"]).to be_nil
     end
   end
 

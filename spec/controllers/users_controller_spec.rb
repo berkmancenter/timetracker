@@ -21,7 +21,10 @@ RSpec.describe UsersController, type: :controller do
       post :sudo, params: { timesheet_id: timesheet.id, users: [user1.id, user2.id, user3.id] }
 
       expect(response).to have_http_status(:ok)
-      expect(session["#{regular_user.id}_active_users"]).to eq([user1.id, user2.id])
+      expect(session["#{regular_user.id}_active_users"]).to eq(
+        'timesheet_id' => timesheet.id,
+        'user_ids' => [user1.id, user2.id]
+      )
     end
 
     it 'returns a bad request if timesheet is not found' do
@@ -49,12 +52,15 @@ RSpec.describe UsersController, type: :controller do
 
     it 'revokes sudo privileges for the current user' do
       user1 = create(:user)
-      session["#{regular_user.id}_active_users"] = [user1.id]
+      session["#{regular_user.id}_active_users"] = {
+        'timesheet_id' => timesheet.id,
+        'user_ids' => [user1.id]
+      }
 
       post :unsudo
 
       expect(response).to have_http_status(:ok)
-      expect(session["#{regular_user.id}_active_users"]).to be_empty
+      expect(session["#{regular_user.id}_active_users"]).to be_nil
     end
   end
 

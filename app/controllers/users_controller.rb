@@ -10,7 +10,10 @@ class UsersController < ApplicationController
     render_bad_request and return if timesheet.nil?
     render_unauthorized and return unless user_can_manage_timesheet?(timesheet)
 
-    session["#{current_user.id}_active_users"] = allowed_user_ids(timesheet)
+    session[active_users_session_key] = {
+      'timesheet_id' => timesheet.id,
+      'user_ids' => allowed_user_ids(timesheet)
+    }
 
     render json: { message: 'ok' }, status: :ok
   end
@@ -18,7 +21,7 @@ class UsersController < ApplicationController
   # POST /unsudo
   # Stops impersonating other users
   def unsudo
-    session["#{current_user.id}_active_users"] = []
+    session.delete(active_users_session_key)
     render json: { message: 'ok' }, status: :ok
   end
 
@@ -43,7 +46,7 @@ class UsersController < ApplicationController
     render json: { users: users }, status: :ok
   end
 
-  # GET /cas_logout
+  # DELETE /cas_logout
   # Logs out the current user and redirects to the CAS server logout page
   def cas_logout
     sign_out(current_user)
@@ -54,10 +57,17 @@ class UsersController < ApplicationController
   private
 
   def active_user_ids
-    session["#{current_user.id}_active_users"] || []
+    selection = session[active_users_session_key]
+    return [] unless selection.is_a?(Hash)
+
+    Array(selection['user_ids'] || selection[:user_ids]).map(&:to_i)
   end
 
   def allowed_user_ids(timesheet)
-    params[:users].map(&:to_i) & timesheet.users.pluck(:id)
+    Array(params[:users]).map(&:to_i) & timesheet.users.pluck(:id)
+  end
+
+  def active_users_session_key
+    "#{current_user.id}_active_users"
   end
 end

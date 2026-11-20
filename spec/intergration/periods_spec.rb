@@ -86,7 +86,7 @@ feature 'Timesheet periods' do
 
     expect(page).to have_content('Hours have been saved.')
     expect(Credit.find_by!(period: period, user: member).amount).to eq(37.5)
-    expect(CustomFieldDataItem.find_by!(custom_field: field, item_id: member.id).value).to eq('Research')
+    expect(CustomFieldDataItem.find_by!(custom_field: field, owner: member).value).to eq('Research')
   end
 
   scenario 'an admin filters statistics and opens a member period in the tracker', js: true do
@@ -120,7 +120,7 @@ feature 'Timesheet periods' do
       decimal_time: 2
     )
     project_field = timesheet.custom_fields.find_by!(machine_name: 'project')
-    create(:custom_field_data_item, custom_field: project_field, item_id: entry.id, value: 'Integration project')
+    create(:custom_field_data_item, custom_field: project_field, owner: entry, value: 'Integration project')
 
     visit front_path("admin/timesheets/#{timesheet.id}/periods/#{period.id}/stats")
 
