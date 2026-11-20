@@ -151,13 +151,47 @@ RSpec.describe TimesheetsController, type: :controller do
 
   describe 'POST #join' do
     it 'allows a user to join a timesheet using a valid invitation code' do
-      invitation = create(:invitation, used: false)
+      invitation = create(:invitation, email: user.email, used: false)
 
       post :join, params: { code: invitation.code }, format: :json
 
       invitation.reload
       expect(invitation.used).to be(true)
       expect(response).to have_http_status(:ok)
+    end
+
+    it 'rejects an invitation issued to another email address' do
+      invitation = create(:invitation, email: 'someone-else@example.com', used: false)
+
+      expect do
+        post :join, params: { code: invitation.code }, format: :json
+      end.not_to change(UsersTimesheet, :count)
+
+      expect(response).to have_http_status(:bad_request)
+      expect(invitation.reload.used).to be(false)
+    end
+
+    it 'rejects an expired invitation' do
+      invitation = create(:invitation, email: user.email, expiration: 1.minute.ago, used: false)
+
+      post :join, params: { code: invitation.code }, format: :json
+
+      expect(response).to have_http_status(:bad_request)
+      expect(invitation.reload.used).to be(false)
+    end
+
+    it 'rolls back membership creation when invitation consumption fails' do
+      invitation = create(:invitation, email: user.email, used: false)
+      allow_any_instance_of(Invitation).to receive(:update!).and_raise(
+        ActiveRecord::RecordInvalid.new(invitation)
+      )
+
+      expect do
+        post :join, params: { code: invitation.code }, format: :json
+      end.not_to change(UsersTimesheet, :count)
+
+      expect(response).to have_http_status(:bad_request)
+      expect(invitation.reload.used).to be(false)
     end
 
     it 'returns bad request for an invalid invitation code' do
@@ -268,6 +302,15 @@ RSpec.describe TimesheetsController, type: :controller do
       post :change_users_role, params: { id: timesheet.id, role: 'user' }, format: :json
 
       expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'rejects an invalid role' do
+      post :change_users_role,
+           params: { id: timesheet.id, users: [user2.id], role: 'owner' },
+           format: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(UsersTimesheet.find_by!(timesheet: timesheet, user: user2).role).to eq('admin')
     end
 
     it 'returns unauthorized for non-admin user' do

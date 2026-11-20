@@ -75,24 +75,33 @@ class TimesheetsController < ApplicationController
     render json: { message: 'ok' }, status: :ok
   end
 
-  # GET /timesheets/join/:code
+  # POST /timesheets/join/:code
   # Joins a timesheet using an invitation code
   def join
     invitation = Invitation.find_by(code: params[:code])
-    return render_bad_request('Invalid or already used invitation') unless valid_invitation?(invitation)
+    return render_bad_request('Invalid, expired, or unavailable invitation') unless invitation
 
-    timesheet = invitation.timesheet
-    ut = UsersTimesheet.new(user: current_user, timesheet: timesheet, role: invitation.role)
+    membership = nil
+    invitation.with_lock do
+      unless invitation.redeemable_by?(current_user)
+        raise ActiveRecord::RecordInvalid.new(invitation)
+      end
 
-    if ut.save
-      mark_invitation_as_used(invitation)
-      render json: { timesheet: timesheet }, status: :ok
-    else
-      render_bad_request(ut.errors.full_messages.join(', '))
+      membership = UsersTimesheet.create!(
+        user: current_user,
+        timesheet: invitation.timesheet,
+        role: invitation.role
+      )
+      invitation.update!(used_by: current_user, used: true) if invitation.single?
     end
+
+    render json: { timesheet: membership.timesheet }, status: :ok
+  rescue ActiveRecord::RecordInvalid => error
+    message = error.record.errors.full_messages.join(', ').presence
+    render_bad_request(message || 'Invalid, expired, or unavailable invitation')
   end
 
-  # GET /timesheets/:id/leave
+  # DELETE /timesheets/:id/leave
   # Leaves a timesheet
   def leave
     UsersTimesheet.where(user: current_user, timesheet: @timesheet).destroy_all
@@ -154,10 +163,13 @@ class TimesheetsController < ApplicationController
     return unless authorize_user_for_timesheet!(@timesheet)
 
     user_ids = params[:users]
+    role = params[:role].to_s
     if user_ids.blank?
       render_bad_request('No users selected.')
+    elsif !UsersTimesheet::VALID_ROLES.include?(role)
+      render_unprocessable_entity('Invalid role provided')
     else
-      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).update_all(role: params[:role])
+      UsersTimesheet.where(timesheet: @timesheet, user_id: user_ids).update_all(role: role)
       render json: { message: 'ok' }, status: :ok
     end
   end
@@ -211,11 +223,4 @@ class TimesheetsController < ApplicationController
     invitations.each { |invitation| InvitationMailer.send_invitation(@timesheet, invitation).deliver_later }
   end
 
-  def valid_invitation?(invitation)
-    invitation.present? && !invitation.used
-  end
-
-  def mark_invitation_as_used(invitation)
-    invitation.update(used_by: current_user, used: true)
-  end
 end

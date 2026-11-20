@@ -28,6 +28,7 @@ feature 'Timesheet invitations' do
       timesheet: sender_membership.timesheet,
       sender: sender_membership.user,
       used_by: nil,
+      email: invitee.email,
       role: 'user'
     )
 

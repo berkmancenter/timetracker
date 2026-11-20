@@ -15,6 +15,14 @@ RSpec.describe Invitation, type: :model do
   describe 'attributes' do
     it { should have_db_column(:used).of_type(:boolean).with_options(default: false) }
     it { should have_db_column(:itype).of_type(:string).with_options(default: 'single') }
+
+    it 'sets a default expiration when one is not supplied' do
+      invitation = build(:invitation, expiration: nil)
+
+      invitation.validate
+
+      expect(invitation.expiration).to be_within(1.second).of(Time.current + Invitation::DEFAULT_EXPIRATION)
+    end
   end
 
   describe 'callbacks' do
@@ -36,6 +44,26 @@ RSpec.describe Invitation, type: :model do
           expect(invitation.code).to eq(original_code)
         end
       end
+    end
+  end
+
+  describe '#redeemable_by?' do
+    let(:recipient) { create(:user, email: 'recipient@example.com') }
+
+    it 'accepts an unexpired invitation for its recipient' do
+      invitation = create(:invitation, email: recipient.email, used_by: nil)
+
+      expect(invitation.redeemable_by?(recipient)).to be(true)
+    end
+
+    it 'rejects used, expired, and wrong-recipient invitations' do
+      used = create(:invitation, email: recipient.email, used: true)
+      expired = create(:invitation, email: recipient.email, expiration: 1.minute.ago)
+      wrong_recipient = create(:invitation, email: 'other@example.com')
+
+      expect(used.redeemable_by?(recipient)).to be(false)
+      expect(expired.redeemable_by?(recipient)).to be(false)
+      expect(wrong_recipient.redeemable_by?(recipient)).to be(false)
     end
   end
 end
