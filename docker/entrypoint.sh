@@ -64,13 +64,11 @@ rm -f tmp/pids/server.pid
 
 # Precompiling assets and building front-end application.
 if [ "$APP_ENV" = "production" ]; then
-  SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=development rails assets:precompile
+  ./bin/compile-assets.sh
 fi
 
 # Build the front-end application.
-cd front
-./deploy.sh
-cd /app
+./bin/compile-front.sh
 
 echo "📦 [Rails] Preparing database for environment: $APP_ENV"
 if bundle exec rails db:prepare RAILS_ENV=$APP_ENV; then

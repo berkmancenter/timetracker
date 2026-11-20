@@ -1,0 +1,286 @@
+# Demo data, loaded by Timetracker::DemoData (lib/timetracker/demo_data.rb).
+# See "Demo data" in README.md.
+#
+# Dates are relative to the day the data is loaded: "3 days ago", "in 2 weeks"
+# or "today". Every user gets the email <key>@demo.timetracker.test.
+
+users:
+  - key: admin
+    name: Ada Admin
+    superadmin: true
+    about: superadmin, sees and manages every timesheet
+  - key: maya
+    name: Maya Chen
+    about: runs the Research Lab, admin there and in the Writing group
+  - key: jonas
+    name: Jonas Weber
+    about: research assistant in the lab, also works in the Legal Clinic
+  - key: priya
+    name: Priya Natarajan
+    about: admin of the Legal Clinic, research assistant in the lab, ahead of her hours
+  - key: sam
+    name: Sam Okafor
+    about: research assistant, behind, logs less than planned and nothing in the last 10 days
+  - key: tom
+    name: Tom Fischer
+    about: joined the Legal Clinic 3 weeks ago, his invitation to the lab expired
+  - key: lea
+    name: Lea Novak
+    about: invited to the Research Lab, hasn't joined yet
+  - key: nora
+    name: Nora Reyes
+    about: in no timesheet, can join the Writing group with its open link
+
+# Timesheets get a UUID made from their key, so their links stay the same.
+#
+# fields: what every time entry has besides hours and date. The machine name
+#   comes from the title like in the app ("Client matter" -> client_matter).
+#   popular: top values in the sidebar, list: a column in the table,
+#   access_key: alt+<key> jumps to the field in the entry form.
+# members: role is admin or user. Members with hours_per_week get generated
+#   entries on weekdays from the day they joined, pause_days leaves the last
+#   days empty.
+# generated: values for the generated entries, the first ones are picked more
+#   often (so the sidebar has clear favourites), "" leaves the field empty.
+# entries: written entries, on top of the generated ones.
+# periods: credits are the hours a person should work in the period, with the
+#   values of the period fields (e.g. funding source) for that person.
+# invitations: to is the key of the invited email, without it the invitation
+#   is a link anybody can use until it expires. used_by marks it used.
+timesheets:
+  - key: research-lab
+    name: Research Lab
+    created: 400 days ago
+    fields:
+      - title: Project
+        list: true
+        popular: true
+        access_key: p
+      - title: Activity
+        list: true
+        popular: true
+        access_key: v
+      - title: Notes
+        input_type: long_text
+        list: true
+        access_key: n
+    members:
+      - user: maya
+        role: admin
+        joined: 380 days ago
+        hours_per_week: 3
+      - user: jonas
+        role: user
+        joined: 300 days ago
+        hours_per_week: 8
+      - user: priya
+        role: user
+        joined: 260 days ago
+        hours_per_week: 12
+      - user: sam
+        role: user
+        joined: 200 days ago
+        hours_per_week: 8
+        pause_days: 10
+    generated:
+      project:
+        - Platform governance
+        - Content moderation study
+        - Data access survey
+        - Grant writing
+        - Lab admin
+      activity:
+        - Literature review
+        - Coding interviews
+        - Data cleaning
+        - Writing
+        - Meeting
+        - Reading group
+      notes:
+        - ""
+        - ""
+        - ""
+        - Weekly check-in with Maya
+        - Coded 12 interviews
+        - Merged survey waves 1 and 2
+        - Drafted the methods section
+        - Read the new transparency reports
+    entries:
+      - user: maya
+        date: today
+        hours: 1.5
+        project: Lab admin
+        activity: Meeting
+        notes: "Weekly lab meeting: agenda, survey status, conference deadlines"
+      - user: jonas
+        date: 1 day ago
+        hours: 3.25
+        project: Data access survey
+        activity: Data cleaning
+        # A long note, to see how the table handles it.
+        notes: |-
+          Cleaned the second survey wave. Removed 14 duplicate answers (same
+          respondent ID, submitted twice within a minute), recoded the "other"
+          answers of question 7 into the existing categories and wrote down
+          every change in the codebook so the numbers can be checked later.
+      - user: priya
+        date: 3 days ago
+        hours: 2
+        project: Platform governance
+        activity: Writing
+        # Starts with "=", the CSV export keeps it as text for spreadsheets.
+        notes: =2+2 is a formula in a spreadsheet, the CSV export keeps it as text
+      - user: sam
+        date: 11 days ago
+        hours: 4
+        project: Content moderation study
+        activity: Coding interviews
+        notes: Coded interviews 31 to 40, last entry before the pause
+    periods:
+      - name: Last term
+        from: 30 weeks ago
+        to: 13 weeks ago
+        fields:
+          - title: Funding source
+          - title: Supervisor
+        credits:
+          - { user: maya, hours: 51, funding_source: Lab budget, supervisor: Ada Admin }
+          - { user: jonas, hours: 136, funding_source: NSF grant, supervisor: Maya Chen }
+          - { user: priya, hours: 204, funding_source: Department fellowship, supervisor: Maya Chen }
+          - { user: sam, hours: 170, funding_source: NSF grant, supervisor: Maya Chen }
+      - name: Current term
+        from: 10 weeks ago
+        to: in 7 weeks
+        fields:
+          - title: Funding source
+          - title: Supervisor
+        credits:
+          - { user: maya, hours: 51, funding_source: Lab budget, supervisor: Ada Admin }
+          - { user: jonas, hours: 136, funding_source: NSF grant, supervisor: Maya Chen }
+          - { user: priya, hours: 136, funding_source: Department fellowship, supervisor: Maya Chen }
+          - { user: sam, hours: 170, funding_source: NSF grant, supervisor: Maya Chen }
+      # Not started yet, nobody should have any hours.
+      - name: Next term
+        from: in 10 weeks
+        to: in 27 weeks
+        fields:
+          - title: Funding source
+        credits:
+          - { user: jonas, hours: 136, funding_source: NSF grant }
+          - { user: priya, hours: 136, funding_source: Department fellowship }
+          - { user: sam, hours: 170, funding_source: NSF grant }
+    invitations:
+      - code: demo-lab-lea
+        to: lea
+        role: user
+        by: maya
+        sent: 2 days ago
+        expires: in 5 days
+      - code: demo-lab-tom
+        to: tom
+        role: user
+        by: maya
+        sent: 20 days ago
+        expires: 13 days ago
+      - code: demo-lab-sam
+        to: sam
+        role: user
+        by: maya
+        sent: 201 days ago
+        expires: 194 days ago
+        used_by: sam
+
+  - key: legal-clinic
+    name: Legal Clinic
+    created: 150 days ago
+    fields:
+      - title: Client matter
+        list: true
+        popular: true
+        access_key: m
+      - title: Task
+        list: true
+        popular: true
+        access_key: k
+      # Not in the table, only in the entry form and the CSV export.
+      - title: Description
+        input_type: long_text
+    members:
+      - user: priya
+        role: admin
+        joined: 140 days ago
+        hours_per_week: 3
+      - user: jonas
+        role: user
+        joined: 100 days ago
+        hours_per_week: 6
+      - user: tom
+        role: user
+        joined: 3 weeks ago
+        hours_per_week: 7
+    generated:
+      client_matter:
+        - Tenant rights - Ortiz
+        - Small business - Bakery coop
+        - Public records request - City council
+        - Copyright - Community radio
+      task:
+        - Research
+        - Drafting
+        - Client meeting
+        - Supervision
+        - Filing
+      description:
+        - ""
+        - ""
+        - Prepared questions for the client
+        - Draft reviewed by the supervisor
+        - Filed the public records request
+    periods:
+      - name: Clinic semester
+        from: 6 weeks ago
+        to: in 10 weeks
+        fields:
+          - title: Supervisor
+        credits:
+          - { user: priya, hours: 48, supervisor: Ada Admin }
+          - { user: jonas, hours: 96, supervisor: Priya Natarajan }
+          - { user: tom, hours: 112, supervisor: Priya Natarajan }
+    invitations:
+      # Nobody has this email yet: sign up with it to join as admin.
+      - code: demo-clinic-rosa
+        to: rosa
+        role: admin
+        by: priya
+        sent: 1 day ago
+        expires: in 6 days
+
+  - key: writing-group
+    name: Writing group
+    created: 60 days ago
+    fields:
+      - title: What I worked on
+        list: true
+        popular: true
+        access_key: w
+    members:
+      - user: maya
+        role: admin
+        joined: 60 days ago
+        hours_per_week: 2
+      - user: priya
+        role: user
+        joined: 45 days ago
+        hours_per_week: 2
+    generated:
+      what_i_worked_on:
+        - Dissertation chapter 3
+        - Op-ed draft
+        - Conference paper
+        - Book review
+    invitations:
+      - code: demo-writing-group
+        role: user
+        by: maya
+        sent: 10 days ago
+        expires: in 20 days

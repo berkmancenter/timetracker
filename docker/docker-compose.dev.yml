@@ -1,3 +1,11 @@
+# Use the scripts: ./docker/start_dev.sh, shell_dev.sh, seed_dev.sh, stop_dev.sh
+# (see "Development" in README.md).
+#
+# Without a name the project would be called "docker" (the folder of this
+# file), like every other app keeping its compose files in docker/, and share
+# their containers and database volume.
+name: timetracker_dev
+
 services:
   db:
     image: 'postgres:14'
@@ -24,15 +32,17 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - '6868:3000'
-      - '6767:5173'
-      - '8517:1080' # Mailcatcher
+      - '6767:5173' # Vite dev server (yarn dev in front/)
+      - '6878:1080' # Mailcatcher
     volumes:
       - '..:/app'
     restart: always
     environment:
       - APP_ENV=development
+      # true loads the demo data on every start, see "Demo data" in README.md
+      - SEED_DEMO_DATA=${SEED_DEMO_DATA:-}
     command: >
-      bash -c "rails s -b 0.0.0.0"
+      bash -c "./bin/rails demo:auto && ./bin/rails s -b 0.0.0.0"
 
 volumes:
   db:

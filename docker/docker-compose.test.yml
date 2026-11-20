@@ -1,3 +1,9 @@
+# Use ./docker/test.sh to run the tests (see "Tests" in README.md).
+#
+# A name of its own, so it doesn't share containers with the development
+# environment, and no published ports, so both can run at the same time.
+name: timetracker_test
+
 services:
   db:
     image: 'postgres:14'
@@ -21,7 +27,4 @@ services:
       dockerfile: docker/Dockerfile
     environment:
       - APP_ENV=test
-    ports:
-      - '6868:3000'
-      - '6767:5173'
     restart: always

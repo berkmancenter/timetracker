@@ -1,0 +1,162 @@
+# Configuration
+
+TimeTracker is configured with environment variables. This page lists what
+each of them does. [.env.sample](../.env.sample) has a starting point.
+
+## Environment files
+
+In Docker, [docker/entrypoint.sh](../docker/entrypoint.sh) reads
+`.env.$APP_ENV` (e.g. `.env.production`) on every container start:
+
+- when the file is missing, it's made from `.env.sample`, with every
+  "development" replaced by the environment name;
+- its variables are exported for the app, and shells in the container
+  (`./docker/shell_dev.sh`) load it too;
+- its `VITE_` lines are copied to `front/.env`, then the front-end is built.
+
+Docker Compose itself reads `.env` for the database container
+(`DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_DB_NAME`).
+
+Without Docker, Rails loads `.env.<RAILS_ENV>` and `.env` (dotenv), variables
+already set in the environment win.
+
+## Application
+
+| Variable | Default | |
+| --- | --- | --- |
+| `APP_ENV` | | `development`, `test` or `production`, picks the env file in Docker |
+| `RAILS_ENV` | `development` | the Rails environment, the same as `APP_ENV` |
+| `SECRET_KEY_BASE` | | signs the session cookies, make one with `bin/rails secret`. The value in `.env.sample` is public, never use it in production |
+| `FRONT_URL` | `https://example.com` | the address of the site, used for the links in invitation emails (`<FRONT_URL>/join/<code>`) and as SAML base URL |
+| `ALLOWED_HOST` | | when set, production only answers requests for this host name |
+| `CORS_ALLOWED_ORIGINS` | | comma separated origins allowed to call the app from another origin with cookies, e.g. the Vite dev server `http://127.0.0.1:6767` |
+| `RAILS_SERVE_STATIC_FILES` | | any value: production serves `public/` itself (front-end and assets), leave it empty when a web server in front does that |
+| `RAILS_LOG_LEVEL` | `debug` (development), `info` (production) | |
+| `PORT` | `3000` | port of the app server (Puma) |
+| `RAILS_MAX_THREADS` | `3` | Puma threads, also the database pool size when `DATABASE_POOL` is not set |
+
+## Database
+
+PostgreSQL, settings in [config/database.yml](../config/database.yml).
+
+| Variable | Default | |
+| --- | --- | --- |
+| `DATABASE_HOST` | | `db` in Docker |
+| `DATABASE_PORT` | `5432` | |
+| `DATABASE_USERNAME` | | |
+| `DATABASE_PASSWORD` | | |
+| `DATABASE_DB_NAME` | | |
+| `DATABASE_POOL` | `RAILS_MAX_THREADS`, or 5 | connections per process |
+| `DATABASE_TIMEOUT` | `5000` | milliseconds |
+
+## Authentication
+
+`DEVISE_AUTH_TYPE` picks how people sign in: `db` (default), `cas`, `saml` or
+`headers`. The front-end needs the same value in `VITE_AUTH_TYPE`, it uses it
+to sign out the right way.
+
+### Database (`db`)
+
+Email and password accounts with sign up, password reset and remember me.
+
+| Variable | Default | |
+| --- | --- | --- |
+| `DEVISE_CONFIRMABLE` | | `true`: new accounts have to confirm their email before they can sign in |
+
+### CAS (`cas`)
+
+Users are made on their first sign in, the CAS `mail` attribute is their
+email. Signing out also signs out from CAS.
+
+| Variable | Default | |
+| --- | --- | --- |
+| `DEVISE_CAS_AUTH_URL` | `https://cas.example.com` | the CAS server |
+| `DEVISE_CAS_AUTH_SERVICE_PATH` | `/users/service` | the service path in this app |
+
+### SAML (`saml`)
+
+Users are made on their first sign in and updated on every sign in from the
+SAML attributes. The service provider metadata is at `/users/saml/metadata`.
+
+| Variable | Default | |
+| --- | --- | --- |
+| `DEVISE_SAML_BASE_URL` | `FRONT_URL` | the address of this app, for the URLs below |
+| `DEVISE_SAML_ASSERTION_CONSUMER_SERVICE_URL` | `<base>/users/saml/auth` | |
+| `DEVISE_SAML_SP_ENTITY_ID` | `<base>/users/saml/metadata` | |
+| `DEVISE_SAML_SIGN_OUT_SUCCESS_URL` | `FRONT_URL` | where people land after signing out |
+| `DEVISE_SAML_IDP_ENTITY_ID` | | the identity provider |
+| `DEVISE_SAML_IDP_SSO_SERVICE_URL` | | its sign in URL |
+| `DEVISE_SAML_IDP_SLO_SERVICE_URL` | | its sign out URL |
+| `DEVISE_SAML_IDP_CERT` | | its certificate, `\n` for new lines |
+| `DEVISE_SAML_IDP_CERT_FINGERPRINT` | | instead of the certificate |
+| `DEVISE_SAML_IDP_CERT_FINGERPRINT_ALGORITHM` | SHA-256 | |
+| `DEVISE_SAML_DEFAULT_USER_KEY` | `email` | the user column people are found by |
+| `DEVISE_SAML_USE_SUBJECT` | | `true`: find people by the NameID instead of an attribute |
+| `DEVISE_SAML_NAME_IDENTIFIER_FORMAT` | email address | |
+| `DEVISE_SAML_ASSERTION_CONSUMER_SERVICE_BINDING` | HTTP-POST | |
+| `DEVISE_SAML_AUTHN_CONTEXT` | | |
+| `DEVISE_SAML_VALIDATE_IN_RESPONSE_TO` | | `true`: check that a response answers a request of this app |
+| `DEVISE_SAML_ALLOWED_CLOCK_DRIFT` | `0` | seconds of clock difference to accept |
+| `DEVISE_SAML_EMAIL_ATTRIBUTE` | | comma separated attribute names for the email, on top of the usual ones (`email`, `mail`, ...) |
+| `DEVISE_SAML_FIRST_NAME_ATTRIBUTE` | | the same for the first name (`givenName`, ...) |
+| `DEVISE_SAML_LAST_NAME_ATTRIBUTE` | | the last name (`sn`, `surname`, ...) |
+| `DEVISE_SAML_DISPLAY_NAME_ATTRIBUTE` | | the display name, used when the first or last name is missing |
+| `DEVISE_SAML_MEMBER_OF_ATTRIBUTE` | | the groups (`memberOf`, ...) |
+| `DEVISE_SAML_REQUIRED_MEMBER_OF` | | comma separated groups, when set only members of one of them can sign in |
+
+The defaults are used when a variable is not set at all. An empty line like
+`DEVISE_SAML_SP_ENTITY_ID=` (as in `.env.sample`) sets it to an empty value, so
+fill these in or remove the lines.
+
+### Headers (`headers`)
+
+An authenticating proxy in front of the app signs people in and sends
+`X-Auth-Email` and `X-Auth-Name` with every request. Without both headers a
+request gets 401. The user is found by the email (any letter case) or made, and
+the name is updated from `X-Auth-Name`. Signing out is up to the proxy.
+
+The app trusts these headers from anybody who can reach it. Make it reachable
+only through the proxy, and make the proxy replace these headers in requests
+coming from browsers.
+
+## Email
+
+The app sends invitation emails, and in `db` mode the Devise emails (password
+reset, confirmation).
+
+| Variable | Default | |
+| --- | --- | --- |
+| `SMTP_ADDRESS` | | the SMTP server. Production containers don't start without it, development and test ones use Mailcatcher when it's empty |
+| `SMTP_PORT` | | |
+| `SMTP_DOMAIN` | | HELO domain |
+| `MAILER_DELIVERY_METHOD` | `smtp` (production), `test` (development) | `test` only keeps emails in memory, `smtp` in development sends them to Mailcatcher (http://127.0.0.1:6878) |
+| `DEFAULT_SENDER` | `no-reply@example.com` | the From address |
+| `RETURN_PATH` | `user@example.com` | where bounces go |
+| `EMAIL_DOMAIN` | `example.com` | host of the links in Devise emails in production (`SMTP_HOST` in development) |
+
+`SMTP_USERNAME` and `SMTP_PASSWORD` are in `.env.sample`, but the app doesn't
+use them yet: the SMTP server has to accept the app without a login.
+
+## Front-end
+
+The Vue front-end gets these at build time: change them, then build it again
+(`bin/compile-front.sh`, or restart the container).
+
+| Variable | Default | |
+| --- | --- | --- |
+| `VITE_API_URL` | | the address of the app the front-end talks to, e.g. `http://127.0.0.1:6868` |
+| `VITE_AUTH_TYPE` | | the same as `DEVISE_AUTH_TYPE` |
+| `VITE_BASE_PATH` | `/` | when the app runs in a sub folder, e.g. `/timetracker/` |
+| `VITE_ENVIRONMENT` | | `development`: requests send cookies to another origin too (for the Vite dev server) |
+
+## Demo data
+
+See [Demo data](../README.md#demo-data).
+
+| Variable | Default | |
+| --- | --- | --- |
+| `SEED_DEMO_DATA` | | `true`: the development Docker setup loads the demo data on every start |
+| `DEMO_HISTORY_DAYS` | `240` | how many days back time entries are generated |
+| `DEMO_PASSWORD` | `timetracker-demo-password` | password of every demo account |
+| `DEMO_RANDOM_SEED` | `2012` | another number gives other generated entries |
+| `ALLOW_DEMO_DATA` | | `true`: allow the demo data outside development and test, e.g. on a demo server |
