@@ -5,6 +5,13 @@ RSpec.describe Period, type: :model do
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:from) }
     it { should validate_presence_of(:to) }
+
+    it 'rejects a period ending before it starts' do
+      period = build(:period, from: Date.new(2026, 11, 2), to: Date.new(2026, 11, 1))
+
+      expect(period).not_to be_valid
+      expect(period.errors[:to]).to include('must be on or after the start date')
+    end
   end
 
   describe 'associations' do
@@ -34,6 +41,24 @@ RSpec.describe Period, type: :model do
       expect(user_stats['email']).to eq(user.email)
       expect(user_stats['credits']).to eq('10.00')
     end
+
+    it 'includes credited users who have no time entries' do
+      time_entry.destroy!
+
+      stats = period.get_stats
+
+      expect(stats.pluck('user_id')).to include(user.id)
+      expect(stats.find { |row| row['user_id'] == user.id }['total_hours']).to eq('0.00')
+    end
+
+    it 'uses zero progress for future periods without invalid percentages' do
+      allow(Date).to receive(:current).and_return(period.from - 1.day)
+
+      stats = period.get_stats
+
+      expect(stats.first['should_hours']).to eq('0.00')
+      expect(stats.first['balance_percent']).to eq('0.00')
+    end
   end
 
   describe 'user_periods' do
@@ -44,7 +69,7 @@ RSpec.describe Period, type: :model do
 
     before do
       admin_period.timesheet.users_timesheets.create(user: admin_user, role: 'admin')
-      non_admin_period.timesheet.users_timesheets.create(user: non_admin_user, role: 'member')
+      non_admin_period.timesheet.users_timesheets.create(user: non_admin_user, role: 'user')
     end
 
     it 'returns periods for admin users' do
@@ -57,6 +82,16 @@ RSpec.describe Period, type: :model do
       superadmin_user = create(:user, superadmin: true)
       all_periods = Period.user_periods(superadmin_user)
       expect(all_periods).to include(admin_period, non_admin_period)
+    end
+  end
+
+  describe '.admin_periods_for_timesheet' do
+    it 'returns only periods belonging to the supplied timesheet' do
+      period = create(:period)
+      other_period = create(:period)
+
+      expect(described_class.admin_periods_for_timesheet(period.timesheet)).to contain_exactly(period)
+      expect(described_class.admin_periods_for_timesheet(period.timesheet)).not_to include(other_period)
     end
   end
 end

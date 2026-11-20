@@ -3,6 +3,7 @@ class Period < ActiveRecord::Base
   validates :from, presence: true
   validates :to, presence: true
   validates :timesheet, presence: true
+  validate :to_must_not_precede_from
 
   has_many :credits, dependent: :destroy, autosave: true
   has_many :custom_fields, -> { order(:order) }, as: :customizable, dependent: :destroy
@@ -11,10 +12,9 @@ class Period < ActiveRecord::Base
   accepts_nested_attributes_for :custom_fields, allow_destroy: true
 
   def get_stats(user_ids = nil)
-    total_num_of_days = (self.to - self.from).to_f
-    current_num_of_days = (Date.today - self.from).to_f
-    current_passed = current_num_of_days / total_num_of_days
-    current_passed = 1 if current_passed > 1
+    current_passed = elapsed_fraction
+    quoted_from = self.class.connection.quote(self.from)
+    quoted_to = self.class.connection.quote(self.to)
 
     query = User
             .select('
@@ -33,11 +33,12 @@ class Period < ActiveRecord::Base
                 time_entries ON
                   time_entries.user_id = users.id
                   AND
-                  (time_entries.entry_date >= '#{self.from}' AND time_entries.entry_date <= '#{self.to}')"
+                  time_entries.timesheet_id = #{self.timesheet_id.to_i}
+                  AND
+                  (time_entries.entry_date >= #{quoted_from} AND time_entries.entry_date <= #{quoted_to})"
             )
             .joins(:credits)
             .joins(:users_timesheets)
-            .where('time_entries.timesheet_id = ?', self.timesheet_id)
             .where('users_timesheets.timesheet_id = ?', self.timesheet_id)
             .where('credits.period_id = ?', self.id)
 
@@ -53,9 +54,13 @@ class Period < ActiveRecord::Base
     results = query.map do |record|
       record = record.attributes
       record['admin'] = self.timesheet.admin?(User.find(record['user_id']))
-      record['should_hours'] = current_passed * record['credits']
+      record['should_hours'] = current_passed * record['credits'].to_d
       record['balance'] = format('%.2f', record['total_hours'] - record['should_hours'])
-      record['balance_percent'] = format('%.2f', (record['total_hours'] / record['should_hours']) * 100)
+      record['balance_percent'] = if record['should_hours'].zero?
+        '0.00'
+      else
+        format('%.2f', (record['total_hours'] / record['should_hours']) * 100)
+      end
       record['should_hours'] = format('%.2f', record['should_hours'])
       record['total_hours'] = format('%.2f', record['total_hours'])
       record['credits'] = format('%.2f', record['credits'])
@@ -71,10 +76,11 @@ class Period < ActiveRecord::Base
       custom_field_data = {}
       CustomFieldDataItem.where(
         custom_field_id: custom_fields.pluck(:id),
-        item_id: user_ids_from_results
+        owner_type: 'User',
+        owner_id: user_ids_from_results
       ).each do |item|
-        custom_field_data[item.item_id] ||= {}
-        custom_field_data[item.item_id][item.custom_field_id] = item.value
+        custom_field_data[item.owner_id] ||= {}
+        custom_field_data[item.owner_id][item.custom_field_id] = item.value
       end
 
       # Add custom field data to each result
@@ -127,14 +133,23 @@ class Period < ActiveRecord::Base
   end
 
   def self.admin_periods_for_timesheet(timesheet)
-    return Period.all if timesheet.superadmin
+    Period.where(timesheet: timesheet)
+  end
 
-    Period.joins(:users_timesheets)
-          .where(
-            users_timesheets: {
-              timesheet_id: timesheet.id,
-              role: 'admin'
-            }
-          )
+  private
+
+  def elapsed_fraction
+    total_days = (self.to - self.from).to_i + 1
+    return 0.0 unless total_days.positive?
+    return 0.0 if Date.current < self.from
+    return 1.0 if Date.current > self.to
+
+    ((Date.current - self.from).to_i + 1).fdiv(total_days)
+  end
+
+  def to_must_not_precede_from
+    return if from.blank? || to.blank? || to >= from
+
+    errors.add(:to, 'must be on or after the start date')
   end
 end

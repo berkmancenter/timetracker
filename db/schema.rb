@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_07_213705) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_20_143931) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -26,13 +26,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_07_213705) do
 
   create_table "custom_field_data_items", force: :cascade do |t|
     t.bigint "custom_field_id", null: false
-    t.integer "item_id", null: false
+    t.bigint "owner_id", null: false
     t.text "value"
     t.jsonb "value_json", default: [], null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["custom_field_id"], name: "index_custom_field_data_items_on_custom_field_id"
-    t.index ["item_id"], name: "index_custom_field_data_items_on_item_id"
+    t.string "owner_type", null: false
+    t.index ["owner_type", "owner_id"], name: "index_custom_field_data_items_on_owner_type_and_owner_id"
   end
 
   create_table "custom_fields", force: :cascade do |t|
@@ -57,7 +58,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_07_213705) do
   create_table "invitations", force: :cascade do |t|
     t.string "code", null: false
     t.string "email"
-    t.datetime "expiration"
+    t.datetime "expiration", null: false
     t.boolean "used", default: false, null: false
     t.bigint "timesheet_id"
     t.bigint "sender_id", null: false
@@ -66,6 +67,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_07_213705) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "role", default: "user", null: false
+    t.index ["code"], name: "index_invitations_on_code", unique: true
     t.index ["sender_id"], name: "index_invitations_on_sender_id"
     t.index ["timesheet_id"], name: "index_invitations_on_timesheet_id"
     t.index ["used_by_id"], name: "index_invitations_on_used_by_id"
@@ -135,12 +137,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_07_213705) do
   create_table "users_timesheets", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "timesheet_id"
-    t.string "role"
+    t.string "role", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["timesheet_id"], name: "index_users_timesheets_on_timesheet_id"
     t.index ["user_id", "timesheet_id"], name: "unique_user_timesheet", unique: true
     t.index ["user_id"], name: "index_users_timesheets_on_user_id"
+    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'user'::character varying]::text[])", name: "users_timesheets_valid_role"
   end
 
   add_foreign_key "custom_field_data_items", "custom_fields"

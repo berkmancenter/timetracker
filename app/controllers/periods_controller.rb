@@ -16,6 +16,8 @@ class PeriodsController < ApplicationController
   # Returns all periods for the current user
   def index
     timesheet = Timesheet.find(params[:timesheet_id])
+    return render_unauthorized unless user_can_manage_timesheet?(timesheet)
+
     periods = Period.timesheet_periods(timesheet)
 
     render json: periods.as_json(PERIOD_PUBLIC_FIELDS), status: :ok
@@ -76,15 +78,18 @@ class PeriodsController < ApplicationController
     return render_unauthorized unless user_can_manage_timesheet?(@period.timesheet)
     return render_bad_request('No users or credits selected.') unless params[:credits]&.any?
 
-    new_credits = build_new_credits(params[:credits], @period)
-    @period.credits = new_credits.compact
+    ActiveRecord::Base.transaction do
+      validate_credit_users!(params[:credits], @period)
+      new_credits = build_new_credits(params[:credits], @period)
+      @period.credits = new_credits.compact
 
-    # Process custom field values
-    save_custom_field_data(params[:credits], @period)
-
-    @period.save
+      save_custom_field_data(params[:credits], @period)
+      @period.save!
+    end
 
     render json: @period.credits, status: :ok
+  rescue ActiveRecord::RecordInvalid => error
+    render_bad_request(error.record.errors.full_messages.join(', ').presence || error.message)
   end
 
   # GET /timesheets/:timesheet_id/periods/:id/stats
@@ -158,11 +163,11 @@ class PeriodsController < ApplicationController
           col
         end
       end
-      csv << header_row
+      csv << header_row.map { |value| csv_safe_cell(value) }
 
       # Add data rows
       stats.each do |record|
-        line = columns.map { |col| record[col].to_s.chomp }
+        line = columns.map { |col| csv_safe_cell(record[col]) }
         csv << line
       end
     end
@@ -194,9 +199,11 @@ class PeriodsController < ApplicationController
     return unless period.custom_fields.any?
 
     custom_field_ids = period.custom_fields.pluck(:id)
+    users_by_id = period.timesheet.users.where(id: credits_params.map { |data| data['user_id'].to_i }).index_by(&:id)
 
     credits_params.each do |credit_data|
       user_id = credit_data['user_id'].to_i
+      user = users_by_id.fetch(user_id)
 
       # Extract custom field values
       custom_field_ids.each do |field_id|
@@ -208,12 +215,12 @@ class PeriodsController < ApplicationController
         # Find or initialize the custom field data item
         data_item = CustomFieldDataItem.find_or_initialize_by(
           custom_field_id: field_id,
-          item_id: user_id
+          owner: user
         )
 
         # Update the value
         data_item.value = value
-        data_item.save
+        data_item.save!
       end
     end
   end
@@ -226,11 +233,11 @@ class PeriodsController < ApplicationController
       field_ids = period.custom_fields.pluck(:id)
       user_ids = users.pluck(:id)
 
-      # Group custom field data by item_id (user_id)
-      CustomFieldDataItem.where(custom_field_id: field_ids, item_id: user_ids)
+      # Group custom field data by owner_id (user_id)
+      CustomFieldDataItem.where(custom_field_id: field_ids, owner_type: 'User', owner_id: user_ids)
         .each do |item|
-          custom_field_data[item.item_id] ||= {}
-          custom_field_data[item.item_id][item.custom_field_id] = item.value
+          custom_field_data[item.owner_id] ||= {}
+          custom_field_data[item.owner_id][item.custom_field_id] = item.value
         end
     end
 
@@ -291,6 +298,15 @@ class PeriodsController < ApplicationController
 
       new_credits_values[user_id] = credit_amount
     end
+  end
+
+  def validate_credit_users!(credits_params, period)
+    requested_user_ids = credits_params.map { |credit_data| credit_data['user_id'].to_i }.uniq
+    valid_user_ids = period.timesheet.users.where(id: requested_user_ids).pluck(:id)
+    return if (requested_user_ids - valid_user_ids).empty?
+
+    period.errors.add(:credits, 'contain users outside this timesheet')
+    raise ActiveRecord::RecordInvalid.new(period)
   end
 
   def clone_period(original_period)

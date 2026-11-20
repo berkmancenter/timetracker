@@ -36,6 +36,14 @@ RSpec.describe PeriodsController, type: :controller do
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body).pluck('id')).to match_array([period2.id])
     end
+
+    it 'does not expose periods to a non-admin account' do
+      period = create(:period)
+
+      get :index, params: { timesheet_id: period.timesheet.id }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   describe 'GET #show' do
@@ -119,6 +127,50 @@ RSpec.describe PeriodsController, type: :controller do
 
       expect(response).to have_http_status(:bad_request)
     end
+
+    it 'rejects period data for a user outside the timesheet' do
+      period = create_period
+      outsider = create(:user)
+      field = create(:custom_field, customizable: period)
+
+      expect do
+        post :set_credits, params: {
+          id: period.id,
+          timesheet_id: period.timesheet.id,
+          credits: [{
+            user_id: outsider.id,
+            credit_amount: 50,
+            "custom_field_#{field.id}" => 'private'
+          }]
+        }
+      end.not_to change { [Credit.count, CustomFieldDataItem.count] }
+
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'rolls back credits when a custom field cannot be saved' do
+      period = create_period
+      field = create(:custom_field, customizable: period)
+      invalid_item = build(:custom_field_data_item, custom_field: field, owner: user)
+      invalid_item.errors.add(:value, 'is invalid')
+      allow_any_instance_of(CustomFieldDataItem).to receive(:save!).and_raise(
+        ActiveRecord::RecordInvalid.new(invalid_item)
+      )
+
+      expect do
+        post :set_credits, params: {
+          id: period.id,
+          timesheet_id: period.timesheet.id,
+          credits: [{
+            user_id: user.id,
+            credit_amount: 50,
+            "custom_field_#{field.id}" => 'value'
+          }]
+        }
+      end.not_to change(Credit, :count)
+
+      expect(response).to have_http_status(:bad_request)
+    end
   end
 
   describe 'GET #stats' do
@@ -133,11 +185,15 @@ RSpec.describe PeriodsController, type: :controller do
 
     it 'returns statistics as CSV if csv param is present' do
       period = create_period
+      field = create(:custom_field, customizable: period, title: 'Department')
+      create(:credit, user: user, period: period, amount: 10)
+      create(:custom_field_data_item, custom_field: field, owner: user, value: ' =1+1')
       get :stats, params: { id: period.id, csv: true, timesheet_id: period.timesheet.id }
 
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to eq('application/octet-stream')
       expect(response.headers['Content-Disposition']).to match(/statistics/)
+      expect(response.body).to include("' =1+1")
     end
   end
 
