@@ -26,7 +26,7 @@ already set in the environment win.
 | --- | --- | --- |
 | `APP_ENV` | | `development`, `test` or `production`, picks the env file in Docker |
 | `RAILS_ENV` | `development` | the Rails environment, the same as `APP_ENV` |
-| `SECRET_KEY_BASE` | | signs the session cookies, make one with `bin/rails secret`. The value in `.env.sample` is public, never use it in production |
+| `SECRET_KEY_BASE` | | signs the session cookies in production (development and test make their own). The Docker entrypoint puts a new one in new env files, and in env files without one or with the public key that `.env.sample` used to have (this signs everybody out once). Without Docker make one with `bin/rails secret` |
 | `FRONT_URL` | `https://example.com` | the address of the site, used for the links in invitation emails (`<FRONT_URL>/join/<code>`) and as SAML base URL |
 | `ALLOWED_HOST` | | when set, production only answers requests for this host name |
 | `CORS_ALLOWED_ORIGINS` | | comma separated origins allowed to call the app from another origin with cookies, e.g. the Vite dev server `http://127.0.0.1:6767` |
@@ -104,20 +104,26 @@ SAML attributes. The service provider metadata is at `/users/saml/metadata`.
 | `DEVISE_SAML_MEMBER_OF_ATTRIBUTE` | | the groups (`memberOf`, ...) |
 | `DEVISE_SAML_REQUIRED_MEMBER_OF` | | comma separated groups, when set only members of one of them can sign in |
 
-The defaults are used when a variable is not set at all. An empty line like
-`DEVISE_SAML_SP_ENTITY_ID=` (as in `.env.sample`) sets it to an empty value, so
-fill these in or remove the lines.
+An empty value (like `DEVISE_SAML_SP_ENTITY_ID=` in `.env.sample`) means the
+default.
 
 ### Headers (`headers`)
 
 An authenticating proxy in front of the app signs people in and sends
-`X-Auth-Email` and `X-Auth-Name` with every request. Without both headers a
-request gets 401. The user is found by the email (any letter case) or made, and
-the name is updated from `X-Auth-Name`. Signing out is up to the proxy.
+`X-Auth-Email` and `X-Auth-Name` with every request. Without both headers, or
+from an address that is not a trusted proxy, a request gets 401. The user is
+found by the email (any letter case) or made, and the name is updated from
+`X-Auth-Name`. Signing out is up to the proxy.
 
-The app trusts these headers from anybody who can reach it. Make it reachable
-only through the proxy, and make the proxy replace these headers in requests
-coming from browsers.
+| Variable | Default | |
+| --- | --- | --- |
+| `AUTH_HEADERS_TRUSTED_PROXIES` | `127.0.0.1,::1` | comma separated IPs or CIDR ranges the headers are accepted from |
+
+The address checked is the direct peer of the app (`REMOTE_ADDR`), not
+`X-Forwarded-For`, so a browser can't pretend to be the proxy. In Docker the
+proxy connects from the Docker network, not from loopback: use its gateway or
+range, e.g. `172.16.0.0/12` (`docker network inspect <network>` shows it). The
+proxy still has to replace these headers in requests coming from browsers.
 
 ## Email
 
@@ -129,13 +135,14 @@ reset, confirmation).
 | `SMTP_ADDRESS` | | the SMTP server. Production containers don't start without it, development and test ones use Mailcatcher when it's empty |
 | `SMTP_PORT` | | |
 | `SMTP_DOMAIN` | | HELO domain |
+| `SMTP_USERNAME` | | log in to the SMTP server with this user, no login when empty |
+| `SMTP_PASSWORD` | | |
+| `SMTP_AUTHENTICATION` | `plain` | `plain`, `login` or `cram_md5`, used with `SMTP_USERNAME` |
+| `SMTP_OPENSSL_VERIFY_MODE` | `peer` | `peer` checks the server certificate, `none` only for a trusted relay with a self-signed certificate |
 | `MAILER_DELIVERY_METHOD` | `smtp` (production), `test` (development) | `test` only keeps emails in memory, `smtp` in development sends them to Mailcatcher (http://127.0.0.1:6878) |
 | `DEFAULT_SENDER` | `no-reply@example.com` | the From address |
 | `RETURN_PATH` | `user@example.com` | where bounces go |
 | `EMAIL_DOMAIN` | `example.com` | host of the links in Devise emails in production (`SMTP_HOST` in development) |
-
-`SMTP_USERNAME` and `SMTP_PASSWORD` are in `.env.sample`, but the app doesn't
-use them yet: the SMTP server has to accept the app without a login.
 
 ## Front-end
 

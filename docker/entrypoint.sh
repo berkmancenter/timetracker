@@ -5,10 +5,27 @@ MAIN_ENV_FILE=".env.${APP_ENV}"
 FRONT_ENV_FILE="/app/front/.env"
 BASHRC_FILE="/home/timetracker/.bashrc"
 
+# This key was committed in .env.sample, so it is public and must never be used.
+PUBLIC_SAMPLE_SECRET="d8b1bd64eca5e6bddd8f4c1f1fc4b0e869890868f7de5954c1aa4a0321ac00300a506a1bbb44bd2702a63dc006e8d96c1a20a86663bf0a76ba2f2e344ce31532"
+
 # Create the main environment file if it doesn't exist
 if [ ! -f "$MAIN_ENV_FILE" ]; then
   cp .env.sample "$MAIN_ENV_FILE"
   sed -i "s/development/${APP_ENV}/g" "$MAIN_ENV_FILE"
+  echo "✅ Created $MAIN_ENV_FILE"
+fi
+
+# New env files get their own secret key, so do older ones copied with the
+# public sample key (this signs out everybody once) or without a key.
+CURRENT_SECRET=$(grep "^SECRET_KEY_BASE=" "$MAIN_ENV_FILE" | tail -n 1 | cut -d= -f2-)
+if [ -z "$CURRENT_SECRET" ] || [ "$CURRENT_SECRET" = "$PUBLIC_SAMPLE_SECRET" ]; then
+  NEW_SECRET=$(ruby -rsecurerandom -e 'puts SecureRandom.hex(64)')
+  if grep -q "^SECRET_KEY_BASE=" "$MAIN_ENV_FILE"; then
+    sed -i "s/^SECRET_KEY_BASE=.*/SECRET_KEY_BASE=${NEW_SECRET}/" "$MAIN_ENV_FILE"
+  else
+    echo "SECRET_KEY_BASE=${NEW_SECRET}" >> "$MAIN_ENV_FILE"
+  fi
+  echo "🔑 Set a new SECRET_KEY_BASE in $MAIN_ENV_FILE"
 fi
 
 # If in test environment, change the port to 9887

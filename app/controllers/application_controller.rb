@@ -55,6 +55,7 @@ class ApplicationController < ActionController::Base
     email = request.headers['X-Auth-Email'].to_s.strip
     name = request.headers['X-Auth-Name'].to_s.strip
     return false unless email.present? && name.present?
+    return false unless trusted_auth_proxy?
 
     user = User.from_auth_headers(email: email, name: name)
     request.env.fetch('warden').set_user(user, scope: :user, store: false)
@@ -63,6 +64,17 @@ class ApplicationController < ActionController::Base
 
   def header_authentication?
     Rails.application.config.devise_auth_type == 'headers'
+  end
+
+  # The auth headers are only trusted when the request comes straight from the
+  # auth proxy. REMOTE_ADDR is the direct peer, it can't be faked with headers.
+  def trusted_auth_proxy?
+    remote_addr = IPAddr.new(request.remote_addr.to_s).native
+    trusted = Rails.application.config.auth_headers_trusted_proxies.any? { |proxy| proxy.include?(remote_addr) }
+    logger.warn("Ignoring auth headers from untrusted address #{request.remote_addr}") unless trusted
+    trusted
+  rescue IPAddr::Error
+    false
   end
 
   def set_csrf_cookie

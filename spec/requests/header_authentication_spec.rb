@@ -63,6 +63,40 @@ RSpec.describe 'Header authentication', type: :request do
     expect(response.parsed_body).to eq('message' => 'Unauthorized')
   end
 
+  it 'ignores the headers when the request does not come from a trusted proxy' do
+    expect do
+      get timesheets_path, headers: headers, env: { 'REMOTE_ADDR' => '203.0.113.9' }
+    end.not_to change(User, :count)
+
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  it 'ignores the headers for the front-end route from an untrusted address' do
+    get root_path, headers: headers, env: { 'REMOTE_ADDR' => '203.0.113.9' }
+
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  it 'accepts the headers from a configured proxy range' do
+    original_proxies = Rails.application.config.auth_headers_trusted_proxies
+    Rails.application.config.auth_headers_trusted_proxies = [IPAddr.new('172.16.0.0/12')]
+
+    get timesheets_path, headers: headers, env: { 'REMOTE_ADDR' => '172.20.0.1' }
+    expect(response).to have_http_status(:ok)
+
+    get timesheets_path, headers: headers, env: { 'REMOTE_ADDR' => '127.0.0.1' }
+    expect(response).to have_http_status(:unauthorized)
+  ensure
+    Rails.application.config.auth_headers_trusted_proxies = original_proxies
+  end
+
+  it 'does not trust a forwarded address' do
+    get timesheets_path, headers: headers.merge('X-Forwarded-For' => '127.0.0.1'),
+                         env: { 'REMOTE_ADDR' => '203.0.113.9' }
+
+    expect(response).to have_http_status(:unauthorized)
+  end
+
   it 'does not reuse the header-authenticated user without headers' do
     get timesheets_path, headers: headers
     expect(response).to have_http_status(:ok)

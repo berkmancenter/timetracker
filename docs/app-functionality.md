@@ -173,7 +173,7 @@ in [Authentication](configuration.md#authentication)):
 | `db` | Sign up with email and password (at least 6 characters), password reset by email, remember me. With `DEVISE_CONFIRMABLE=true` new accounts confirm their email first. |
 | `cas` | CAS single sign-on, users are made on their first sign in and found by their email. Signing out also signs out from CAS. |
 | `saml` | SAML single sign-on, users are made and updated from the SAML attributes, access can require a group. |
-| `headers` | An authenticating proxy sends `X-Auth-Email` and `X-Auth-Name` with every request, the user is made or updated from them. |
+| `headers` | An authenticating proxy sends `X-Auth-Email` and `X-Auth-Name` with every request, the user is made or updated from them. Only requests from the proxy's addresses (`AUTH_HEADERS_TRUSTED_PROXIES`) are accepted. |
 
 ## Operational endpoints
 

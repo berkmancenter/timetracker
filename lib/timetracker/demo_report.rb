@@ -36,7 +36,8 @@ module Timetracker
       when 'db'
         "Log in at #{url('users/sign_in')}, every demo account has the password: #{@demo.password}"
       when 'headers'
-        'Header auth: send X-Auth-Email with a demo email and X-Auth-Name with the name, e.g. ' \
+        'Header auth: send X-Auth-Email with a demo email and X-Auth-Name with the name ' \
+          '(from an address in AUTH_HEADERS_TRUSTED_PROXIES), e.g. ' \
           "curl -H 'X-Auth-Email: maya@#{DemoData::DOMAIN}' -H 'X-Auth-Name: Maya Chen' #{url('timesheets')}"
       else
         "#{Rails.application.config.devise_auth_type.upcase} log in: demo users are matched by their email."
