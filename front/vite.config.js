@@ -15,6 +15,14 @@ export default defineConfig({
       { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
     ],
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Don't show deprecation warnings of packages (Bulma), ours are still shown
+        quietDeps: true,
+      },
+    },
+  },
   build: {
     assetsDir: 'front_assets',
   },

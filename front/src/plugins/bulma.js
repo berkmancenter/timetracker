@@ -1,1 +1,1 @@
-import 'bulma'
+import '@/assets/scss/bulma.scss'

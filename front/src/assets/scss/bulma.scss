@@ -1,0 +1,3 @@
+// Bulma is loaded from here and not straight from JS, so Sass sees it as a
+// dependency and quietDeps in vite.config.js hides its deprecation warnings
+@use 'bulma/bulma';

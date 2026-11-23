@@ -11,9 +11,9 @@
 </script>
 
 <style lang="scss">
-  @import '@/assets/scss/fonts/fonts.scss';
-  @import '@/assets/scss/variables.scss';
-  @import '@/assets/scss/bulma-custom.scss';
-  @import '@/assets/scss/datepicker-custom.scss';
-  @import '@/assets/scss/global.scss';
+  @use '@/assets/scss/fonts/fonts.scss';
+  @use '@/assets/scss/variables.scss';
+  @use '@/assets/scss/bulma-custom.scss';
+  @use '@/assets/scss/datepicker-custom.scss';
+  @use '@/assets/scss/global.scss';
 </style>
