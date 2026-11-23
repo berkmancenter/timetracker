@@ -367,48 +367,60 @@
       async deleteEntry() {
         this.mitt.emit('spinnerStart')
 
-        const response = await this.$store.dispatch('tracker/deleteEntry', this.deleteEntryCurrent)
+        try {
+          const response = await this.$store.dispatch('tracker/deleteEntry', this.deleteEntryCurrent)
 
-        if (response.ok && this.periodsView) {
-          // Stay in the period view, only its totals in the sidebar change
-          await this.$store.dispatch('tracker/reloadViewData', ['periodTotals', 'totals'])
-        } else if (response.ok) {
-          const months = await this.$store.dispatch('tracker/fetchMonths')
+          if (response.ok && this.periodsView) {
+            // Stay in the period view, only its totals in the sidebar change
+            await this.$store.dispatch('tracker/reloadViewData', ['periodTotals', 'totals'])
+          } else if (response.ok) {
+            const months = await this.$store.dispatch('tracker/fetchMonths')
 
-          this.$store.dispatch('tracker/setMonths', months)
-          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-          this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
+            this.$store.dispatch('tracker/setMonths', months)
+            this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+            this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
 
-          this.redirectToSelectedMonth(this.$store)
-        } else {
-          this.awn.warning('Something went wrong, try again.')
+            this.redirectToSelectedMonth(this.$store)
+          } else {
+            this.awn.warning('Something went wrong, try again.')
+          }
+        } catch (error) {
+          if (error?.name !== 'AbortError') {
+            this.awn.warning('Something went wrong, try again.')
+          }
+        } finally {
+          this.mitt.emit('spinnerStop')
+          this.deleteEntryModalStatus = false
         }
-
-        this.mitt.emit('spinnerStop')
-        this.deleteEntryModalStatus = false
       },
       async unSudo() {
         this.mitt.emit('spinnerStart')
 
-        const response = await this.$store.dispatch('tracker/unsudoUsersTimesheet')
+        try {
+          const response = await this.$store.dispatch('tracker/unsudoUsersTimesheet')
 
-        if (response.ok) {
-          const months = await this.$store.dispatch('tracker/fetchMonths')
+          if (response.ok) {
+            const months = await this.$store.dispatch('tracker/fetchMonths')
 
-          this.$store.dispatch('tracker/setMonths', months)
-          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-          this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals', 'entries'])
+            this.$store.dispatch('tracker/setMonths', months)
+            this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+            this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals', 'entries'])
 
-          const user = await this.$store.dispatch('shared/fetchUser')
+            const user = await this.$store.dispatch('shared/fetchUser')
 
-          this.$store.dispatch('shared/setUser', user)
+            this.$store.dispatch('shared/setUser', user)
 
-          this.redirectToSelectedMonth(this.$store)
-        } else {
-          this.awn.warning('Something went wrong, try again.')
+            this.redirectToSelectedMonth(this.$store)
+          } else {
+            this.awn.warning('Something went wrong, try again.')
+          }
+        } catch (error) {
+          if (error?.name !== 'AbortError') {
+            this.awn.warning('Something went wrong, try again.')
+          }
+        } finally {
+          this.mitt.emit('spinnerStop')
         }
-
-        this.mitt.emit('spinnerStop')
       },
       formatDate(date) {
         dayjs.extend(utc)

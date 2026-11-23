@@ -18,7 +18,6 @@ function freshState(overrides = {}) {
     entries: [],
     months: [],
     timesheets: [],
-    abortControllers: {},
     formEntry: { id: null, decimal_time: '', entry_date: '', fields: {} },
     ...overrides,
   }
@@ -58,34 +57,72 @@ describe('tracker store', () => {
     expect(state.entries).toEqual([{ id: 1, hours: 3 }])
   })
 
-  it('aborts an earlier request and returns parsed response data', async () => {
-    const abort = vi.fn()
-    const state = freshState({ abortControllers: { fetchEntries: { abort } } })
+  it('returns parsed response data', async () => {
     const data = [{ id: 4 }]
-    mocks.fetchIt.mockResolvedValue({ json: vi.fn().mockResolvedValue(data) })
+    mocks.fetchIt.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(data) })
 
     await expect(tracker.actions.fetchGet(
-      { state },
+      { state: freshState() },
       { url: '/entries', methodName: 'fetchEntries' },
     )).resolves.toEqual(data)
 
-    expect(abort).toHaveBeenCalledOnce()
     expect(mocks.fetchIt).toHaveBeenCalledWith('/entries', {
       method: 'GET',
       signal: expect.any(AbortSignal),
     })
   })
 
-  it('returns an empty result and reports non-abort request failures', async () => {
+  it('aborts an older request without giving it the result of the newer one', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
-    mocks.fetchIt.mockRejectedValue('network unavailable')
+    const signals = {}
+    mocks.fetchIt.mockImplementation((url, { signal }) => new Promise((resolve, reject) => {
+      signals[url] = signal
 
+      if (url === '/entries?month=old') {
+        signal.addEventListener('abort', () => reject('The user aborted a request.'))
+      } else {
+        resolve({ ok: true, json: async () => [{ id: 2 }] })
+      }
+    }))
+
+    const older = tracker.actions.fetchGet({ state: freshState() }, { url: '/entries?month=old', methodName: 'fetchEntries' })
+    const newer = tracker.actions.fetchGet({ state: freshState() }, { url: '/entries?month=new', methodName: 'fetchEntries' })
+
+    await expect(older).rejects.toMatchObject({ name: 'AbortError' })
+    await expect(newer).resolves.toEqual([{ id: 2 }])
+    expect(signals['/entries?month=old'].aborted).toBe(true)
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('throws and reports network and HTTP failures', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    mocks.fetchIt.mockRejectedValueOnce('network unavailable')
     await expect(tracker.actions.fetchGet(
       { state: freshState() },
       { url: '/entries', methodName: 'fetchEntries' },
-    )).resolves.toEqual([])
-
+    )).rejects.toBe('network unavailable')
     expect(error).toHaveBeenCalledWith('network unavailable /entries')
+
+    mocks.fetchIt.mockResolvedValueOnce({ ok: false, status: 500, json: vi.fn() })
+    await expect(tracker.actions.fetchGet(
+      { state: freshState() },
+      { url: '/totals', methodName: 'fetchTotals' },
+    )).rejects.toThrow('HTTP 500')
+  })
+
+  it('keeps the shown data of items which failed to reload', async () => {
+    const commit = vi.fn()
+    const totals = { total_hours_current_month: 1, total_hours_current_timesheet: 2 }
+    const dispatch = vi.fn(async (action) => {
+      if (action === 'fetchEntries') throw new Error('HTTP 500')
+      return totals
+    })
+
+    await tracker.actions.reloadViewData({ dispatch, commit }, ['entries', 'totals'])
+
+    expect(commit).toHaveBeenCalledOnce()
+    expect(commit).toHaveBeenCalledWith('setTotals', totals)
   })
 
   it('encodes autocomplete parameters and keeps separate request slots for every field', async () => {
@@ -103,6 +140,16 @@ describe('tracker store', () => {
       url: expect.stringMatching(/\/time_entries\/auto_complete\?field=description&term=notes&timesheet_uuid=alpha$/),
       methodName: 'fetchAutoComplete:description',
     })
+  })
+
+  it('does not share the request slot of users and timesheets', async () => {
+    const dispatch = vi.fn()
+    const state = freshState({ selectedTimesheet: { id: 3 } })
+
+    await tracker.actions.fetchUser({ state, dispatch }, 7)
+    await tracker.actions.fetchTimesheets({ state, dispatch })
+
+    expect(dispatch.mock.calls.map(([, options]) => options.methodName)).toEqual(['fetchUser', 'fetchTimesheets'])
   })
 
   it('throws when the time entry could not be saved', async () => {

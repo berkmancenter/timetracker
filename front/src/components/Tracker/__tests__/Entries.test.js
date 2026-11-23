@@ -191,6 +191,22 @@ describe('Entries', () => {
     expect(wrapper.vm.deleteEntryModalStatus).toBe(false)
   })
 
+  it('stops loading and closes the confirmation when deletion refresh fails', async () => {
+    const store = createStore()
+    store.dispatch.mockImplementation(async (action) => {
+      if (action === 'tracker/deleteEntry') return { ok: true }
+      if (action === 'tracker/fetchMonths') throw new Error('HTTP 500')
+    })
+    const { wrapper, emit, warning } = mountEntries(store)
+
+    wrapper.vm.deleteEntryConfirm(store.state.tracker.entries[0])
+    await wrapper.vm.deleteEntry()
+
+    expect(warning).toHaveBeenCalledWith('Something went wrong, try again.')
+    expect(emit).toHaveBeenCalledWith('spinnerStop')
+    expect(wrapper.vm.deleteEntryModalStatus).toBe(false)
+  })
+
   it('goes to the older month with previous and to the newer month with next', async () => {
     const { wrapper, store, push, emit } = mountEntries()
 

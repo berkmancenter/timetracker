@@ -286,6 +286,30 @@ feature 'Timesheets' do
     expect(window_event_listener_count('resize')).to eq(listeners_after_first_close)
   end
 
+  scenario 'switching months does not empty the list in between', js: true do
+    membership = signed_in_user_with_timesheet
+    create_entry_with_project(membership, date: Date.new(2026, 10, 5), project: 'October project')
+    create_entry_with_project(membership, date: Date.new(2026, 11, 5), project: 'November project')
+
+    visit front_path("#{membership.timesheet.uuid}/2026-11")
+    expect(page).to have_selector('.tracker-entries-entry', text: 'November project')
+
+    # Remembers the smallest number of entries the list ever had
+    page.execute_script(<<~JS)
+      window.smallestEntryCount = document.querySelectorAll('.tracker-entries-entry').length;
+      new MutationObserver(() => {
+        const count = document.querySelectorAll('.tracker-entries-entry').length;
+        window.smallestEntryCount = Math.min(window.smallestEntryCount, count);
+      }).observe(document.body, { childList: true, subtree: true });
+    JS
+
+    find('[title="Select month"]').click
+    find('.tracker-entries-months-selector-month', text: '2026-10').click
+
+    expect(page).to have_selector('.tracker-entries-entry', text: 'October project')
+    expect(page.evaluate_script('window.smallestEntryCount')).to eq(1)
+  end
+
   scenario 'a new entry gets the current date also when the page was opened the day before', js: true do
     signed_in_user_with_timesheet
     install_browser_clock

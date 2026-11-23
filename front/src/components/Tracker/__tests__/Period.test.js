@@ -89,6 +89,19 @@ describe('Period', () => {
     expect(emit).toHaveBeenCalledWith('spinnerStop')
   })
 
+  it('stops loading when period data fails', async () => {
+    const store = createStore()
+    store.dispatch.mockImplementation(async (action) => {
+      if (action === 'tracker/fetchTimesheets') throw new Error('HTTP 500')
+    })
+    const { emit } = mountPeriod(store)
+
+    await flushPromises()
+
+    expect(emit).toHaveBeenCalledWith('spinnerStart')
+    expect(emit).toHaveBeenCalledWith('spinnerStop')
+  })
+
   it('clears period view state when unmounted', () => {
     const { wrapper, store } = mountPeriod()
 

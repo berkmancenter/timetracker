@@ -84,4 +84,62 @@ describe('TimesheetSelect', () => {
     expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
     expect(emit).toHaveBeenCalledWith('spinnerStop')
   })
+
+  it('stops loading when the months request fails', async () => {
+    const store = createStore()
+    store.dispatch.mockImplementation(async (action, payload) => {
+      if (action === 'tracker/setSelectedTimesheet') {
+        store.state.tracker.selectedTimesheet = payload
+      }
+      if (action === 'tracker/fetchMonths') throw new Error('HTTP 500')
+    })
+    const emit = vi.fn()
+    const wrapper = mount(TimesheetSelect, {
+      global: {
+        mocks: {
+          $store: store,
+          $router: { push: vi.fn() },
+          mitt: { emit },
+        },
+      },
+    })
+
+    await wrapper.find('select').setValue('1')
+    await flushPromises()
+
+    expect(emit).toHaveBeenCalledWith('spinnerStart')
+    expect(emit).toHaveBeenCalledWith('spinnerStop')
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/setMonths', expect.anything())
+  })
+
+  it('waits for the timesheet route before loading and selecting its month', async () => {
+    const store = createStore()
+    mocks.redirectToSelectedMonth.mockClear()
+    let finishNavigation
+    const push = vi.fn(() => new Promise((resolve) => {
+      finishNavigation = resolve
+    }))
+    const wrapper = mount(TimesheetSelect, {
+      global: {
+        mocks: {
+          $store: store,
+          $router: { push },
+          mitt: { emit: vi.fn() },
+        },
+      },
+    })
+
+    await wrapper.find('select').setValue('1')
+    await flushPromises()
+
+    expect(push).toHaveBeenCalled()
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/fetchMonths')
+    expect(mocks.redirectToSelectedMonth).not.toHaveBeenCalled()
+
+    finishNavigation()
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/fetchMonths')
+    expect(mocks.redirectToSelectedMonth).toHaveBeenCalledWith(store)
+  })
 })

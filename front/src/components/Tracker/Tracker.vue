@@ -31,33 +31,40 @@
       async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
-        const timesheets = await this.$store.dispatch('tracker/fetchTimesheets')
-        this.$store.dispatch('tracker/setTimesheets', timesheets)
+        try {
+          const timesheets = await this.$store.dispatch('tracker/fetchTimesheets')
+          this.$store.dispatch('tracker/setTimesheets', timesheets)
 
-        if (timesheets.length === 0) {
-          this.mitt.emit('spinnerStop')
+          if (timesheets.length === 0) {
+            this.redirectToSelectedMonth(this.$store)
+
+            return
+          }
+
+          this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
+
+          const months = await this.$store.dispatch('tracker/fetchMonths')
+          this.$store.dispatch('tracker/setMonths', months)
+
+          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+
+          await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'periodTotals', 'totals', 'users'])
           this.redirectToSelectedMonth(this.$store)
-
-          return
+        } catch {
+          // fetchGet reports real failures; cancelled requests need no user-visible error
+        } finally {
+          this.mitt.emit('spinnerStop')
         }
-
-        this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
-
-        const months = await this.$store.dispatch('tracker/fetchMonths')
-        this.$store.dispatch('tracker/setMonths', months)
-
-        this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'periodTotals', 'totals', 'users'])
-        this.redirectToSelectedMonth(this.$store)
-
-        this.mitt.emit('spinnerStop')
       },
     },
     watch: {
       '$route.params': {
         handler: async function (to, from) {
-          if (Object.keys(from).length > 0) {
+          if (Object.keys(from).length === 0) {
+            return
+          }
+
+          try {
             const timesheetAlreadySelected = this.$store.state.tracker.selectedTimesheet.uuid === to.timesheet
             this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
 
@@ -71,6 +78,8 @@
 
             this.$store.dispatch('tracker/setSelectedMonthFromRoute')
             await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals', 'users'])
+          } catch {
+            // Keep the current view when route data could not be refreshed
           }
         },
         deep: true,

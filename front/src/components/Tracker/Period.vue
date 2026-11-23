@@ -66,22 +66,26 @@
 
         this.mitt.emit('spinnerStart')
 
-        const timesheets = await this.$store.dispatch('tracker/fetchTimesheets')
-        this.$store.dispatch('tracker/setTimesheets', timesheets)
-        this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
+        try {
+          const timesheets = await this.$store.dispatch('tracker/fetchTimesheets')
+          this.$store.dispatch('tracker/setTimesheets', timesheets)
+          this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
 
-        const period = await this.$store.dispatch('admin/fetchPeriod', {
-          timesheetId: this.$route.params.timesheet,
-          periodId: this.$route.params.period_id,
-        })
-        this.$store.dispatch('tracker/setPeriod', period)
+          const period = await this.$store.dispatch('admin/fetchPeriod', {
+            timesheetId: this.$route.params.timesheet,
+            periodId: this.$route.params.period_id,
+          })
+          this.$store.dispatch('tracker/setPeriod', period)
 
-        const user = await this.$store.dispatch('tracker/fetchUser', this.$route.params.user_id)
-        this.$store.dispatch('tracker/setPeriodUser', user)
+          const user = await this.$store.dispatch('tracker/fetchUser', this.$route.params.user_id)
+          this.$store.dispatch('tracker/setPeriodUser', user)
 
-        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'], this.$route.params.period_id)
-
-        this.mitt.emit('spinnerStop')
+          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'], this.$route.params.period_id)
+        } catch {
+          // fetchGet reports real failures; cancelled requests need no user-visible error
+        } finally {
+          this.mitt.emit('spinnerStop')
+        }
       },
     },
     unmounted() {

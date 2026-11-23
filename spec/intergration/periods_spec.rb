@@ -98,6 +98,25 @@ feature 'Timesheet periods' do
     expect(page).not_to have_selector('a[title="Edit entry"]')
   end
 
+  scenario 'the period view loads the selected user and the timesheet', js: true do
+    admin_membership = signed_in_user_with_timesheet
+    timesheet = admin_membership.timesheet
+    member = create(:user, email: 'period-user@example.com')
+    member_membership = create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+    period = create(:period, timesheet: timesheet, name: 'Loaded period', from: Date.new(2026, 11, 1), to: Date.new(2026, 11, 30))
+    create_entry_with_project(member_membership, date: Date.new(2026, 11, 12), project: 'Loaded project')
+
+    visit front_path("#{timesheet.uuid}/period/#{period.id}/user/#{member.id}")
+
+    within('.tracker-period-notification') do
+      expect(page).to have_content('Test timesheet')
+      expect(page).to have_content('Loaded period')
+      expect(page).to have_content(member.email)
+    end
+    expect(page).to have_selector('.tracker-entries-entry', text: 'Loaded project')
+    expect(page).to have_link('Go back to list period stats')
+  end
+
   scenario 'statistics filters find users by the shown name and keep the role tab', js: true do
     admin_membership = signed_in_user_with_timesheet
     timesheet = admin_membership.timesheet

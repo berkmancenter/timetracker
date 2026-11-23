@@ -87,6 +87,19 @@ describe('Tracker', () => {
     expect(emit).toHaveBeenCalledWith('spinnerStop')
   })
 
+  it('stops loading when the initial request fails', async () => {
+    const store = createStore()
+    store.dispatch.mockImplementation(async (action) => {
+      if (action === 'tracker/fetchTimesheets') throw new Error('HTTP 500')
+    })
+    const { emit } = mountTracker(store)
+
+    await flushPromises()
+
+    expect(emit).toHaveBeenCalledWith('spinnerStart')
+    expect(emit).toHaveBeenCalledWith('spinnerStop')
+  })
+
   it('reloads route-dependent data when route params change after initial navigation', async () => {
     const store = createStore()
     const { wrapper } = mountTracker(store)
@@ -133,5 +146,25 @@ describe('Tracker', () => {
 
     expect(store.dispatch).not.toHaveBeenCalledWith('tracker/fetchMonths')
     expect(store.dispatch).toHaveBeenCalledWith('tracker/setSelectedMonthFromRoute')
+  })
+
+  it('handles a failed route refresh without continuing with missing months', async () => {
+    const store = createStore()
+    const { wrapper } = mountTracker(store)
+    const handler = wrapper.vm.$options.watch['$route.params'].handler
+
+    await flushPromises()
+    store.dispatch.mockClear()
+    store.dispatch.mockImplementation(async (action) => {
+      if (action === 'tracker/fetchMonths') throw new Error('HTTP 500')
+    })
+
+    await expect(handler.call(
+      wrapper.vm,
+      { timesheet: 'beta', month: '2026-03' },
+      { timesheet: 'alpha', month: '2026-06' },
+    )).resolves.toBeUndefined()
+
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/setMonths', expect.anything())
   })
 })

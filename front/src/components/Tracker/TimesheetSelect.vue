@@ -41,30 +41,34 @@
       async changeTimesheet(ev) {
         this.mitt.emit('spinnerStart')
 
-        const selectedTimesheet = this.$store.state.tracker.timesheets.find(timesheet => timesheet.id == ev.target.value)
+        try {
+          const selectedTimesheet = this.$store.state.tracker.timesheets.find(timesheet => timesheet.id == ev.target.value)
 
-        this.$store.dispatch('tracker/setSelectedTimesheet', selectedTimesheet)
+          this.$store.dispatch('tracker/setSelectedTimesheet', selectedTimesheet)
 
-        this.$router.push(
-          {
-            name: 'tracker.index',
-            params: {
-              timesheet: this.$store.state.tracker.selectedTimesheet.uuid,
-              month: null,
+          await this.$router.push(
+            {
+              name: 'tracker.index',
+              params: {
+                timesheet: this.$store.state.tracker.selectedTimesheet.uuid,
+                month: null,
+              }
             }
-          }
-        )
+          )
 
-        const months = await this.$store.dispatch('tracker/fetchMonths')
+          const months = await this.$store.dispatch('tracker/fetchMonths')
 
-        this.$store.dispatch('tracker/setMonths', months)
-        this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+          this.$store.dispatch('tracker/setMonths', months)
+          this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
-        this.redirectToSelectedMonth(this.$store)
+          this.redirectToSelectedMonth(this.$store)
 
-        await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
-
-        this.mitt.emit('spinnerStop')
+          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+        } catch {
+          // Keep the selected view as-is when its data could not be refreshed
+        } finally {
+          this.mitt.emit('spinnerStop')
+        }
       },
     },
     watch: {

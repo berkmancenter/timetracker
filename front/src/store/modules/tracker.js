@@ -13,6 +13,29 @@ const defaultEntry = () => ({
   fields: {},
 })
 
+// The latest GET request for every fetch action, kept outside of the reactive state
+const latestRequests = {}
+
+const cancelledRequestError = () => {
+  const error = new Error('Request was superseded by a newer request')
+  error.name = 'AbortError'
+
+  return error
+}
+
+const fetchJson = async (url, signal) => {
+  const response = await fetchIt(url, {
+    method: 'GET',
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+
+  return await response.json()
+}
+
 const state = {
   timesheets: [],
   timesheetUsers: [],
@@ -28,7 +51,6 @@ const state = {
   periodTotalsMode: 'days',
   totalCurrentTimesheet: 0,
   totalCurrentMonth: 0,
-  abortControllers: {},
   isPeriodView: false,
   period: {},
   periodUser: {},
@@ -113,30 +135,30 @@ const mutations = {
 }
 
 const actions = {
+  // Only the newest request of every kind is kept. Superseded and failed requests
+  // reject, so their callers cannot apply data which belongs to another request.
   async fetchGet(context, options) {
-    if (context.state.abortControllers[options.methodName]) {
-      context.state.abortControllers[options.methodName].abort()
-    }
+    const name = options.methodName
+    latestRequests[name]?.controller.abort()
 
-    context.state.abortControllers[options.methodName] = new AbortController()
-
-    let response
-    try {
-      response = await fetchIt(options.url, {
-        method: 'GET',
-        signal: context.state.abortControllers[options.methodName].signal,
-      })
-    } catch (error) {
-      if (error.includes('aborted') === false) {
-        console.error(`${error} ${options.url}`)
+    const request = { controller: new AbortController() }
+    request.result = fetchJson(options.url, request.controller.signal).catch((error) => {
+      if (request.controller.signal.aborted && latestRequests[name] !== request) {
+        throw cancelledRequestError()
       }
 
-      return []
+      console.error(`${error} ${options.url}`)
+      throw error
+    })
+    latestRequests[name] = request
+
+    try {
+      return await request.result
+    } finally {
+      if (latestRequests[name] === request) {
+        delete latestRequests[name]
+      }
     }
-
-    const data = await response.json()
-
-    return data
   },
   async fetchMonths(context) {
     return await context.dispatch('fetchGet', {
@@ -214,7 +236,7 @@ const actions = {
   async fetchUser(context, userId) {
     return await context.dispatch('fetchGet', {
       url: `${apiUrl}/timesheets/${context.state.selectedTimesheet.id}/users/${userId}`,
-      methodName: 'fetchTimesheets',
+      methodName: 'fetchUser',
     })
   },
   async submitEntryForm(context) {
@@ -319,20 +341,15 @@ const actions = {
   },
   async reloadViewData(context, itemsToReload = ['months', 'popular', 'entries', 'periodTotals', 'totals']) {
     const capitalize = s => (s && s[0].toUpperCase() + s.slice(1)) || ''
-    const promises = []
 
-    for (const item of itemsToReload) {
-      const promise = (async () => {
-        const fetchMethodName = `fetch${capitalize(item)}`
-
-        const data = await context.dispatch(fetchMethodName)
+    await Promise.all(itemsToReload.map(async (item) => {
+      try {
+        const data = await context.dispatch(`fetch${capitalize(item)}`)
         context.commit(`set${capitalize(item)}`, data)
-      })()
-
-      promises.push(promise)
-    }
-
-    return await Promise.all(promises)
+      } catch (error) {
+        // Keep the data which is already shown, fetchGet has logged the error
+      }
+    }))
   },
   async joinTimesheet(context, code) {
     const response = await fetchIt(`${apiUrl}/timesheets/join/${code}`, {
