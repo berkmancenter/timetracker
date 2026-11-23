@@ -144,6 +144,7 @@
                           <Icon :src="editIcon" /> Edit entry
                         </a>
                         <a
+                          v-if="canRemoveEntry(entry)"
                           class="dropdown-item"
                           title="Delete entry"
                           @click="deleteEntryConfirm(entry)"
@@ -368,7 +369,10 @@
 
         const response = await this.$store.dispatch('tracker/deleteEntry', this.deleteEntryCurrent)
 
-        if (response.ok) {
+        if (response.ok && this.periodsView) {
+          // Stay in the period view, only its totals in the sidebar change
+          await this.$store.dispatch('tracker/reloadViewData', ['periodTotals', 'totals'])
+        } else if (response.ok) {
           const months = await this.$store.dispatch('tracker/fetchMonths')
 
           this.$store.dispatch('tracker/setMonths', months)
@@ -423,6 +427,10 @@
         }
       },
       openMenu(entry, event) {
+        if (!this.hasEntryActions(entry)) {
+          return
+        }
+
         entry.menuOpen = true
 
         let parentElem = this.$refs[`entry${entry.id}MenuRef`][0].offsetParent
@@ -563,6 +571,18 @@
       },
       adminInTimesheet(timesheet) {
         return timesheet.roles.includes('admin')
+      },
+      // Same rule as the API: only the owner or a superadmin can delete an entry
+      canRemoveEntry(entry) {
+        const user = this.$store.state.shared.user
+
+        return entry.user_id === user.user_id || user.is_superadmin === true
+      },
+      // Edit and remove depend on the user, clone is hidden in the period view
+      hasEntryActions(entry) {
+        return entry.user_id === this.$store.state.shared.user.user_id ||
+          this.canRemoveEntry(entry) ||
+          !this.$store.state.tracker.isPeriodView
       },
     }
   }

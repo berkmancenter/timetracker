@@ -57,6 +57,47 @@ feature 'Timesheet periods' do
     expect(period.reload).to have_attributes(from: Date.new(2026, 11, 1), to: Date.new(2026, 11, 30))
   end
 
+  scenario 'a superadmin deletes a member entry in the period view and stays there', js: true do
+    admin_membership = signed_in_user_with_timesheet
+    admin_membership.user.update!(superadmin: true)
+    timesheet = admin_membership.timesheet
+    member = create(:user, email: 'reviewed-member@example.com')
+    member_membership = create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+    period = create(:period, timesheet: timesheet, from: Date.new(2026, 11, 1), to: Date.new(2026, 11, 30))
+    removed_entry = create_entry_with_project(member_membership, date: Date.new(2026, 11, 10), project: 'Removed project')
+    create_entry_with_project(member_membership, date: Date.new(2026, 11, 11), project: 'Kept project')
+    period_path = front_path("#{timesheet.uuid}/period/#{period.id}/user/#{member.id}")
+
+    visit period_path
+
+    find('.tracker-entries-entry', text: 'Removed project').click
+    find('a[title="Delete entry"]').click
+    click_on 'Confirm'
+
+    expect(page).not_to have_selector('.tracker-entries-entry', text: 'Removed project')
+    expect(page).to have_current_path(period_path)
+    expect(page).to have_content('You are viewing time entries for the selected timesheet period and user.')
+    expect(page).to have_selector('.tracker-entries-entry', text: 'Kept project')
+    expect(TimeEntry.exists?(removed_entry.id)).to be(false)
+  end
+
+  scenario 'the period view does not offer to delete entries of other users', js: true do
+    admin_membership = signed_in_user_with_timesheet
+    timesheet = admin_membership.timesheet
+    member = create(:user, email: 'other-member@example.com')
+    member_membership = create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+    period = create(:period, timesheet: timesheet, from: Date.new(2026, 11, 1), to: Date.new(2026, 11, 30))
+    create_entry_with_project(member_membership, date: Date.new(2026, 11, 10), project: 'Member project')
+
+    visit front_path("#{timesheet.uuid}/period/#{period.id}/user/#{member.id}")
+
+    find('.tracker-entries-entry', text: 'Member project').click
+
+    # The menu opens a moment after the click, so wait for it a while
+    expect { find('a[title="Delete entry"]', wait: 1) }.to raise_error(Capybara::ElementNotFound)
+    expect(page).not_to have_selector('a[title="Edit entry"]')
+  end
+
   scenario 'statistics filters find users by the shown name and keep the role tab', js: true do
     admin_membership = signed_in_user_with_timesheet
     timesheet = admin_membership.timesheet

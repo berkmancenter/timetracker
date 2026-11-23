@@ -227,6 +227,44 @@ describe('Entries', () => {
     expect(wrapper.vm.hasPreviousMonth()).toBe(false)
   })
 
+  it('stays in the period view after deleting an entry', async () => {
+    const { wrapper, store } = mountEntries(createStore({ tracker: { isPeriodView: true } }), { periodsView: true })
+    mocks.redirectToSelectedMonth.mockClear()
+
+    wrapper.vm.deleteEntryConfirm(store.state.tracker.entries[0])
+    await wrapper.vm.deleteEntry()
+
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['periodTotals', 'totals'])
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/fetchMonths')
+    expect(mocks.redirectToSelectedMonth).not.toHaveBeenCalled()
+    expect(wrapper.vm.deleteEntryModalStatus).toBe(false)
+  })
+
+  it('shows remove entry only for own entries, or for all entries to a superadmin', () => {
+    const { wrapper } = mountEntries()
+    const [ownEntry, otherEntry] = wrapper.vm.$store.state.tracker.entries
+
+    expect(wrapper.vm.canRemoveEntry(ownEntry)).toBe(true)
+    expect(wrapper.vm.canRemoveEntry(otherEntry)).toBe(false)
+    expect(wrapper.findAll('[title="Delete entry"]')).toHaveLength(1)
+
+    const { wrapper: superadminWrapper } = mountEntries(createStore({ user: { is_superadmin: true } }))
+
+    expect(superadminWrapper.vm.canRemoveEntry(otherEntry)).toBe(true)
+    expect(superadminWrapper.findAll('[title="Delete entry"]')).toHaveLength(2)
+  })
+
+  it('does not open an empty actions menu in the period view', () => {
+    const { wrapper } = mountEntries(createStore({ tracker: { isPeriodView: true } }), { periodsView: true })
+    const otherEntry = wrapper.vm.$store.state.tracker.entries[1]
+
+    expect(wrapper.vm.hasEntryActions(otherEntry)).toBe(false)
+
+    wrapper.vm.openMenu(otherEntry, { clientX: 0, clientY: 0 })
+
+    expect(otherEntry.menuOpen).toBeUndefined()
+  })
+
   it('changes selected month from the month selector', async () => {
     const { wrapper, store, push } = mountEntries()
     wrapper.vm.selectMonthModalStatus = true
