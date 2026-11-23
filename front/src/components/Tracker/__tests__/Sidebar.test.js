@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import Sidebar from '../Sidebar.vue'
 
@@ -27,11 +27,7 @@ function mountSidebar(sudoMode = false) {
 }
 
 describe('Sidebar', () => {
-  afterEach(() => {
-    document.body.classList.remove('tracker-entries')
-  })
-
-  it('renders tracker sidebar sections and adds the body class', () => {
+  it('renders tracker sidebar sections without mutating document.body classes', () => {
     const wrapper = mountSidebar()
 
     expect(wrapper.find('.main-menu-stub').exists()).toBe(true)
@@ -39,16 +35,12 @@ describe('Sidebar', () => {
     expect(wrapper.find('.popular-stub').exists()).toBe(true)
     expect(wrapper.find('.totals-stub').exists()).toBe(true)
     expect(wrapper.find('.period-totals-stub').exists()).toBe(true)
-    expect(document.body.classList.contains('tracker-entries')).toBe(true)
+    expect(document.body.classList.contains('tracker-entries')).toBe(false)
   })
 
-  it('hides popular items in sudo mode and removes the body class on unmount', () => {
+  it('hides popular items in sudo mode', () => {
     const wrapper = mountSidebar(true)
 
     expect(wrapper.find('.popular-stub').exists()).toBe(false)
-
-    wrapper.unmount()
-
-    expect(document.body.classList.contains('tracker-entries')).toBe(false)
   })
 })

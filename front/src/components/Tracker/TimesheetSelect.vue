@@ -1,8 +1,8 @@
 <template>
   <div class="tracker-timesheets">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Timesheet</h5>
+    <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-section-header">Timesheet</h5>
 
-    <div class="switmenu-section-content">
+    <div class="sidebar-section-content">
       <div class="select">
         <select ref="timesheetsSelect" v-model="selectedTimesheet" @change="changeTimesheet($event)">
           <option v-for="timesheet in timesheets" :key="timesheet.id" :value="timesheet.id">

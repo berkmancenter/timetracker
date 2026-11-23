@@ -1,19 +1,23 @@
 <template>
-  <div>
-    <swit-menu
-      button-selector=".side-menu-toggler"
-      content-selector=".timetracker-content"
-      :close-on-click="false"
-      v-if="$store.state.shared.layout.sideMenuEnabled"
-    >
-      <router-view name="Sidebar"></router-view>
-    </swit-menu>
-
+  <div
+    class="app-shell"
+    :class="[
+      `app-shell--sidebar-${sidebarMode}`,
+      { 'app-shell--sidebar-open': isSidebarOpen },
+    ]"
+  >
     <nav class="top-nav">
       <div class="top-nav-brand no-select">
-        <a class="side-menu-toggler top-nav-button" v-if="$store.state.shared.layout.sideMenuEnabled">
+        <button
+          v-if="hasSidebar"
+          type="button"
+          class="side-menu-toggler top-nav-button"
+          :aria-expanded="String(isSidebarOpen)"
+          aria-label="Toggle sidebar"
+          @click="toggleSideMenu"
+        >
           <Icon :src="menuIcon" />
-        </a>
+        </button>
 
         <div class="top-nav-brand-name-link ml-2">
           <h3 class="logo is-size-3">T <img :src="logoImg" /> TRACKer</h3>
@@ -67,12 +71,24 @@
       </div>
     </nav>
 
-    <div class="timetracker-content content">
-      <div class="container is-fluid mt-4">
-        <router-view />
-      </div>
+    <div class="app-body">
+      <aside
+        v-if="hasSidebar"
+        class="app-sidebar"
+        :aria-hidden="String(!isSidebarOpen)"
+      >
+        <router-view name="Sidebar" />
+      </aside>
 
-      <footer id="footer">© 2013 - {{ new Date().getFullYear() }} Timetracker</footer>
+      <main class="app-main">
+        <div class="timetracker-content content">
+          <div class="container is-fluid mt-4">
+            <router-view />
+          </div>
+
+          <footer id="footer">© 2013 - {{ new Date().getFullYear() }} Timetracker</footer>
+        </div>
+      </main>
     </div>
   </div>
 
@@ -84,7 +100,6 @@
   import helpIcon from '@/images/help.svg'
   import userIcon from '@/images/user.svg'
   import menuIcon from '@/images/menu.svg'
-  import SwitMenu from '@/components/Shared/SwitMenu.vue'
   import Spinner from '@/components/Shared/Spinner.vue'
   import { redirectToSelectedMonth } from '@/router/index'
   import { ModalsContainer } from 'vue-final-modal'
@@ -93,7 +108,6 @@
   export default {
     name: 'DefaultLayout',
     components: {
-      SwitMenu,
       Spinner,
       ModalsContainer,
       Icon,
@@ -108,14 +122,36 @@
         menuIcon,
       }
     },
+    computed: {
+      sidebarMode() {
+        return this.$route?.meta?.sidebar || 'full'
+      },
+      hasSidebar() {
+        return this.sidebarMode !== 'none'
+      },
+      isSidebarOpen() {
+        return this.hasSidebar && Boolean(this.$store.state.shared.layout.sideMenuStatus)
+      },
+    },
     created() {
+      this.closeSideMenuHandler = () => this.closeSideMenu()
+      this.mitt.on('closeSideMenu', this.closeSideMenuHandler)
       this.initialDataLoad()
+    },
+    beforeUnmount() {
+      this.mitt.off('closeSideMenu', this.closeSideMenuHandler)
     },
     methods: {
       async initialDataLoad() {
         const user = await this.$store.dispatch('shared/fetchUser')
 
         this.$store.dispatch('shared/setUser', user)
+      },
+      toggleSideMenu() {
+        this.$store.dispatch('shared/setSideMenuStatus', !this.$store.state.shared.layout.sideMenuStatus)
+      },
+      closeSideMenu() {
+        this.$store.dispatch('shared/setSideMenuStatus', false)
       },
       reloadPath() {
         this.redirectToSelectedMonth(this.$store)
@@ -145,12 +181,30 @@
 
 <style lang="scss">
   html {
+    background-color: var(--super-light-color);
     overflow-y: auto;
+    overscroll-behavior: none;
+
+    @media all and (max-width: 700px) {
+      &:has(.app-shell--sidebar-open) {
+        overflow: hidden;
+      }
+    }
   }
 
   body, button, input, optgroup, select, textarea {
     color: #000000;
     font-family: var(--main-font-family);
+  }
+
+  .app-shell {
+    --top-nav-offset: calc(4rem + 5px);
+    --sidebar-width: 25%;
+
+    @media all and (max-width: 1600px) { --sidebar-width: 30%; }
+    @media all and (max-width: 1300px) { --sidebar-width: 35%; }
+    @media all and (max-width: 900px) { --sidebar-width: 40%; }
+    @media all and (max-width: 700px) { --sidebar-width: 100%; }
   }
 
   // Top Navigation
@@ -208,14 +262,21 @@
     &-button {
       height: 4rem;
       width: 4rem;
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      border: 0;
+      background: transparent;
+      padding: 0;
 
-      img {
+      img,
+      img.tracker-icon {
         height: 3rem;
         width: 3rem;
         max-width: 3rem;
         padding: 0.5rem;
+        margin-right: 0;
       }
 
       &:hover,
@@ -251,10 +312,39 @@
     }
   }
 
-  // Side Menu
-  .switmenu-menu {
-    ul {
-      a {
+  // Reactive Application Shell (Sidebar + Main)
+  .app-body {
+    display: flex;
+    padding-top: var(--top-nav-offset);
+    min-height: 100vh;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: var(--top-nav-offset);
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 100;
+    background-color: var(--greyish-color);
+    padding: 1rem 0.5rem 1rem 0;
+    transform: translateX(-100%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                opacity 0.3s ease-in-out,
+                visibility 0.3s ease-in-out;
+    will-change: transform, opacity;
+
+    @media all and (max-width: 700px) {
+      z-index: 10000;
+    }
+
+    .timetracker-menu {
+      ul a {
         display: flex;
         background-color: #ffffff;
         padding: 0.5rem 1rem;
@@ -276,9 +366,73 @@
         img {
           width: 1rem;
           height: 1rem;
-          margin-right: .5rem;
+          margin-right: 0.5rem;
         }
       }
+    }
+
+    .sidebar-section-header {
+      margin-bottom: 0.5rem;
+      padding: 0.25rem 1rem;
+      background-color: #ffffff;
+      border-radius: 0 0.8rem 0.8rem 0;
+      box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+      user-select: none;
+      display: flex;
+    }
+
+    .sidebar-section-content {
+      padding: 0 1rem;
+
+      table {
+        width: 100%;
+      }
+    }
+  }
+
+  .app-shell--sidebar-open {
+    .app-sidebar {
+      transform: translateX(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+
+      .sidebar-section-content {
+        animation: slideUp 0.5s ease-out forwards;
+      }
+    }
+  }
+
+  // On desktop, tracker views already show main nav links in the top bar,
+  // while admin routes only use the sidebar as a mobile navigation drawer.
+  @media all and (min-width: 701px) {
+    .app-shell--sidebar-full {
+      .app-sidebar .timetracker-menu {
+        display: none;
+      }
+
+      &.app-shell--sidebar-open .app-main {
+        margin-left: var(--sidebar-width);
+      }
+    }
+
+    .app-shell--sidebar-mobile-only {
+      .side-menu-toggler,
+      .app-sidebar {
+        display: none;
+      }
+    }
+  }
+
+  .app-main {
+    flex: 1;
+    min-width: 0;
+    padding: 1.25rem 1rem 2rem;
+    transition: margin-left 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+
+    @media all and (max-width: 700px) {
+      padding: 0 0 2rem;
     }
   }
 
@@ -290,13 +444,14 @@
   // Timetracker Content
   .timetracker-content {
     background-color: #ffffff;
-    margin: 5.5rem 1rem 2rem;
+    width: 100%;
+    margin: 0;
     border-radius: 1rem;
     padding-top: 0.5rem;
     box-shadow: rgba(17, 18, 54, 0.16) 0px 1px 4px 0px;
+    overflow: hidden;
 
     @media all and (max-width: 700px) {
-      margin: 4rem 0 2rem;
       border-radius: 0;
     }
 
@@ -334,35 +489,24 @@
     user-select: none;
   }
 
-  // Disable pull-to-refresh
-  html {
-    overscroll-behavior: none;
-  }
-
   // Custom Scrollbar
   ::-webkit-scrollbar {
     width: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: rgb(209, 184, 185);
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
   }
 
-  // Admin customizations
-  .tracker-admin {
-    .side-menu-toggler {
-      display: none;
-
-      @media all and (max-width: 700px) {
-        display: block;
-      }
-    }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>

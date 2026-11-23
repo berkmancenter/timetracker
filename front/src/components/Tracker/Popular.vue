@@ -1,11 +1,11 @@
 <template>
   <div v-if="filteredFields.length > 0">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Popular</h5>
+    <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-section-header">Popular</h5>
 
     <div
       v-for="field in filteredFields"
       :key="field.machine_name"
-      class="switmenu-section-content"
+      class="sidebar-section-content"
     >
       <popular-items
         :title="field.title"

@@ -1,6 +1,6 @@
 <template>
   <div class="tracker-period-totals" v-if="$store.state.tracker.periodTotals.length > 0">
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">
+    <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-section-header">
       {{ periodName }} Totals
       <VDropdown>
         <span>
@@ -18,7 +18,7 @@
       </VDropdown>
     </h5>
 
-    <div class="switmenu-section-content">
+    <div class="sidebar-section-content">
       <table class="table">
         <tbody>
           <template v-for="(item, index) in $store.state.tracker.periodTotals" :key="index">

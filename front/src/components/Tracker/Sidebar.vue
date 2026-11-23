@@ -1,8 +1,8 @@
 <template>
   <div>
     <main-menu
-      header-class="switmenu-section-header"
-      content-class="switmenu-section-content"
+      header-class="sidebar-section-header"
+      content-class="sidebar-section-content"
     />
     <timesheet-select></timesheet-select>
     <popular v-if="$store.state.shared.user.sudoMode === false"></popular>
@@ -27,21 +27,5 @@
       Popular,
       MainMenu,
     },
-    mounted() {
-      document.body.classList.add('tracker-entries')
-    },
-    beforeUnmount() {
-      document.body.classList.remove('tracker-entries')
-    }
   }
 </script>
-
-<style lang="scss">
-  .tracker-entries {
-    .timetracker-menu {
-      @media all and (min-width: 701px) {
-        display: none;
-      }
-    }
-  }
-</style>

@@ -12,7 +12,6 @@ const state = {
   },
   layout: {
     sideMenuStatus: false,
-    sideMenuEnabled: true,
   },
 }
 
@@ -25,9 +24,6 @@ const mutations = {
   },
   setSideMenuStatus(state, status) {
     state.layout.sideMenuStatus = status
-  },
-  setSideMenuEnabled(state, enabled) {
-    state.layout.sideMenuEnabled = enabled
   },
 }
 
@@ -63,9 +59,6 @@ const actions = {
   setSideMenuStatus(context, status) {
     context.commit('setSideMenuStatus', status)
     store2('timetracker.side_menu_status', status)
-  },
-  setSideMenuEnabled(context, enabled) {
-    context.commit('setSideMenuEnabled', enabled)
   },
 }
 

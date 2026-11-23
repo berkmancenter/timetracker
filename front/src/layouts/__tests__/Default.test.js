@@ -7,26 +7,39 @@ vi.mock('@/router/index', () => router)
 
 import DefaultLayout from '../Default.vue'
 
-function mountLayout({ routeName = 'tracker.index', sideMenuEnabled = true } = {}) {
+function mountLayout({ routeName = 'tracker.index', sidebar = 'full', sideMenuStatus = false } = {}) {
   const user = { username: 'ada@example.com', sudo_users: [] }
-  const dispatch = vi.fn(async (action) => (action === 'shared/fetchUser' ? user : undefined))
-  const emit = vi.fn()
+  const handlers = {}
+  const mitt = {
+    handlers,
+    emit: vi.fn(),
+    on: vi.fn((event, handler) => {
+      handlers[event] = handler
+    }),
+    off: vi.fn(),
+  }
   const store = {
     state: {
       shared: {
-        layout: { sideMenuEnabled },
+        layout: { sideMenuStatus },
         user: { username: 'ada@example.com' },
       },
     },
-    dispatch,
+    dispatch: vi.fn(async (action, payload) => {
+      if (action === 'shared/fetchUser') return user
+      if (action === 'shared/setSideMenuStatus') {
+        store.state.shared.layout.sideMenuStatus = payload
+      }
+      return undefined
+    }),
   }
 
   const wrapper = mount(DefaultLayout, {
     global: {
       mocks: {
         $store: store,
-        $route: { name: routeName },
-        mitt: { emit },
+        $route: { name: routeName, meta: sidebar === undefined ? {} : { sidebar } },
+        mitt,
       },
       stubs: {
         RouterLink: {
@@ -37,7 +50,6 @@ function mountLayout({ routeName = 'tracker.index', sideMenuEnabled = true } = {
           props: ['name'],
           template: '<div class="router-view-stub" :data-name="name" />',
         },
-        SwitMenu: { template: '<div class="swit-menu-stub"><slot /></div>' },
         Spinner: { template: '<div class="spinner-stub" />' },
         ModalsContainer: { template: '<div class="modals-container-stub" />' },
         Icon: { template: '<i class="icon-stub" />' },
@@ -51,7 +63,7 @@ function mountLayout({ routeName = 'tracker.index', sideMenuEnabled = true } = {
     },
   })
 
-  return { wrapper, dispatch, emit, store, user }
+  return { wrapper, dispatch: store.dispatch, emit: mitt.emit, mitt, store, user }
 }
 
 function menuLink(wrapper, routeName) {
@@ -68,21 +80,58 @@ describe('DefaultLayout', () => {
     expect(dispatch).toHaveBeenNthCalledWith(2, 'shared/setUser', user)
   })
 
-  it('shows the signed in user, the page and the sidebar', () => {
+  it('shows the signed in user, the page and the reactive sidebar shell', () => {
     const { wrapper } = mountLayout()
 
+    expect(wrapper.find('.app-shell').classes()).toContain('app-shell--sidebar-full')
+    expect(wrapper.find('.app-shell').classes()).not.toContain('app-shell--sidebar-open')
     expect(wrapper.find('.dropdown-stub').text()).toContain('ada@example.com')
-    expect(wrapper.find('.swit-menu-stub .router-view-stub[data-name="Sidebar"]').exists()).toBe(true)
+    expect(wrapper.find('.app-sidebar .router-view-stub[data-name="Sidebar"]').exists()).toBe(true)
     expect(wrapper.find('.side-menu-toggler').exists()).toBe(true)
-    expect(wrapper.find('.timetracker-content .router-view-stub').exists()).toBe(true)
+    expect(wrapper.find('.app-main .timetracker-content .router-view-stub').exists()).toBe(true)
     expect(wrapper.find('#footer').text()).toContain(`${new Date().getFullYear()}`)
   })
 
-  it('hides the side menu when it is not enabled', () => {
-    const { wrapper } = mountLayout({ sideMenuEnabled: false })
+  it('applies mobile-only sidebar mode from route metadata', () => {
+    const { wrapper } = mountLayout({ routeName: 'timesheets.index', sidebar: 'mobile-only' })
 
-    expect(wrapper.find('.swit-menu-stub').exists()).toBe(false)
+    expect(wrapper.find('.app-shell').classes()).toContain('app-shell--sidebar-mobile-only')
+    expect(wrapper.find('.app-sidebar').exists()).toBe(true)
+    expect(wrapper.find('.side-menu-toggler').exists()).toBe(true)
+  })
+
+  it('hides the sidebar and toggler when route meta disables the sidebar', () => {
+    const { wrapper } = mountLayout({ routeName: 'timesheets.join', sidebar: 'none', sideMenuStatus: true })
+
+    expect(wrapper.find('.app-shell').classes()).toContain('app-shell--sidebar-none')
+    expect(wrapper.find('.app-shell').classes()).not.toContain('app-shell--sidebar-open')
+    expect(wrapper.find('.app-sidebar').exists()).toBe(false)
     expect(wrapper.find('.side-menu-toggler').exists()).toBe(false)
+  })
+
+  it('toggles the sidebar via the store without touching document classes', async () => {
+    const { wrapper, dispatch } = mountLayout({ sideMenuStatus: false })
+
+    await wrapper.find('.side-menu-toggler').trigger('click')
+
+    expect(dispatch).toHaveBeenCalledWith('shared/setSideMenuStatus', true)
+    expect(document.documentElement.classList.contains('switmenu-html-open')).toBe(false)
+    expect(document.body.classList.contains('tracker-entries')).toBe(false)
+    expect(document.body.classList.contains('tracker-admin')).toBe(false)
+  })
+
+  it('reflects open sidebar state and closes on closeSideMenu event, cleaning up on unmount', () => {
+    const { wrapper, dispatch, mitt } = mountLayout({ sideMenuStatus: true })
+
+    expect(wrapper.find('.app-shell').classes()).toContain('app-shell--sidebar-open')
+    expect(wrapper.find('.side-menu-toggler').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.find('.app-sidebar').attributes('aria-hidden')).toBe('false')
+
+    mitt.handlers.closeSideMenu()
+    expect(dispatch).toHaveBeenCalledWith('shared/setSideMenuStatus', false)
+
+    wrapper.unmount()
+    expect(mitt.off).toHaveBeenCalledWith('closeSideMenu', mitt.handlers.closeSideMenu)
   })
 
   it('marks the menu item of the current page', () => {
@@ -90,11 +139,11 @@ describe('DefaultLayout', () => {
     expect(menuLink(tracker, 'tracker.index').classes()).toContain('top-nav-button-menu-active')
     expect(menuLink(tracker, 'timesheets.index').classes()).not.toContain('top-nav-button-menu-active')
 
-    const timesheets = mountLayout({ routeName: 'timesheets.index' }).wrapper
+    const timesheets = mountLayout({ routeName: 'timesheets.index', sidebar: 'mobile-only' }).wrapper
     expect(menuLink(timesheets, 'tracker.index').classes()).not.toContain('top-nav-button-menu-active')
     expect(menuLink(timesheets, 'timesheets.index').classes()).toContain('top-nav-button-menu-active')
 
-    const other = mountLayout({ routeName: 'periods.stats' }).wrapper
+    const other = mountLayout({ routeName: 'periods.stats', sidebar: 'mobile-only' }).wrapper
     expect(other.findAll('.top-nav-button-menu-active')).toHaveLength(0)
   })
 

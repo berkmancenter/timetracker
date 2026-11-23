@@ -6,6 +6,7 @@ import Join from '../Join.vue'
 function mountJoin(response = { ok: true }) {
   const dispatch = vi.fn(async (action) => {
     if (action === 'tracker/joinTimesheet') {
+      if (response instanceof Error) throw response
       return response
     }
 
@@ -34,32 +35,35 @@ function mountJoin(response = { ok: true }) {
 }
 
 describe('Join', () => {
-  it('sets the join layout on creation', () => {
-    const { dispatch } = mountJoin()
-
-    expect(dispatch).toHaveBeenCalledWith('shared/setSideMenuEnabled', false)
-    expect(dispatch).toHaveBeenCalledWith('shared/setSideMenuStatus', false)
-  })
-
-  it('joins a timesheet, restores tracker layout, and redirects', async () => {
+  it('joins a timesheet and redirects without overwriting sidebar state', async () => {
     const { dispatch, push, emit, awn } = mountJoin()
 
     await new Promise((resolve) => setTimeout(resolve))
 
     expect(emit).toHaveBeenCalledWith('spinnerStart')
     expect(dispatch).toHaveBeenCalledWith('tracker/joinTimesheet', 'invite-code')
+    expect(dispatch).not.toHaveBeenCalledWith('shared/setSideMenuStatus', expect.anything())
     expect(awn.success).toHaveBeenCalledWith('You have joined successfully.')
     expect(push).toHaveBeenCalledWith({ name: 'tracker.index' })
-    expect(dispatch).toHaveBeenCalledWith('shared/setSideMenuEnabled', true)
-    expect(dispatch).toHaveBeenCalledWith('shared/setSideMenuStatus', true)
     expect(emit).toHaveBeenCalledWith('spinnerStop')
   })
 
   it('warns when joining fails', async () => {
-    const { awn } = mountJoin({ ok: false })
+    const { awn, emit } = mountJoin({ ok: false })
 
     await new Promise((resolve) => setTimeout(resolve))
 
     expect(awn.warning).toHaveBeenCalledWith('Something went wrong, try again.')
+    expect(emit).toHaveBeenCalledWith('spinnerStop')
+  })
+
+  it('stops the spinner and redirects when the request throws', async () => {
+    const { awn, emit, push } = mountJoin(new Error('network error'))
+
+    await new Promise((resolve) => setTimeout(resolve))
+
+    expect(awn.warning).toHaveBeenCalledWith('Something went wrong, try again.')
+    expect(emit).toHaveBeenCalledWith('spinnerStop')
+    expect(push).toHaveBeenCalledWith({ name: 'tracker.index' })
   })
 })

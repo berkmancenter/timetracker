@@ -1,14 +1,10 @@
 import { mount } from '@vue/test-utils'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import PeriodSidebar from '../PeriodSidebar.vue'
 
 describe('PeriodSidebar', () => {
-  afterEach(() => {
-    document.body.classList.remove('tracker-entries')
-  })
-
-  it('renders period sidebar sections and manages the body class', () => {
+  it('renders period sidebar sections without mutating document.body classes', () => {
     const wrapper = mount(PeriodSidebar, {
       global: {
         stubs: {
@@ -22,10 +18,6 @@ describe('PeriodSidebar', () => {
     expect(wrapper.find('.main-menu-stub').exists()).toBe(true)
     expect(wrapper.find('.totals-stub').exists()).toBe(true)
     expect(wrapper.find('.period-totals-stub').exists()).toBe(true)
-    expect(document.body.classList.contains('tracker-entries')).toBe(true)
-
-    wrapper.unmount()
-
     expect(document.body.classList.contains('tracker-entries')).toBe(false)
   })
 })

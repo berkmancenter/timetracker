@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h5 class="has-text-weight-bold is-size-5 mt-2 switmenu-section-header">Totals</h5>
+    <h5 class="has-text-weight-bold is-size-5 mt-2 sidebar-section-header">Totals</h5>
 
-    <div class="switmenu-section-content">
+    <div class="sidebar-section-content">
       <div class="tracker-totals">
         <table class="table">
           <tbody>

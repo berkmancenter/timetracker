@@ -11,8 +11,12 @@ const router = createRouter({
       children: [
         {
           path: '',
-          component: () => import('@/components/Tracker/Tracker.vue'),
+          components: {
+            default: () => import('@/components/Tracker/Tracker.vue'),
+            Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
+          },
           name: 'app.index',
+          meta: { sidebar: 'full' },
         },
         {
           path: ':timesheet?/:month?',
@@ -21,6 +25,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
           },
           name: 'tracker.index',
+          meta: { sidebar: 'full' },
         },
         {
           path: ':timesheet/period/:period_id/user/:user_id',
@@ -29,6 +34,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Tracker/PeriodSidebar.vue'),
           },
           name: 'tracker.period.user',
+          meta: { sidebar: 'full' },
         },
         {
           path: 'admin/timesheets',
@@ -37,6 +43,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.index',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/new',
@@ -45,6 +52,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.new',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:id/edit',
@@ -53,6 +61,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.edit',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:id/invite',
@@ -61,6 +70,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.invite',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:id/users',
@@ -69,6 +79,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'timesheets.users',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:timesheet_id/periods',
@@ -77,6 +88,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'periods.index',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:timesheet_id/periods/new',
@@ -85,6 +97,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'periods.new',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:timesheet_id/periods/:id/edit',
@@ -93,6 +106,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'periods.edit',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:timesheet_id/periods/:id/stats',
@@ -101,6 +115,7 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'periods.stats',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'admin/timesheets/:timesheet_id/periods/:id/credits',
@@ -109,14 +124,13 @@ const router = createRouter({
             Sidebar: () => import('@/components/Admin/Sidebar.vue'),
           },
           name: 'periods.credits',
+          meta: { sidebar: 'mobile-only' },
         },
         {
           path: 'join/:code',
-          components: {
-            default: () => import('@/components/Tracker/Join.vue'),
-            Sidebar: () => import('@/components/Tracker/Sidebar.vue'),
-          },
+          component: () => import('@/components/Tracker/Join.vue'),
           name: 'timesheets.join',
+          meta: { sidebar: 'none' },
         },
       ],
     }
