@@ -150,7 +150,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_193418) do
     t.index ["timesheet_id"], name: "index_users_timesheets_on_timesheet_id"
     t.index ["user_id", "timesheet_id"], name: "unique_user_timesheet", unique: true
     t.index ["user_id"], name: "index_users_timesheets_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying::text, 'user'::character varying::text])", name: "users_timesheets_valid_role"
+    t.check_constraint "role::text = ANY (ARRAY['admin'::character varying, 'user'::character varying]::text[])", name: "users_timesheets_valid_role"
   end
 
   add_foreign_key "credits", "periods"
