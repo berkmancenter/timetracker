@@ -77,5 +77,133 @@ RSpec.describe UsersController, type: :controller do
       expect(data['is_superadmin']).to eq(true)
       expect(data['sudo_users']).to eq([])
     end
+
+    it 'returns the users selected with sudo' do
+      sign_in regular_user
+      session["#{regular_user.id}_active_users"] = { 'timesheet_id' => timesheet.id, 'user_ids' => ['5', 7] }
+
+      get :current_user_data
+
+      expect(response.parsed_body).to include(
+        'username' => regular_user.email,
+        'is_superadmin' => false,
+        'sudo_users' => [5, 7]
+      )
+    end
+
+    it 'ignores a selection in a wrong format' do
+      sign_in regular_user
+      session["#{regular_user.id}_active_users"] = 'not a selection'
+
+      get :current_user_data
+
+      expect(response.parsed_body['sudo_users']).to eq([])
+    end
+
+    it 'returns unauthorized when not signed in' do
+      get :current_user_data
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).to eq('message' => 'Unauthorized')
+    end
+  end
+
+  describe 'POST #sudo access' do
+    let(:member) { create(:user) }
+
+    before do
+      create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+    end
+
+    it 'lets a superadmin select users of any timesheet' do
+      sign_in superadmin_user
+
+      post :sudo, params: { timesheet_id: timesheet.id, users: [member.id] }
+
+      expect(response).to have_http_status(:ok)
+      expect(session["#{superadmin_user.id}_active_users"]).to eq(
+        'timesheet_id' => timesheet.id,
+        'user_ids' => [member.id]
+      )
+    end
+
+    it 'does not let a regular member select users' do
+      create(:users_timesheet, user: regular_user, timesheet: timesheet, role: 'user')
+      sign_in regular_user
+
+      post :sudo, params: { timesheet_id: timesheet.id, users: [member.id] }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(session["#{regular_user.id}_active_users"]).to be_nil
+    end
+
+    it 'saves an empty selection when no users are given' do
+      create(:users_timesheet, user: regular_user, timesheet: timesheet, role: 'admin')
+      sign_in regular_user
+
+      post :sudo, params: { timesheet_id: timesheet.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(session["#{regular_user.id}_active_users"]['user_ids']).to eq([])
+    end
+
+    it 'returns unauthorized when not signed in' do
+      post :sudo, params: { timesheet_id: timesheet.id, users: [member.id] }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe 'POST #unsudo of one user' do
+    it 'keeps the selections of other users' do
+      sign_in regular_user
+      session["#{regular_user.id}_active_users"] = { 'timesheet_id' => timesheet.id, 'user_ids' => [1] }
+      session["#{superadmin_user.id}_active_users"] = { 'timesheet_id' => timesheet.id, 'user_ids' => [2] }
+
+      post :unsudo
+
+      expect(session["#{regular_user.id}_active_users"]).to be_nil
+      expect(session["#{superadmin_user.id}_active_users"]).to be_present
+    end
+  end
+
+  describe 'GET #index' do
+    before do
+      create(:users_timesheet, user: regular_user, timesheet: timesheet, role: 'admin')
+      sign_in regular_user
+    end
+
+    it 'returns the members of the timesheet' do
+      member = create(:user, first_name: 'Ada', last_name: 'Lovelace')
+      create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: create(:user), timesheet: create(:timesheet))
+
+      get :index, params: { timesheet_id: timesheet.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['users']).to contain_exactly(
+        { 'id' => regular_user.id, 'email' => regular_user.email, 'first_name' => nil, 'last_name' => nil },
+        { 'id' => member.id, 'email' => member.email, 'first_name' => 'Ada', 'last_name' => 'Lovelace' }
+      )
+    end
+
+    it 'returns a bad request for a missing timesheet' do
+      get :index, params: { timesheet_id: 0 }
+
+      expect(response).to have_http_status(:bad_request)
+    end
+  end
+
+  describe 'DELETE #cas_logout' do
+    it 'signs the user out and goes to the CAS logout page' do
+      sign_in regular_user
+      allow(Rails.application.config).to receive(:rack_cas)
+        .and_return(ActiveSupport::OrderedOptions.new.merge!(server_url: 'https://cas.example.test'))
+
+      delete :cas_logout
+
+      expect(response).to redirect_to('https://cas.example.test/logout')
+      expect(controller.current_user).to be_nil
+    end
   end
 end

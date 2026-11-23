@@ -74,4 +74,81 @@ RSpec.describe Timesheet, type: :model do
       end
     end
   end
+
+  describe 'access in another timesheet' do
+    it 'does not make an admin of one timesheet an admin or user of another one' do
+      user = create(:user)
+      create(:users_timesheet, user: user, timesheet: create(:timesheet), role: 'admin')
+      other_timesheet = create(:timesheet)
+
+      expect(other_timesheet.admin?(user)).to be(false)
+      expect(other_timesheet.user?(user)).to be(false)
+    end
+  end
+
+  describe '#all_users' do
+    it 'lists the members with their roles and join date' do
+      timesheet = create(:timesheet)
+      admin = create(:user)
+      member = create(:user)
+      create(:users_timesheet, user: admin, timesheet: timesheet, role: 'admin')
+      create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: create(:user), timesheet: create(:timesheet))
+
+      rows = timesheet.all_users.index_by(&:id)
+
+      expect(rows.keys).to contain_exactly(admin.id, member.id)
+      expect(rows[admin.id].roles).to eq(['admin'])
+      expect(rows[member.id].roles).to eq(['user'])
+      expect(rows[member.id].email).to eq(member.email)
+      expect(rows[member.id].joined).to be_present
+    end
+  end
+
+  describe 'custom fields' do
+    let(:timesheet) { create(:timesheet) }
+
+    it { should have_many(:custom_fields).dependent(:destroy) }
+
+    it 'lists them by their order' do
+      second = create(:custom_field, customizable: timesheet, machine_name: 'second', order: 2)
+      first = create(:custom_field, customizable: timesheet, machine_name: 'first', order: 1)
+
+      expect(timesheet.custom_fields).to eq([first, second])
+    end
+
+    it 'can add, change and remove them with nested attributes' do
+      removed = create(:custom_field, customizable: timesheet, machine_name: 'removed')
+      changed = create(:custom_field, customizable: timesheet, machine_name: 'changed', title: 'Old')
+
+      timesheet.update!(custom_fields_attributes: [
+        { id: removed.id, _destroy: '1' },
+        { id: changed.id, title: 'New' },
+        { title: 'Client name', input_type: 'text' }
+      ])
+
+      expect(timesheet.reload.custom_fields.pluck(:machine_name, :title)).to contain_exactly(
+        %w[changed New], ['client_name', 'Client name']
+      )
+    end
+  end
+
+  describe 'removing' do
+    it 'removes its entries, members, periods and invitations but not the users' do
+      timesheet = create(:timesheet)
+      user = create(:user)
+      create(:users_timesheet, user: user, timesheet: timesheet)
+      create(:time_entry, user: user, timesheet: timesheet)
+      create(:period, timesheet: timesheet)
+      create(:invitation, timesheet: timesheet)
+
+      timesheet.destroy!
+
+      expect(UsersTimesheet.where(timesheet_id: timesheet.id)).to be_empty
+      expect(TimeEntry.where(timesheet_id: timesheet.id)).to be_empty
+      expect(Period.where(timesheet_id: timesheet.id)).to be_empty
+      expect(Invitation.where(timesheet_id: timesheet.id)).to be_empty
+      expect(User.exists?(user.id)).to be(true)
+    end
+  end
 end

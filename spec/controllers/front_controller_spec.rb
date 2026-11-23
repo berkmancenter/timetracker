@@ -31,4 +31,21 @@ RSpec.describe FrontController, type: :controller do
       expect(response).to redirect_to(new_user_session_path)
     end
   end
+
+  describe 'GET #ping' do
+    it 'answers pong to a signed in user' do
+      sign_in user
+
+      get :ping
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to eq('pong')
+    end
+
+    it 'redirects an unauthenticated user to sign in' do
+      get :ping
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
+  end
 end

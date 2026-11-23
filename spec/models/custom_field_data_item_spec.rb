@@ -19,4 +19,21 @@ RSpec.describe CustomFieldDataItem, type: :model do
     expect { time_entry.destroy }.to change(described_class, :count).by(-1)
     expect(described_class.exists?(item.id)).to be(false)
   end
+
+  it 'can belong to a user for period fields' do
+    user = create(:user)
+    field = create(:custom_field, customizable: create(:period))
+
+    item = create(:custom_field_data_item, custom_field: field, owner: user, value: 'NSF')
+
+    expect(item.reload.owner).to eq(user)
+    expect(user.custom_field_data_items).to eq([item])
+  end
+
+  it 'is removed when its custom field is removed' do
+    field = create(:custom_field, customizable: create(:timesheet))
+    create(:custom_field_data_item, custom_field: field)
+
+    expect { field.destroy }.to change(described_class, :count).by(-1)
+  end
 end

@@ -20,5 +20,23 @@ RSpec.describe InvitationMailer, type: :mailer do
       expect(mail.body.encoded).to include('Research hours')
       expect(mail.body.encoded).to include("/join/#{invitation.code}")
     end
+
+    it 'is sent from the configured sender with a full join link' do
+      invitation = create(:invitation, email: 'recipient@example.com')
+
+      mail = described_class.send_invitation(invitation.timesheet, invitation)
+
+      expect(mail.from).to eq([Timetracker::Application.config.default_sender])
+      expect(mail.return_path).to eq(Timetracker::Application.config.return_path)
+      expect(mail.body.encoded).to include("#{Timetracker::Application.config.front_url}/join/#{invitation.code}")
+    end
+
+    it 'is delivered' do
+      invitation = create(:invitation, email: 'recipient@example.com')
+
+      expect do
+        described_class.send_invitation(invitation.timesheet, invitation).deliver_now
+      end.to change(ActionMailer::Base.deliveries, :count).by(1)
+    end
   end
 end
