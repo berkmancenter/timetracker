@@ -43,7 +43,6 @@
     name: 'Modal',
     data() {
       return {
-        working: false,
         closeIcon,
       }
     },
@@ -51,6 +50,12 @@
       title: {
         type: String,
         required: true,
+      },
+      // Shows a spinner on the confirm button while the parent saves
+      working: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
       confirmButtonTitle: {
         type: String,
@@ -86,10 +91,6 @@
     components: {
       VueFinalModal,
       Icon,
-    },
-    created() {
-      this.mitt.on('modalIsWorking', () => { this.working = true })
-      this.mitt.on('modalIsNotWorking', () => { this.working = false })
     },
     methods: {
       opened() {

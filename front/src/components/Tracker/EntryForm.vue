@@ -4,6 +4,7 @@
     title="Time entry data"
     :confirmButtonTitle="submitButtonName"
     :focusOnConfirm="false"
+    :working="working"
     @confirm="submitForm()"
     @cancel="visible = false"
   >
@@ -120,11 +121,31 @@
         working: false,
         visible: false,
         addIcon,
-        submittingInProcess: false,
+      }
+    },
+    created() {
+      // Not reactive on purpose, these are only kept to clean up later
+      this.autocompletes = []
+      this.mittHandlers = {
+        addEntry: () => this.openForm(true),
+        editEntry: () => this.openForm(),
+        cloneEntry: () => this.openForm(),
+        popularSelected: () => this.openForm(),
       }
     },
     mounted() {
       this.initEvents()
+    },
+    beforeUnmount() {
+      this.removeEvents()
+      this.destroyAutoComplete()
+    },
+    watch: {
+      visible(isVisible) {
+        if (!isVisible) {
+          this.destroyAutoComplete()
+        }
+      },
     },
     computed: {
       formValue() {
@@ -139,106 +160,114 @@
       },
     },
     methods: {
-      async submitForm(ev) {
-        if (this.$refs.entryForm.reportValidity() === false) {
+      async submitForm() {
+        // Enter in the form and the confirm button both submit, so it can come twice
+        if (this.working || this.$refs.entryForm.reportValidity() === false) {
           return
         }
 
-        this.mitt.emit('modalIsWorking')
-        this.mitt.emit('spinnerStart')
         this.working = true
+        this.mitt.emit('spinnerStart')
 
-        const submitResponse = await this.$store.dispatch('tracker/submitEntryForm')
+        let saved = false
+        try {
+          const savedEntry = await this.$store.dispatch('tracker/submitEntryForm')
 
-        if (this.$store.state.tracker.formMode === 'create') {
-          this.$store.dispatch('tracker/addEntry', submitResponse)
-        } else {
-          this.$store.dispatch('tracker/replaceEntry', submitResponse)
+          if (this.$store.state.tracker.formMode === 'create') {
+            this.$store.dispatch('tracker/addEntry', savedEntry)
+          } else {
+            this.$store.dispatch('tracker/replaceEntry', savedEntry)
+          }
+
+          saved = true
+        } catch (error) {
+          console.error(error)
+          this.awn.warning('The time entry could not be saved, try again.')
         }
 
-        const months = await this.$store.dispatch('tracker/fetchMonths')
+        if (saved) {
+          try {
+            const months = await this.$store.dispatch('tracker/fetchMonths')
 
-        this.$store.dispatch('tracker/setMonths', months)
-        this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+            this.$store.dispatch('tracker/setMonths', months)
+            this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
-        await this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
+            await this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
+          } catch (error) {
+            // The entry is saved, only the refresh of the months failed
+            console.error(error)
+          }
 
-        this.$store.dispatch('tracker/clearEntryForm')
+          this.$store.dispatch('tracker/clearEntryForm')
+          this.visible = false
+        }
+
         this.working = false
         this.mitt.emit('spinnerStop')
-        this.mitt.emit('modalIsNotWorking')
-
-        this.visible = false
       },
+      // Let only digits and a dot through. The input itself checks min, max and step
+      // (so max 2 decimals), it also works when the old value is selected and replaced.
       isNumberKey(event) {
-        const charCode = event.which ? event.which : event.keyCode
-
-        if (charCode > 31 && (charCode < 48 || charCode > 57) && !(charCode == 46 || charCode == 8)) {
-          return event.preventDefault()
-        } else {
-          const len = event.target.value.length
-          const index = event.target.value.indexOf('.')
-          if (index > 0 && charCode == 46) {
-            return event.preventDefault()
-          }
-          if (index > 0) {
-            const charAfterdot = (len + 1) - index
-            if (charAfterdot > 3) {
-              return event.preventDefault()
-            }
-          }
+        if (event.ctrlKey || event.metaKey || event.altKey || event.key.length !== 1) {
+          return
         }
 
-        return true
+        if (!/[0-9.]/.test(event.key)) {
+          event.preventDefault()
+        }
       },
       initAutoComplete() {
-        const that = this
+        this.destroyAutoComplete()
 
-        this.$store.state.tracker.selectedTimesheet.custom_fields.forEach(field => {
-          if (field.input_type !== 'text') {
+        this.getTextFields().forEach(field => {
+          const input = this.getFieldInput(field)
+          if (!input) {
             return
           }
 
-          const fieldRefName = `${field.machine_name}Input`
-
-          autocomplete({
-            input: that.$refs[fieldRefName][0],
+          this.autocompletes.push(autocomplete({
+            input,
             preventSubmit: 2, // OnSelect
             showOnFocus: true,
             minLength: 0,
             fetch: async (text, update) => {
-              let items = await that.$store.dispatch('tracker/fetchAutoComplete', {
-                term: text.toLowerCase(),
-                field: field.machine_name,
-              })
+              try {
+                const items = await this.$store.dispatch('tracker/fetchAutoComplete', {
+                  term: text.toLowerCase(),
+                  field: field.machine_name,
+                })
 
-              items = items.map((item) => {
-                return { label: item }
-              })
-
-              update(items)
+                update(items.map(item => ({ label: item })))
+              } catch (error) {
+                update([])
+              }
             },
-            onSelect: function(item) {
-              that.$refs[fieldRefName][0].value = item.label
-              that.changeFormValue(field.machine_name, item.label)
+            onSelect: (item) => {
+              input.value = item.label
+              this.changeFormValue(field.machine_name, item.label)
             },
-            render: function(item) {
-              if (that.$refs[fieldRefName][0].value !== item.label) {
+            render: (item) => {
+              if (input.value !== item.label) {
                 const div = document.createElement('div')
-                div.innerHTML = item.label
+                // textContent, the values are typed by users and are not HTML
+                div.textContent = item.label
 
                 return div
               }
             },
-          })
-        });
+          }))
+        })
+      },
+      // The autocompleter adds listeners to window and document, so it must be removed
+      destroyAutoComplete() {
+        this.autocompletes.forEach(instance => instance.destroy())
+        this.autocompletes = []
       },
       initEvents() {
-        const that = this
-        this.mitt.on('addEntry', () => that.openForm(true))
-        this.mitt.on('editEntry', () => that.openForm())
-        this.mitt.on('cloneEntry', () => that.openForm())
-        this.mitt.on('popularSelected', () => that.openForm())
+        Object.entries(this.mittHandlers).forEach(([event, handler]) => this.mitt.on(event, handler))
+      },
+      removeEvents() {
+        Object.entries(this.mittHandlers).forEach(([event, handler]) => this.mitt.off(event, handler))
       },
       async openForm(clearForm = false) {
         if (clearForm) {
@@ -249,41 +278,48 @@
 
         await this.waitForLastField()
 
+        // The form could be closed while waiting
+        if (!this.visible) {
+          return
+        }
+
         this.initAutoComplete()
 
         // Focus the first field if not on a touch device
         const textFields = this.getTextFields()
         if (textFields.length > 0 && this.isTouchDevice === false) {
-          const firstField = textFields[0]
-
-          this.$refs[`${firstField.machine_name}Input`][0].focus()
+          this.getFieldInput(textFields[0])?.focus()
         }
       },
-      async waitUntil(condition) {
-        return await new Promise(resolve => {
-          const interval = setInterval(() => {
-            if (condition()) {
-              resolve()
-              clearInterval(interval)
-            }
-          }, 10)
-        })
+      async waitUntil(condition, timeout = 2000) {
+        const startedAt = Date.now()
+
+        while (!condition()) {
+          if (Date.now() - startedAt > timeout) {
+            throw new Error(`not found after ${timeout} ms`)
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 10))
+        }
       },
       async waitForLastField() {
         const textFields = this.getTextFields()
 
         if (textFields.length === 0) {
-          console.error('No fields available to process.')
           return
         }
 
         const lastField = textFields[textFields.length - 1]
 
         try {
-          await this.waitUntil(() => this.$refs[`${lastField.machine_name}Input`])
+          await this.waitUntil(() => this.getFieldInput(lastField))
         } catch (error) {
           console.error(`Failed to find last field ${lastField.machine_name}: ${error.message}`)
         }
+      },
+      // Refs inside v-for are arrays, after the modal is closed the array is empty
+      getFieldInput(field) {
+        return this.$refs[`${field.machine_name}Input`]?.[0]
       },
       changeFormValue(field, value) {
         this.$store.commit('tracker/setFormField', {

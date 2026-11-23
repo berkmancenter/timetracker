@@ -158,6 +158,152 @@ feature 'Timesheets' do
     expect(page).to have_button('Next month', disabled: true)
   end
 
+  scenario 'a time entry which could not be saved keeps the form open with a warning', js: true do
+    membership = signed_in_user_with_timesheet
+
+    visit front_path
+
+    click_on 'Add time entry'
+    fill_in 'Project', with: 'Refused project'
+    fill_in 'Time spent', with: '2'
+
+    # The user is removed from the timesheet while the form is open, so the API refuses the entry
+    membership.destroy!
+    click_on 'Add entry'
+
+    expect(page).to have_content('The time entry could not be saved, try again.')
+    expect(page).to have_field('Project', with: 'Refused project')
+    expect(page).not_to have_selector('.timetracker-modal-buttons-confirm.running')
+    expect(TimeEntry.count).to eq(0)
+  end
+
+  scenario 'pressing enter twice adds the time entry only once', js: true do
+    signed_in_user_with_timesheet
+
+    visit front_path
+
+    click_on 'Add time entry'
+    fill_in 'Project', with: 'Single project'
+    fill_in 'Time spent', with: '3'
+    find_field('Time spent').send_keys(:enter, :enter)
+
+    expect(page).to have_selector('.tracker-entries-entry', text: 'Single project')
+    expect(page).not_to have_field('Time spent')
+    expect(page).to have_selector('.tracker-entries-entry', text: 'Single project', count: 1)
+    expect(TimeEntry.count).to eq(1)
+  end
+
+  scenario 'a time with two decimals can be replaced by typing over it', js: true do
+    membership = signed_in_user_with_timesheet
+    entry = create_entry_with_project(membership, date: Date.current, project: 'Decimal project', hours: 1.25)
+
+    visit front_path
+
+    find('.tracker-entries-entry', text: 'Decimal project').click
+    find('a[title="Edit entry"]').click
+    find_field('Time spent', with: '1.25').send_keys([:control, 'a'], '2.5')
+
+    expect(page).to have_field('Time spent', with: '2.5')
+    click_on 'Save changes'
+
+    expect(page).to have_selector('.tracker-entries-entry-decimal-time', text: '2.5')
+    expect(entry.reload.decimal_time).to eq(2.5)
+  end
+
+  scenario 'the entry form keeps working after leaving the tracker and coming back', js: true do
+    signed_in_user_with_timesheet
+    collect_js_errors
+
+    visit front_path
+
+    click_on 'Add time entry'
+    fill_in 'Project', with: 'First visit'
+    fill_in 'Time spent', with: '1'
+    click_on 'Add entry'
+    expect(page).to have_selector('.tracker-entries-entry', text: 'First visit')
+
+    2.times do
+      find('.top-nav-button-menu', text: 'Timesheets').click
+      expect(page).to have_content('Create new timesheets for yourself')
+      find('.top-nav-button-menu', text: 'Time entries').click
+      expect(page).to have_selector('.tracker-entries-entry', text: 'First visit')
+    end
+
+    click_on 'Add time entry'
+    fill_in 'Project', with: 'Second visit'
+    fill_in 'Time spent', with: '2'
+    click_on 'Add entry'
+
+    expect(page).to have_selector('.tracker-entries-entry', text: 'Second visit')
+    expect(TimeEntry.count).to eq(2)
+    expect(js_errors).to eq([])
+  end
+
+  scenario 'autocomplete finds values with special characters', js: true do
+    membership = signed_in_user_with_timesheet
+    create_entry_with_project(membership, date: Date.current, project: 'Plan #1')
+    create_entry_with_project(membership, date: Date.current, project: 'Plan #2 & more')
+
+    visit front_path
+
+    click_on 'Add time entry'
+    find_field('Project').send_keys('n #2 &')
+
+    expect(page).to have_selector('.autocomplete div', exact_text: 'Plan #2 & more')
+    expect(page).not_to have_selector('.autocomplete div', text: 'Plan #1')
+  end
+
+  scenario 'autocomplete shows values as text, not as HTML', js: true do
+    membership = signed_in_user_with_timesheet
+    create_entry_with_project(membership, date: Date.current, project: 'Tag <b>bold</b>')
+
+    visit front_path
+
+    click_on 'Add time entry'
+    find_field('Project').click
+
+    expect(page).to have_selector('.autocomplete div', exact_text: 'Tag <b>bold</b>')
+    expect(page).not_to have_selector('.autocomplete b')
+  end
+
+  scenario 'closing the entry form removes its autocomplete listeners', js: true do
+    signed_in_user_with_timesheet
+
+    visit front_path
+
+    open_and_close_form = lambda do
+      click_on 'Add time entry'
+      # The first field gets the focus after the autocomplete is set up
+      expect(page).to have_selector('.tracker-entry-form input:focus')
+      click_on 'Cancel'
+      expect(page).not_to have_field('Time spent')
+    end
+
+    open_and_close_form.call
+    listeners_after_first_close = window_event_listener_count('resize')
+    3.times { open_and_close_form.call }
+
+    expect(window_event_listener_count('resize')).to eq(listeners_after_first_close)
+  end
+
+  scenario 'a new entry gets the current date also when the page was opened the day before', js: true do
+    signed_in_user_with_timesheet
+    install_browser_clock
+
+    visit front_path
+    expect(page).to have_button('Add time entry')
+
+    move_browser_clock(1.day)
+    click_on 'Add time entry'
+
+    tomorrow = page.evaluate_script(
+      "new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date())"
+    )
+    within('.tracker-entry-form .mx-datepicker') do
+      expect(page).to have_field(with: tomorrow)
+    end
+  end
+
   scenario 'an admin views another member entries and returns to their own entries', js: true do
     admin_membership = signed_in_user_with_timesheet
     timesheet = admin_membership.timesheet

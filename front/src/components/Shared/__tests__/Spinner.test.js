@@ -11,6 +11,7 @@ function createMittMock() {
     on: vi.fn((event, callback) => {
       handlers[event] = callback
     }),
+    off: vi.fn(),
   }
 }
 
@@ -35,5 +36,21 @@ describe('Spinner', () => {
     mitt.handlers.spinnerStop()
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.timetracker-spinner').exists()).toBe(false)
+  })
+
+  it('removes its event listeners when unmounted', () => {
+    const mitt = createMittMock()
+    const wrapper = mount(Spinner, {
+      global: {
+        mocks: {
+          mitt,
+        },
+      },
+    })
+
+    wrapper.unmount()
+
+    expect(mitt.off).toHaveBeenCalledWith('spinnerStart', mitt.handlers.spinnerStart)
+    expect(mitt.off).toHaveBeenCalledWith('spinnerStop', mitt.handlers.spinnerStop)
   })
 })

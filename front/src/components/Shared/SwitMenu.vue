@@ -30,7 +30,8 @@
     },
     mounted () {
       const that = this
-      this.mitt.on('closeSideMenu', () => that.closeMenu())
+      this.closeSideMenuHandler = () => that.closeMenu()
+      this.mitt.on('closeSideMenu', this.closeSideMenuHandler)
 
       this.button = document.querySelector(this.buttonSelector)
       this.content = document.querySelector(this.contentSelector)
@@ -53,6 +54,14 @@
           }
         }
       })
+    },
+    beforeUnmount () {
+      this.mitt.off('closeSideMenu', this.closeSideMenuHandler)
+
+      // The toggle button is outside of this component and stays on the page
+      if (this.button && this.button.onclick === this.toggleMenu) {
+        this.button.onclick = null
+      }
     },
     methods: {
       toggleMenu() {

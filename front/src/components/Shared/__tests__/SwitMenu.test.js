@@ -30,6 +30,7 @@ function createMittMock() {
     on: vi.fn((event, callback) => {
       handlers[event] = callback
     }),
+    off: vi.fn(),
   }
 }
 
@@ -100,6 +101,18 @@ describe('SwitMenu', () => {
     wrapper.find('a').element.onclick()
 
     expect(store.dispatch).toHaveBeenCalledWith('shared/setSideMenuStatus', false)
+  })
+
+  it('removes its event listener and the button handler when unmounted', () => {
+    const { wrapper, mitt } = mountSwitMenu()
+    const button = document.querySelector('#menu-button')
+
+    expect(button.onclick).toBeTypeOf('function')
+
+    wrapper.unmount()
+
+    expect(mitt.off).toHaveBeenCalledWith('closeSideMenu', mitt.handlers.closeSideMenu)
+    expect(button.onclick).toBeNull()
   })
 
   it('can leave the menu open when menu links are clicked', () => {

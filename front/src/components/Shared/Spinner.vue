@@ -16,10 +16,12 @@
       }
     },
     created() {
-      const that = this
-
-      this.mitt.on('spinnerStart', () => that.start())
-      this.mitt.on('spinnerStop', () => that.stop())
+      this.mitt.on('spinnerStart', this.start)
+      this.mitt.on('spinnerStop', this.stop)
+    },
+    beforeUnmount() {
+      this.mitt.off('spinnerStart', this.start)
+      this.mitt.off('spinnerStop', this.stop)
     },
     methods: {
       start() {

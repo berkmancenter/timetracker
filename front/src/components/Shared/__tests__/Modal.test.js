@@ -85,15 +85,16 @@ describe('Modal', () => {
     expect(wrapper.find('.button.ml-2').exists()).toBe(false)
   })
 
-  it('tracks working state from mitt events', async () => {
+  it('shows the working state from its own prop and listens to no global events', async () => {
     const { wrapper, mitt } = mountModal()
 
-    mitt.handlers.modalIsWorking()
-    await wrapper.vm.$nextTick()
+    expect(mitt.on).not.toHaveBeenCalled()
+    expect(wrapper.find('.timetracker-modal-buttons-confirm').classes()).not.toContain('running')
+
+    await wrapper.setProps({ working: true })
     expect(wrapper.find('.timetracker-modal-buttons-confirm').classes()).toContain('running')
 
-    mitt.handlers.modalIsNotWorking()
-    await wrapper.vm.$nextTick()
+    await wrapper.setProps({ working: false })
     expect(wrapper.find('.timetracker-modal-buttons-confirm').classes()).not.toContain('running')
   })
 

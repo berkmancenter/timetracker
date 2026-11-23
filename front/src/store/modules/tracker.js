@@ -5,12 +5,13 @@ import store2 from 'store2'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
-const defaultEntry = {
+// A function, so the default date is today also when the tab stays open over midnight
+const defaultEntry = () => ({
   id: null,
   decimal_time: '',
   entry_date: dayjs().format('MMMM D, YYYY'),
   fields: {},
-}
+})
 
 const state = {
   timesheets: [],
@@ -20,7 +21,7 @@ const state = {
   entriesBeforeChange: false,
   selectedMonth: '',
   selectedTimesheet: {},
-  formEntry: JSON.parse(JSON.stringify(defaultEntry)),
+  formEntry: defaultEntry(),
   formMode: 'create',
   popular: {},
   periodTotals: [],
@@ -77,7 +78,7 @@ const mutations = {
     })
   },
   clearEntryForm(state) {
-    state.formEntry = { ...JSON.parse(JSON.stringify(defaultEntry)) }
+    state.formEntry = defaultEntry()
   },
   setFormField(state, data) {
     state.formEntry.fields[data.field] = data.value
@@ -192,9 +193,16 @@ const actions = {
     })
   },
   async fetchAutoComplete(context, options) {
+    const query = new URLSearchParams({
+      field: options.field,
+      term: options.term,
+      timesheet_uuid: context.state.selectedTimesheet.uuid,
+    })
+
     return await context.dispatch('fetchGet', {
-      url: `${apiUrl}/time_entries/auto_complete?field=${options.field}&term=${options.term}&timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
-      methodName: 'fetchAutoComplete',
+      url: `${apiUrl}/time_entries/auto_complete?${query}`,
+      // Different fields have different result sets and must not cancel each other
+      methodName: `fetchAutoComplete:${options.field}`,
     })
   },
   async fetchUsers(context) {
@@ -217,9 +225,12 @@ const actions = {
         timesheet_uuid: context.state.selectedTimesheet.uuid,
       }),
     })
-    const data = response.json()
 
-    return data
+    if (!response.ok) {
+      throw new Error(`Saving the time entry failed (HTTP ${response.status})`)
+    }
+
+    return await response.json()
   },
   async deleteEntry(context, entry) {
     const response = await fetchIt(`${apiUrl}/time_entries/${entry.id}/delete`, {

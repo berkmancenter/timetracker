@@ -88,6 +88,46 @@ describe('tracker store', () => {
     expect(error).toHaveBeenCalledWith('network unavailable /entries')
   })
 
+  it('encodes autocomplete parameters and keeps separate request slots for every field', async () => {
+    const dispatch = vi.fn()
+    const state = freshState({ selectedTimesheet: { uuid: 'alpha' } })
+
+    await tracker.actions.fetchAutoComplete({ state, dispatch }, { field: 'project', term: 'r&d #1 + 50%' })
+    await tracker.actions.fetchAutoComplete({ state, dispatch }, { field: 'description', term: 'notes' })
+
+    expect(dispatch).toHaveBeenNthCalledWith(1, 'fetchGet', {
+      url: expect.stringMatching(/\/time_entries\/auto_complete\?field=project&term=r%26d\+%231\+%2B\+50%25&timesheet_uuid=alpha$/),
+      methodName: 'fetchAutoComplete:project',
+    })
+    expect(dispatch).toHaveBeenNthCalledWith(2, 'fetchGet', {
+      url: expect.stringMatching(/\/time_entries\/auto_complete\?field=description&term=notes&timesheet_uuid=alpha$/),
+      methodName: 'fetchAutoComplete:description',
+    })
+  })
+
+  it('throws when the time entry could not be saved', async () => {
+    const state = freshState({ selectedTimesheet: { uuid: 'alpha' } })
+
+    mocks.fetchIt.mockResolvedValueOnce({ ok: false, status: 400, json: vi.fn() })
+    await expect(tracker.actions.submitEntryForm({ state })).rejects.toThrow('HTTP 400')
+
+    mocks.fetchIt.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 5 }) })
+    await expect(tracker.actions.submitEntryForm({ state })).resolves.toEqual({ id: 5 })
+  })
+
+  it('uses the current day as the date of a cleared entry form', () => {
+    vi.useFakeTimers()
+    const state = freshState()
+
+    vi.setSystemTime(new Date(2026, 10, 23, 23, 59))
+    tracker.mutations.clearEntryForm(state)
+    expect(state.formEntry.entry_date).toBe('November 23, 2026')
+
+    vi.setSystemTime(new Date(2026, 10, 24, 0, 1))
+    tracker.mutations.clearEntryForm(state)
+    expect(state.formEntry.entry_date).toBe('November 24, 2026')
+  })
+
   it('uses non-GET methods for deletion and invitation redemption', async () => {
     const response = { ok: true }
     const commit = vi.fn()
