@@ -55,6 +55,24 @@ RSpec.describe PeriodsController, type: :controller do
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)['id']).to eq(period.id)
     end
+
+    it 'accepts the timesheet uuid used by tracker period routes' do
+      period = create_period
+
+      get :show, params: { id: period.id, timesheet_id: period.timesheet.uuid }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['id']).to eq(period.id)
+    end
+
+    it 'returns unauthorized before looking up the period when not signed in' do
+      timesheet = create(:timesheet)
+      sign_out user
+
+      get :show, params: { id: 0, timesheet_id: timesheet.id }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   describe 'POST #upsert' do
@@ -78,9 +96,52 @@ RSpec.describe PeriodsController, type: :controller do
     end
 
     it 'returns a bad request if invalid data is provided' do
-      post :upsert, params: { period: attributes_for(:period, timesheet_id: nil), timesheet_id: create(:timesheet), id: nil }
+      timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+
+      post :upsert, params: {
+        period: attributes_for(:period, name: nil, timesheet_id: nil),
+        timesheet_id: timesheet.id,
+        id: nil
+      }
 
       expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'does not move a period from another timesheet before authorizing it' do
+      victim_timesheet = create(:timesheet)
+      victim_period = create(:period, timesheet: victim_timesheet, name: 'Victim period')
+      credit = create(:credit, period: victim_period)
+      attacker_timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: attacker_timesheet, role: 'admin')
+
+      post :upsert, params: {
+        timesheet_id: attacker_timesheet.id,
+        period: attributes_for(
+          :period,
+          id: victim_period.id,
+          timesheet_id: attacker_timesheet.id,
+          name: 'Hijacked period'
+        )
+      }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(victim_period.reload).to have_attributes(timesheet_id: victim_timesheet.id, name: 'Victim period')
+      expect(credit.reload.period_id).to eq(victim_period.id)
+    end
+
+    it 'uses the nested timesheet instead of a body timesheet id' do
+      timesheet = create(:timesheet)
+      other_timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+
+      post :upsert, params: {
+        timesheet_id: timesheet.id,
+        period: attributes_for(:period, timesheet_id: other_timesheet.id)
+      }
+
+      expect(response).to have_http_status(:ok)
+      expect(Period.find(response.parsed_body.dig('period', 'id')).timesheet_id).to eq(timesheet.id)
     end
   end
 

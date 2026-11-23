@@ -344,6 +344,31 @@ RSpec.describe TimeEntriesController, type: :controller do
         expect(entry_ids(month: 'all', user: user.id)).to eq([own.id])
       end
 
+      %i[entries days months totals].each do |action|
+        it "returns unauthorized from #{action} for the entries of another member" do
+          add_entry(Date.new(2026, 9, 10), owner: member)
+
+          get action, params: { timesheet_uuid: timesheet.uuid, month: '2026-09', user: member.id }
+
+          expect(response).to have_http_status(:unauthorized)
+          expect(response.parsed_body).to eq('message' => 'Unauthorized')
+        end
+      end
+
+      it 'returns unauthorized from the CSV export for the entries of another member' do
+        add_entry(Date.new(2026, 9, 10), owner: member)
+
+        get :entries, params: { timesheet_uuid: timesheet.uuid, month: '2026-09', user: member.id, csv: true }
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it 'returns unauthorized for a user that does not exist' do
+        get :entries, params: { timesheet_uuid: timesheet.uuid, month: 'all', user: 0 }
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
       it 'returns the user email and the custom field values' do
         field = create(:custom_field, customizable: timesheet, machine_name: 'project')
         entry = add_entry(Date.new(2026, 9, 10))
@@ -393,6 +418,20 @@ RSpec.describe TimeEntriesController, type: :controller do
         }
 
         expect(entry_ids(month: 'all')).to match_array(selected.map(&:id))
+      end
+
+      it 'returns no entries when the selected sudo users left the timesheet' do
+        unselected_member = create(:user)
+        create(:users_timesheet, user: unselected_member, timesheet: timesheet, role: 'user')
+        add_entry(Date.new(2026, 9, 10), owner: member)
+        add_entry(Date.new(2026, 9, 11), owner: unselected_member)
+        session["#{user.id}_active_users"] = {
+          'timesheet_id' => timesheet.id,
+          'user_ids' => [member.id]
+        }
+        UsersTimesheet.find_by!(user: member, timesheet: timesheet).destroy!
+
+        expect(entry_ids(month: 'all')).to be_empty
       end
     end
 
@@ -504,6 +543,34 @@ RSpec.describe TimeEntriesController, type: :controller do
       expect(response).to have_http_status(:unauthorized)
       expect(entry.reload.decimal_time).to eq(1)
       expect(CustomFieldDataItem.where(owner: entry)).to be_empty
+    end
+
+    it 'lets a superadmin edit another user entry without changing its owner' do
+      owner = create(:user)
+      entry = create(:time_entry, user: owner, timesheet: timesheet, decimal_time: 1)
+      sign_in create(:user, superadmin: true)
+
+      post :edit, params: {
+        timesheet_uuid: timesheet.uuid,
+        time_entry: { id: entry.id, decimal_time: 4 }
+      }
+
+      expect(response).to have_http_status(:ok)
+      expect(entry.reload).to have_attributes(user_id: owner.id, timesheet_id: timesheet.id, decimal_time: 4)
+    end
+
+    it 'does not move a persisted entry to another timesheet' do
+      other_timesheet = create(:timesheet)
+      entry = create(:time_entry, user: user, timesheet: timesheet, decimal_time: 1)
+      sign_in create(:user, superadmin: true)
+
+      post :edit, params: {
+        timesheet_uuid: other_timesheet.uuid,
+        time_entry: { id: entry.id, decimal_time: 4 }
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(entry.reload).to have_attributes(timesheet_id: timesheet.id, decimal_time: 1)
     end
 
     it 'returns a bad request for an entry without a date' do

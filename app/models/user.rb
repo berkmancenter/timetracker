@@ -9,12 +9,10 @@ class User < ActiveRecord::Base
 
   if Rails.application.config.devise_auth_type == 'cas'
     devise :cas_authenticatable, :rememberable
-    before_validation :match_existing_user
   end
 
   if Rails.application.config.devise_auth_type == 'saml'
     devise :saml_authenticatable, :rememberable
-    before_validation :match_existing_user
   end
 
   devise :rememberable if Rails.application.config.devise_auth_type == 'headers'
@@ -91,18 +89,13 @@ class User < ActiveRecord::Base
   end
 
   def set_random_password
+    return unless self.class.devise_modules.include?(:database_authenticatable)
     return if encrypted_password.present?
 
-    random_password = SecureRandom.base64(15)
-    self.password = random_password if respond_to?(:password=)
-    self.encrypted_password = random_password if encrypted_password.blank?
+    self.password = SecureRandom.base64(15)
   end
 
   private
-
-  def match_existing_user
-    self.password = SecureRandom.base64(15) unless self.password.present?
-  end
 
   def assign_external_attributes(email: nil, first_name: nil, last_name: nil, display_name: nil)
     self.email = email if email.present?

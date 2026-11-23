@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-  before_action :superadmin?, except: %i[current_user_data sudo unsudo cas_logout]
   before_action :authenticate_user_json!, except: %i[cas_logout]
 
   # POST /sudo
@@ -41,6 +40,7 @@ class UsersController < ApplicationController
   def index
     timesheet = Timesheet.find_by(id: params[:timesheet_id])
     render_bad_request and return if timesheet.nil?
+    return unless authorize_user_for_timesheet!(timesheet)
 
     users = timesheet.users.select(:id, :email, :first_name, :last_name)
     render json: { users: users }, status: :ok

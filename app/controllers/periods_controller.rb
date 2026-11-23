@@ -1,6 +1,6 @@
 class PeriodsController < ApplicationController
-  before_action :set_period, except: %i[index upsert delete]
   before_action :authenticate_user_json!
+  before_action :set_period, except: %i[index upsert delete]
 
   PERIOD_PUBLIC_FIELDS = {
     only: %i[id timesheet_id name from to],
@@ -15,7 +15,8 @@ class PeriodsController < ApplicationController
   # GET /timesheets/:timesheet_id/periods
   # Returns all periods for the current user
   def index
-    timesheet = Timesheet.find(params[:timesheet_id])
+    timesheet = find_timesheet
+    return render_bad_request if timesheet.nil?
     return render_unauthorized unless user_can_manage_timesheet?(timesheet)
 
     periods = Period.timesheet_periods(timesheet)
@@ -34,10 +35,13 @@ class PeriodsController < ApplicationController
   # POST /timesheets/:timesheet_id/periods/upsert
   # Creates or updates a period
   def upsert
-    period = find_or_initialize_period
+    timesheet = find_timesheet
+    return render_bad_request if timesheet.nil?
+    return render_unauthorized unless user_can_manage_timesheet?(timesheet)
 
-    return render_bad_request if period.timesheet.nil?
-    return render_unauthorized unless user_can_manage_timesheet?(period.timesheet)
+    period = find_or_initialize_period(timesheet)
+
+    return render_bad_request if period.nil?
 
     if period.save
       render json: { period: period.as_json(PERIOD_PUBLIC_FIELDS) }, status: :ok
@@ -122,23 +126,31 @@ class PeriodsController < ApplicationController
   private
 
   def set_period
-    @period = Period.includes(:custom_fields).find(params[:id])
+    @period = find_timesheet&.periods&.includes(:custom_fields)&.find_by(id: params[:id])
+    render_bad_request if @period.nil?
+  end
+
+  def find_timesheet
+    identifier = params[:timesheet_id].to_s
+    return Timesheet.find_by(id: identifier) if identifier.match?(/\A\d+\z/)
+
+    Timesheet.find_by(uuid: identifier)
   end
 
   def period_params
     params.require(:period).permit(
-      :id, :name, :timesheet_id, :from, :to,
+      :id, :name, :from, :to,
       custom_fields_attributes: %i[id title access_key input_type popular list order _destroy]
     )
   end
 
-  def find_or_initialize_period
+  def find_or_initialize_period(timesheet)
     if period_params[:id]
-      Period.find(period_params[:id]).tap do |period|
-        period.assign_attributes(period_params)
+      timesheet.periods.find_by(id: period_params[:id])&.tap do |period|
+        period.assign_attributes(period_params.except(:id))
       end
     else
-      Period.new(period_params)
+      timesheet.periods.new(period_params)
     end
   end
 

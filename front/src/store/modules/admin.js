@@ -149,20 +149,6 @@ const actions = {
 
     return response
   },
-  async toggleAdminUsers(context, users) {
-    const response = await fetchIt(`${apiUrl}/users/toggle_admin`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        users: users,
-      }),
-    })
-
-    return response
-  },
   setUsers(context, users) {
     context.commit('setUsers', users)
   },

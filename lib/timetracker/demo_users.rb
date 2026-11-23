@@ -26,12 +26,10 @@ module Timetracker
     # Other auth types (CAS, SAML, headers) have no passwords, their users are
     # matched by email when they log in.
     def assign_password(user)
-      if devise_module?(:database_authenticatable)
-        user.password = @password
-        user.password_confirmation = @password
-      else
-        user.set_random_password
-      end
+      return unless devise_module?(:database_authenticatable)
+
+      user.password = @password
+      user.password_confirmation = @password
     end
 
     def devise_module?(name)

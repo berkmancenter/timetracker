@@ -192,6 +192,27 @@ RSpec.describe UsersController, type: :controller do
 
       expect(response).to have_http_status(:bad_request)
     end
+
+    it 'does not return members to a signed-in user outside the timesheet' do
+      sign_out regular_user
+      sign_in create(:user)
+
+      get :index, params: { timesheet_id: timesheet.id }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).to eq('message' => 'Unauthorized')
+    end
+
+    it 'does not return members to a regular timesheet member' do
+      member = create(:user)
+      create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+      sign_out regular_user
+      sign_in member
+
+      get :index, params: { timesheet_id: timesheet.id }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   describe 'DELETE #cas_logout' do

@@ -121,7 +121,8 @@ class TimesheetsController < ApplicationController
   def user
     return unless authorize_user_for_timesheet!(@timesheet)
 
-    user = User.find_by(id: params[:user_id])
+    user = @timesheet.users.find_by(id: params[:user_id])
+    return render_bad_request if user.nil?
 
     render json: user.as_json(only: %i[id email first_name last_name]), status: :ok
   end

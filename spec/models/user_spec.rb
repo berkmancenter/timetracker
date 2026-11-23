@@ -149,7 +149,17 @@ RSpec.describe User, type: :model do
       user.set_random_password
 
       expect(user.encrypted_password).to be_present
+      expect(user.encrypted_password).to start_with('$2')
       expect(user).to be_valid
+    end
+
+    it 'does not set a local password without database authentication' do
+      user = described_class.new(email: 'new@example.com')
+      allow(described_class).to receive(:devise_modules).and_return([:rememberable])
+
+      user.set_random_password
+
+      expect(user.encrypted_password).to be_blank
     end
 
     it 'does not change an existing password' do

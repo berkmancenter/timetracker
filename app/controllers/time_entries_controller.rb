@@ -9,6 +9,8 @@ class TimeEntriesController < ApplicationController
   def entries
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
+    return render_unauthorized if active_users.nil?
+
     render_entries_csv and return if params[:csv]
 
     if params[:period].present?
@@ -48,6 +50,7 @@ class TimeEntriesController < ApplicationController
     return render_unauthorized if time_entry.persisted? && !time_entry_owned_by_current_user?(time_entry)
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
+    return render_unauthorized if time_entry.persisted? && time_entry.timesheet != @timesheet
 
     if update_time_entry(time_entry, time_entry_params, custom_fields)
       render json: TimeEntry.single(time_entry.id), status: :ok
@@ -80,6 +83,7 @@ class TimeEntriesController < ApplicationController
   def days
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
+    return render_unauthorized if active_users.nil?
 
     if params[:period].present?
       period = Period.find_by(id: params[:period])
@@ -106,6 +110,7 @@ class TimeEntriesController < ApplicationController
   def months
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
+    return render_unauthorized if active_users.nil?
 
     if params[:period].present?
       period = Period.find_by(id: params[:period])
@@ -128,6 +133,7 @@ class TimeEntriesController < ApplicationController
   def totals
     return render_bad_request if @timesheet.nil?
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
+    return render_unauthorized if active_users.nil?
 
     render json: {
       total_hours_current_month: TimeEntry.total_hours_by_month(active_users, params[:month], @timesheet),
@@ -166,16 +172,22 @@ class TimeEntriesController < ApplicationController
     @current_month ||= (params[:month].blank?) ? "#{Time.now.to_date.year}-#{Time.now.strftime("%m")}" : params[:month]
   end
 
+  # Returns nil when the current user can't see the requested user, the
+  # actions must render unauthorized then instead of fetching the entries.
   def active_users
+    return @active_users if defined?(@active_users)
+
+    @active_users = find_active_users
+  end
+
+  def find_active_users
     # Check for user_id in params first
     if params[:user].present?
       user = User.find_by(id: params[:user])
       # Verify current user has permission to view this user's data
-      if user && (user_can_manage_timesheet?(@timesheet) || user.id == current_user.id)
-        return [user]
-      else
-        render_unauthorized and return
-      end
+      return [user] if user && (user_can_manage_timesheet?(@timesheet) || user.id == current_user.id)
+
+      nil
     # Then check for session-stored active users
     elsif active_user_selection.present?
       selection = active_user_selection
@@ -264,8 +276,10 @@ class TimeEntriesController < ApplicationController
 
   def update_time_entry(time_entry, time_entry_params, custom_fields)
     time_entry.assign_attributes(time_entry_params)
-    time_entry.timesheet = @timesheet
-    time_entry.user = current_user
+    unless time_entry.persisted?
+      time_entry.timesheet = @timesheet
+      time_entry.user = current_user
+    end
 
     if time_entry.save
       update_custom_fields(time_entry, custom_fields)

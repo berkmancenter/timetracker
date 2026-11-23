@@ -89,8 +89,8 @@ class TimeEntry < ActiveRecord::Base
       query = query.includes(custom_field_data_items: :custom_field) if options[:group_by].nil?
     end
 
-    # Filter by users if provided
-    if users.present?
+    # nil means no user filter; an empty selection must return no entries.
+    unless users.nil?
       user_ids = users.respond_to?(:map) ? users.map(&:id) : [users.id]
       query = query.where(users: { id: user_ids })
     end

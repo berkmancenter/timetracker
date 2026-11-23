@@ -87,7 +87,7 @@ describe('Admin Periods Form', () => {
 
     expect(store.state.admin.period.timesheet_id).toBe('9')
     expect(store.dispatch).toHaveBeenCalledWith('admin/savePeriod', {
-      timesheet_id: '9',
+      timesheetId: '9',
       period: store.state.admin.period,
     })
     expect(awn.success).toHaveBeenCalledWith('Period has been saved.')

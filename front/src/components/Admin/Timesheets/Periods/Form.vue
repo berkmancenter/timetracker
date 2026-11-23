@@ -139,7 +139,7 @@
         this.$store.state.admin.period.timesheet_id = this.$route.params.timesheet_id
 
         const response = await this.$store.dispatch('admin/savePeriod', {
-          timesheet_id: this.$route.params.timesheet_id,
+          timesheetId: this.$route.params.timesheet_id,
           period: this.$store.state.admin.period,
         })
 

@@ -640,6 +640,17 @@ RSpec.describe TimesheetsController, type: :controller do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it 'does not return a user from another timesheet to an admin' do
+      outsider = create(:user, first_name: 'Private', last_name: 'Person')
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+      create(:users_timesheet, user: outsider, timesheet: create(:timesheet), role: 'user')
+
+      get :user, params: { id: timesheet.id, user_id: outsider.id }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.parsed_body).to eq('message' => 'Bad request')
+    end
   end
 
   describe 'POST #delete_users in one timesheet' do

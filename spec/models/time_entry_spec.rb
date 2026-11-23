@@ -265,6 +265,13 @@ RSpec.describe TimeEntry, type: :model do
       expect(described_class.fetch_time_entries([user], { aggregate: 'sum_hours' })).to eq(0)
     end
 
+    it 'returns an empty list or zero hours for an empty user selection' do
+      add_entry(Date.new(2026, 11, 2))
+
+      expect(fetch([], alltime: true)).to eq([])
+      expect(fetch([], alltime: true, aggregate: 'sum_hours')).to eq(0)
+    end
+
     it 'uses the current month when no month or dates are given' do
       current = add_entry(Date.new(2026, 11, 1))
       add_entry(Date.new(2026, 10, 31))
