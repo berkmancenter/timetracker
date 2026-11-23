@@ -55,7 +55,8 @@ function createStore(overrides = {}) {
       ],
       entriesBeforeChange: false,
       selectedMonth: '2026-05',
-      months: ['2026-04', '2026-05', '2026-06'],
+      // Newest first, like the API returns them
+      months: ['2026-06', '2026-05', '2026-04'],
       timesheetUsers: [
         { id: 2, email: 'zeta@example.com', selected: false },
         { id: 1, email: 'alpha@example.com', selected: true },
@@ -190,7 +191,7 @@ describe('Entries', () => {
     expect(wrapper.vm.deleteEntryModalStatus).toBe(false)
   })
 
-  it('navigates between months only when a target month exists', async () => {
+  it('goes to the older month with previous and to the newer month with next', async () => {
     const { wrapper, store, push, emit } = mountEntries()
 
     expect(wrapper.vm.hasPreviousMonth()).toBe(true)
@@ -202,6 +203,28 @@ describe('Entries', () => {
     expect(push).toHaveBeenCalledWith({ name: 'tracker.index', params: { timesheet: 'alpha', month: '2026-04' } })
     expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
     expect(emit).toHaveBeenCalledWith('spinnerStop')
+
+    store.state.tracker.selectedMonth = '2026-05'
+    await wrapper.vm.redirectToNextMonth()
+
+    expect(store.commit).toHaveBeenLastCalledWith('tracker/setSelectedMonth', '2026-06')
+    expect(push).toHaveBeenLastCalledWith({ name: 'tracker.index', params: { timesheet: 'alpha', month: '2026-06' } })
+  })
+
+  it('disables next on the newest month, previous on the oldest and both for all months', () => {
+    const { wrapper, store } = mountEntries()
+
+    store.state.tracker.selectedMonth = '2026-06'
+    expect(wrapper.vm.hasNextMonth()).toBe(false)
+    expect(wrapper.vm.hasPreviousMonth()).toBe(true)
+
+    store.state.tracker.selectedMonth = '2026-04'
+    expect(wrapper.vm.hasNextMonth()).toBe(true)
+    expect(wrapper.vm.hasPreviousMonth()).toBe(false)
+
+    store.state.tracker.selectedMonth = 'all'
+    expect(wrapper.vm.hasNextMonth()).toBe(false)
+    expect(wrapper.vm.hasPreviousMonth()).toBe(false)
   })
 
   it('changes selected month from the month selector', async () => {

@@ -133,6 +133,31 @@ feature 'Timesheets' do
     expect(page).not_to have_selector('.tracker-entries-entry', text: 'November project')
   end
 
+  scenario 'previous month goes to the older month and next month to the newer one', js: true do
+    membership = signed_in_user_with_timesheet
+    timesheet = membership.timesheet
+    create_entry_with_project(membership, date: Date.new(2026, 9, 5), project: 'September project')
+    create_entry_with_project(membership, date: Date.new(2026, 10, 5), project: 'October project')
+    create_entry_with_project(membership, date: Date.new(2026, 11, 5), project: 'November project')
+
+    visit front_path("#{timesheet.uuid}/2026-10")
+    expect(page).to have_selector('.tracker-entries-entry', text: 'October project')
+
+    click_on 'Previous month'
+
+    expect(page).to have_current_path(%r{/#{timesheet.uuid}/2026-09})
+    expect(page).to have_selector('.tracker-entries-entry', text: 'September project')
+    expect(page).to have_button('Previous month', disabled: true)
+
+    click_on 'Next month'
+    expect(page).to have_current_path(%r{/#{timesheet.uuid}/2026-10})
+    click_on 'Next month'
+
+    expect(page).to have_current_path(%r{/#{timesheet.uuid}/2026-11})
+    expect(page).to have_selector('.tracker-entries-entry', text: 'November project')
+    expect(page).to have_button('Next month', disabled: true)
+  end
+
   scenario 'an admin views another member entries and returns to their own entries', js: true do
     admin_membership = signed_in_user_with_timesheet
     timesheet = admin_membership.timesheet

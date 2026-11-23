@@ -448,17 +448,23 @@
       openForm() {
         this.mitt.emit('addEntry')
       },
+      // Months come from the API newest first, so the previous (older) month has
+      // a higher index and the next (newer) month has a lower index
+      selectedMonthIndex() {
+        return this.$store.state.tracker.months.indexOf(this.$store.state.tracker.selectedMonth)
+      },
       hasPreviousMonth() {
-        return this.$store.state.tracker.months[0] && this.$store.state.tracker.months[0] !== this.$store.state.tracker.selectedMonth
+        const index = this.selectedMonthIndex()
+
+        return index !== -1 && index < this.$store.state.tracker.months.length - 1
       },
       hasNextMonth() {
-        return this.$store.state.tracker.months[this.$store.state.tracker.months.length - 1] && this.$store.state.tracker.months[this.$store.state.tracker.months.length - 1] !== this.$store.state.tracker.selectedMonth
+        return this.selectedMonthIndex() > 0
       },
       async redirectToMonth(direction) {
         const months = this.$store.state.tracker.months
-        const currentMonthIndex = months.indexOf(this.$store.state.tracker.selectedMonth)
-        const offset = direction === 'next' ? 1 : -1
-        const targetMonth = months[currentMonthIndex + offset]
+        const offset = direction === 'next' ? -1 : 1
+        const targetMonth = months[this.selectedMonthIndex() + offset]
 
         if (!targetMonth) return
 

@@ -98,4 +98,40 @@ describe('Tracker', () => {
     expect(store.dispatch).toHaveBeenCalledWith('tracker/setSelectedMonthFromRoute')
     expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals', 'users'])
   })
+
+  it('loads the months again only when the timesheet in the route changed', async () => {
+    const store = createStore()
+    const { wrapper } = mountTracker(store)
+    const handler = wrapper.vm.$options.watch['$route.params'].handler
+
+    await flushPromises()
+    store.dispatch.mockClear()
+
+    await handler.call(wrapper.vm, { timesheet: 'alpha', month: '2026-06' }, { timesheet: 'alpha', month: '2026-05' })
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/fetchMonths')
+
+    // For example the browser back button to the URL of another timesheet
+    await handler.call(wrapper.vm, { timesheet: 'beta', month: '2026-03' }, { timesheet: 'alpha', month: '2026-06' })
+
+    const actions = store.dispatch.mock.calls.map(([action]) => action)
+    expect(actions).toContain('tracker/fetchMonths')
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/setMonths', ['May 2026'])
+    // The month in the route is checked against the months of the new timesheet
+    expect(actions.lastIndexOf('tracker/setMonths')).toBeLessThan(actions.lastIndexOf('tracker/setSelectedMonthFromRoute'))
+  })
+
+  it('does not duplicate the months request when the selector already changed the timesheet', async () => {
+    const store = createStore()
+    const { wrapper } = mountTracker(store)
+    const handler = wrapper.vm.$options.watch['$route.params'].handler
+
+    await flushPromises()
+    store.state.tracker.selectedTimesheet = { id: 2, uuid: 'beta' }
+    store.dispatch.mockClear()
+
+    await handler.call(wrapper.vm, { timesheet: 'beta' }, { timesheet: 'alpha' })
+
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/fetchMonths')
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/setSelectedMonthFromRoute')
+  })
 })

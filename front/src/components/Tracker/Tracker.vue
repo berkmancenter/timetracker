@@ -58,7 +58,17 @@
       '$route.params': {
         handler: async function (to, from) {
           if (Object.keys(from).length > 0) {
+            const timesheetAlreadySelected = this.$store.state.tracker.selectedTimesheet.uuid === to.timesheet
             this.$store.dispatch('tracker/setSelectedTimesheetFromRoute')
+
+            // Months are different for every timesheet, so load them again when the
+            // timesheet changed through navigation such as the browser back button.
+            // TimesheetSelect already loads them when it changes the selected store value.
+            if (to.timesheet !== from.timesheet && !timesheetAlreadySelected) {
+              const months = await this.$store.dispatch('tracker/fetchMonths')
+              this.$store.dispatch('tracker/setMonths', months)
+            }
+
             this.$store.dispatch('tracker/setSelectedMonthFromRoute')
             await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals', 'users'])
           }
