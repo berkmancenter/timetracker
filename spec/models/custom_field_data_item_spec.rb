@@ -36,4 +36,14 @@ RSpec.describe CustomFieldDataItem, type: :model do
 
     expect { field.destroy }.to change(described_class, :count).by(-1)
   end
+
+  it 'allows only one value per custom field and owner' do
+    entry = create(:time_entry)
+    field = create(:custom_field, customizable: entry.timesheet)
+    item = create(:custom_field_data_item, custom_field: field, owner: entry)
+    duplicate = build(:custom_field_data_item, custom_field: item.custom_field, owner: item.owner)
+
+    expect(duplicate).not_to be_valid
+    expect(duplicate.errors[:custom_field_id]).to include('has already been taken')
+  end
 end

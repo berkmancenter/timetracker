@@ -105,6 +105,16 @@ RSpec.describe Period, type: :model do
     end
   end
 
+  describe '.user_periods_for_timesheet' do
+    it 'returns only periods of the given timesheet for a superadmin' do
+      period = create(:period)
+      create(:period)
+      superadmin = create(:user, superadmin: true)
+
+      expect(described_class.user_periods_for_timesheet(superadmin, period.timesheet)).to contain_exactly(period)
+    end
+  end
+
   describe 'dates' do
     it 'can start and end on the same day' do
       expect(build(:period, from: Date.new(2026, 3, 4), to: Date.new(2026, 3, 4))).to be_valid
@@ -213,12 +223,31 @@ RSpec.describe Period, type: :model do
       end
     end
 
-    it 'leaves out members without a credit in this period' do
-      no_credit = create(:user)
+    it 'lists members without a credit in this period with zero credits' do
+      no_credit = create(:user, username: 'no_credit')
       create(:users_timesheet, user: no_credit, timesheet: timesheet, role: 'user')
-      create(:credit, user: no_credit, period: create(:period, timesheet: timesheet))
+      create(:credit, user: no_credit, period: create(:period, timesheet: timesheet), amount: 30)
 
-      expect(period.get_stats.pluck('user_id')).to eq([member.id])
+      travel_to Time.zone.local(2026, 12, 1, 12) do
+        add_entry(Date.new(2026, 11, 3), 4, user: no_credit)
+
+        expect(period.get_stats.pluck('user_id')).to eq([member.id, no_credit.id])
+        expect(stats_row(no_credit)).to include(
+          'credits' => '0.00',
+          'total_hours' => '4.00',
+          'should_hours' => '0.00',
+          'balance' => '4.00',
+          'balance_percent' => '0.00'
+        )
+      end
+    end
+
+    it 'keeps listing a member after the credit is removed' do
+      removed = add_member(username: 'removed_credit')
+      Credit.find_by(user: removed, period: period).destroy!
+
+      expect(period.get_stats.pluck('user_id')).to include(removed.id)
+      expect(stats_row(removed)['credits']).to eq('0.00')
     end
 
     it 'leaves out credited users that are not members anymore' do
@@ -242,11 +271,25 @@ RSpec.describe Period, type: :model do
       expect(period.get_stats("#{member.id},#{other.id}").pluck('user_id')).to contain_exactly(member.id, other.id)
     end
 
-    it 'marks the timesheet admins' do
+    it 'filters by an array of user ids without crashing' do
+      other = add_member
+      add_member
+
+      expect(period.get_stats([other.id.to_s]).pluck('user_id')).to eq([other.id])
+      expect(period.get_stats([member.id.to_s, other.id.to_s]).pluck('user_id')).to contain_exactly(member.id, other.id)
+      expect(period.get_stats(["#{member.id},#{other.id}"]).pluck('user_id')).to contain_exactly(member.id, other.id)
+    end
+
+    it 'marks the timesheet admins and superadmins without exposing superadmin flag' do
       admin = add_member(role: 'admin')
+      superadmin = create(:user, superadmin: true, username: 'root')
+      create(:users_timesheet, user: superadmin, timesheet: timesheet, role: 'user')
+      create(:credit, user: superadmin, period: period, amount: 5)
 
       expect(stats_row(admin)).to include('admin' => true, 'roles' => ['admin'])
       expect(stats_row(member)).to include('admin' => false, 'roles' => ['user'])
+      expect(stats_row(superadmin)).to include('admin' => true, 'roles' => ['user'])
+      expect(stats_row(superadmin)).not_to have_key('superadmin')
     end
 
     it 'adds the period custom field values of every user' do

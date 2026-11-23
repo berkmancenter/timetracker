@@ -35,6 +35,22 @@ RSpec.describe CustomField, type: :model do
 
       expect(field).to be_valid
     end
+
+    it 'allows the same machine name on a Timesheet and a Period with the same id' do
+      timesheet = create(:timesheet)
+      period = create(:period, id: timesheet.id)
+      create(:custom_field, customizable: timesheet, machine_name: 'project')
+      period_field = build(:custom_field, customizable: period, machine_name: 'project')
+
+      expect(period_field).to be_valid
+    end
+
+    it 'handles a nil title without crashing' do
+      field = build(:custom_field, title: nil, machine_name: nil)
+
+      expect(field).not_to be_valid
+      expect(field.errors[:machine_name]).to be_present
+    end
   end
 
   describe 'machine name generation' do

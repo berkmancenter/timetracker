@@ -515,12 +515,57 @@ RSpec.describe PeriodsController, type: :controller do
       )
     end
 
-    it 'keeps one credit when the amount is the same' do
-      create(:credit, user: user, period: period, amount: 10)
+    it 'keeps the same credit record when the amount is unchanged' do
+      existing = create(:credit, user: user, period: period, amount: 10)
 
       post :set_credits, params: params_base.merge(credits: [{ user_id: user.id, credit_amount: '10.0' }])
 
-      expect(Credit.where(period: period, user: user).pluck(:amount)).to eq([10])
+      expect(response).to have_http_status(:ok)
+      expect(Credit.where(period: period, user: user).pluck(:id, :amount)).to eq([[existing.id, 10]])
+    end
+
+    it 'removes an existing credit when set to zero or blank' do
+      create(:credit, user: user, period: period, amount: 10)
+      create(:credit, user: member, period: period, amount: 25)
+
+      post :set_credits, params: params_base.merge(credits: [
+        { user_id: user.id, credit_amount: 0 },
+        { user_id: member.id, credit_amount: '' }
+      ])
+
+      expect(response).to have_http_status(:ok)
+      expect(Credit.where(period: period)).to be_empty
+    end
+
+    it 'rejects a negative credit amount' do
+      existing = create(:credit, user: user, period: period, amount: 10)
+
+      post :set_credits, params: params_base.merge(credits: [{ user_id: user.id, credit_amount: -5 }])
+
+      expect(response).to have_http_status(:bad_request)
+      expect(existing.reload.amount).to eq(10)
+    end
+
+    it 'rejects a credit amount that is not a number and changes nothing' do
+      existing = create(:credit, user: user, period: period, amount: 10)
+      other = create(:credit, user: member, period: period, amount: 25)
+
+      %w[abc 10,5 Infinity NaN].each do |amount|
+        post :set_credits, params: params_base.merge(credits: [
+          { user_id: member.id, credit_amount: 30 },
+          { user_id: user.id, credit_amount: amount }
+        ])
+
+        expect(response).to have_http_status(:bad_request)
+        expect(response.parsed_body['message']).to eq('Credits must be numbers')
+        expect(existing.reload.amount).to eq(10)
+        expect(other.reload.amount).to eq(25)
+      end
+    end
+
+    it 'does not route POST stats, the front-end uses GET' do
+      expect(post: "/timesheets/#{period.timesheet_id}/periods/#{period.id}/stats").not_to be_routable
+      expect(get: "/timesheets/#{period.timesheet_id}/periods/#{period.id}/stats").to be_routable
     end
 
     it 'sets the credits of many users at once' do

@@ -129,6 +129,7 @@ describe('Tracker', () => {
     const actions = store.dispatch.mock.calls.map(([action]) => action)
     expect(actions).toContain('tracker/fetchMonths')
     expect(store.dispatch).toHaveBeenCalledWith('tracker/setMonths', ['May 2026'])
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['popular', 'entries', 'periodTotals', 'totals', 'users'])
     // The month in the route is checked against the months of the new timesheet
     expect(actions.lastIndexOf('tracker/setMonths')).toBeLessThan(actions.lastIndexOf('tracker/setSelectedMonthFromRoute'))
   })

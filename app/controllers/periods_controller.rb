@@ -84,14 +84,11 @@ class PeriodsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       validate_credit_users!(params[:credits], @period)
-      new_credits = build_new_credits(params[:credits], @period)
-      @period.credits = new_credits.compact
-
+      update_credits!(params[:credits], @period)
       save_custom_field_data(params[:credits], @period)
-      @period.save!
     end
 
-    render json: @period.credits, status: :ok
+    render json: @period.credits.reload, status: :ok
   rescue ActiveRecord::RecordInvalid => error
     render_bad_request(error.record.errors.full_messages.join(', ').presence || error.message)
   end
@@ -192,7 +189,16 @@ class PeriodsController < ApplicationController
   end
 
   def unauthorized_periods?(periods_ids)
-    Period.where(id: periods_ids).any? { |p| !p.timesheet.admin?(current_user) }
+    timesheet_ids = Period.where(id: periods_ids).distinct.pluck(:timesheet_id)
+    return false if timesheet_ids.empty?
+
+    admin_timesheet_ids = UsersTimesheet.where(
+      user: current_user,
+      timesheet_id: timesheet_ids,
+      role: 'admin'
+    ).pluck(:timesheet_id)
+
+    (timesheet_ids - admin_timesheet_ids).any?
   end
 
   def load_users_with_roles(timesheet)
@@ -208,9 +214,10 @@ class PeriodsController < ApplicationController
   end
 
   def save_custom_field_data(credits_params, period)
-    return unless period.custom_fields.any?
+    fields = period.custom_fields.to_a
+    return unless fields.any?
 
-    custom_field_ids = period.custom_fields.pluck(:id)
+    custom_field_ids = fields.map(&:id)
     users_by_id = period.timesheet.users.where(id: credits_params.map { |data| data['user_id'].to_i }).index_by(&:id)
 
     credits_params.each do |credit_data|
@@ -239,13 +246,14 @@ class PeriodsController < ApplicationController
 
   def build_credits(users, period)
     custom_field_data = {}
+    fields = period.custom_fields.to_a
+    user_list = users.to_a
+    user_ids = user_list.map(&:id)
+    credits_by_user_id = period.credits.where(user_id: user_ids).pluck(:user_id, :amount).to_h
 
-    if period.custom_fields.any?
-      # Fetch all custom field data for the period's custom fields and users
-      field_ids = period.custom_fields.pluck(:id)
-      user_ids = users.pluck(:id)
+    if fields.any?
+      field_ids = fields.map(&:id)
 
-      # Group custom field data by owner_id (user_id)
       CustomFieldDataItem.where(custom_field_id: field_ids, owner_type: 'User', owner_id: user_ids)
         .each do |item|
           custom_field_data[item.owner_id] ||= {}
@@ -253,12 +261,11 @@ class PeriodsController < ApplicationController
         end
     end
 
-    users.map do |user|
+    user_list.map do |user|
       user_custom_fields = {}
 
-      # Add custom field data if it exists
-      if period.custom_fields.any? && custom_field_data[user.id]
-        period.custom_fields.each do |field|
+      if fields.any? && custom_field_data[user.id]
+        fields.each do |field|
           user_custom_fields["custom_field_#{field.id}"] = custom_field_data[user.id][field.id] || ''
         end
       end
@@ -266,50 +273,52 @@ class PeriodsController < ApplicationController
       {
         user_id: user.id,
         username: user.username,
-        admin: period.timesheet.admin?(user),
+        admin: user.superadmin? || Array(user.roles).include?('admin'),
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
         roles: user.roles,
-        credit_amount: Credit.where(user: user, period: period).first&.amount || 0.00
+        credit_amount: credits_by_user_id[user.id] || 0.00
       }.merge(user_custom_fields)
     end
   end
 
-  def build_new_credits(credits_params, period)
-    new_credits_values = extract_new_credits_values(credits_params, period.timesheet.users.pluck(:id))
+  def update_credits!(credits_params, period)
+    existing_by_user_id = period.credits.index_by(&:user_id)
+    updates_by_user_id = {}
 
-    existing_and_new_credits = period.credits.each_with_object([]) do |existing_credit, collection|
-      if new_credits_values.key?(existing_credit.user_id)
-        value = new_credits_values[existing_credit.user_id]
-        next if existing_credit.amount.to_d == value.to_d
+    credits_params.each do |credit_data|
+      next unless credit_data.key?('credit_amount')
 
-        existing_credit.amount = value
-        new_credits_values.delete(existing_credit.user_id)
+      user_id = credit_data['user_id'].to_i
+      updates_by_user_id[user_id] = parse_credit_amount!(credit_data['credit_amount'], period)
+    end
+
+    updates_by_user_id.each do |user_id, amount|
+      existing_credit = existing_by_user_id[user_id]
+
+      if amount.zero?
+        existing_credit&.destroy!
+      elsif existing_credit
+        existing_credit.update!(amount: amount) if existing_credit.amount.to_d != amount
+      else
+        period.credits.create!(user_id: user_id, amount: amount)
       end
-      collection << existing_credit
     end
-
-    new_credits_values.each do |user_id, value|
-      existing_and_new_credits << Credit.new(
-        user_id: user_id,
-        period: period,
-        amount: value.to_d
-      )
-    end
-
-    existing_and_new_credits
   end
 
-  def extract_new_credits_values(credits_params, timesheet_user_ids)
-    credits_params.each_with_object({}) do |credit_data, new_credits_values|
-      user_id = credit_data['user_id'].to_i
-      credit_amount = credit_data['credit_amount'].to_d
+  # Blank means no credit (0). Text like "abc" is rejected, String#to_d would
+  # make it 0 and remove the credit without telling.
+  def parse_credit_amount!(raw_amount, period)
+    return 0.to_d if raw_amount.blank?
 
-      next if !credit_data['credit_amount'].present? || credit_amount == 0.0 || !timesheet_user_ids.include?(user_id)
+    amount = BigDecimal(raw_amount.to_s.strip)
+    return amount if amount.finite?
 
-      new_credits_values[user_id] = credit_amount
-    end
+    raise ArgumentError
+  rescue ArgumentError, TypeError
+    period.errors.add(:credits, 'must be numbers')
+    raise ActiveRecord::RecordInvalid.new(period)
   end
 
   def validate_credit_users!(credits_params, period)

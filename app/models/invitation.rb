@@ -1,4 +1,4 @@
-class Invitation < ActiveRecord::Base
+class Invitation < ApplicationRecord
   DEFAULT_EXPIRATION = 7.days
   VALID_ROLES = %w[admin user].freeze
   VALID_TYPES = %w[single multi].freeze

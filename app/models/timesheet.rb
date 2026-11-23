@@ -1,6 +1,6 @@
 require 'securerandom'
 
-class Timesheet < ActiveRecord::Base
+class Timesheet < ApplicationRecord
   has_many :time_entries, dependent: :destroy
   has_many :users_timesheets, dependent: :destroy
   has_many :users, through: :users_timesheets
@@ -13,9 +13,10 @@ class Timesheet < ActiveRecord::Base
   before_validation :set_uuid
 
   validates :name, presence: true
-  validates :uuid, presence: true
+  validates :uuid, presence: true, uniqueness: true
 
   def admin?(user)
+    return false if user.nil?
     return true if user.superadmin
 
     UsersTimesheet.where(
@@ -26,6 +27,7 @@ class Timesheet < ActiveRecord::Base
   end
 
   def user?(user)
+    return false if user.nil?
     return true if user.superadmin
 
     UsersTimesheet.where(

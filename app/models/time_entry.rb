@@ -1,4 +1,4 @@
-class TimeEntry < ActiveRecord::Base
+class TimeEntry < ApplicationRecord
   belongs_to :user
   belongs_to :timesheet
   has_many :custom_field_data_items, as: :owner, dependent: :destroy
@@ -7,6 +7,7 @@ class TimeEntry < ActiveRecord::Base
 
   validates :user, :entry_date, presence: true
   validates :timesheet, presence: true
+  validates :decimal_time, numericality: { greater_than_or_equal_to: 0, less_than: 100 }
 
   attr_accessor :fields
 
@@ -32,31 +33,34 @@ class TimeEntry < ActiveRecord::Base
     entry
   end
 
-  def self.popular(user)
-    return {} unless user.present?
+  def self.popular(user, timesheet = nil)
+    return {} if user.blank? || timesheet.blank?
 
-    popular_fields = CustomField.where(popular: true)
-    popular_values = {}
+    ranked_values = CustomFieldDataItem
+      .joins(:custom_field)
+      .joins('INNER JOIN time_entries ON time_entries.id = custom_field_data_items.owner_id')
+      .where(
+        owner_type: 'TimeEntry',
+        custom_fields: { customizable_type: 'Timesheet', customizable_id: timesheet.id, popular: true },
+        time_entries: { user_id: user.id, timesheet_id: timesheet.id }
+      )
+      .where.not(value: [nil, ''])
+      .group('custom_fields.machine_name', 'custom_field_data_items.value')
+      .select(
+        'custom_fields.machine_name AS field_name',
+        'custom_field_data_items.value AS field_value',
+        'ROW_NUMBER() OVER (PARTITION BY custom_fields.machine_name ORDER BY COUNT(*) DESC, custom_field_data_items.value ASC) AS rank'
+      )
 
-    popular_fields.each do |field|
-      data_items = CustomFieldDataItem
-        .joins("INNER JOIN time_entries ON time_entries.id = custom_field_data_items.owner_id")
-        .where(custom_field_id: field.id, owner_type: 'TimeEntry', time_entries: { user_id: user.id })
-        .where.not(value: [nil, ''])
-        .group(:value)
-        .order(Arel.sql('COUNT(*) DESC'))
-        .limit(20)
-        .count
+    rows = CustomFieldDataItem
+      .from("(#{ranked_values.to_sql}) AS ranked_popular_values")
+      .where('rank <= 20')
+      .order('field_name ASC, rank ASC')
+      .pluck(Arel.sql('field_name'), Arel.sql('field_value'))
 
-      if data_items.keys.present?
-        # Merge the values, concatenating arrays if the key already exists
-        popular_values.merge!(field.machine_name => data_items.keys) do |key, old_val, new_val|
-          old_val | new_val # Use the union operator to combine arrays without duplicates
-        end
-      end
+    rows.each_with_object({}) do |(field_name, value), popular_values|
+      (popular_values[field_name] ||= []) << value
     end
-
-    popular_values
   end
 
   def self.fetch_time_entries(users = nil, options = {})
@@ -99,20 +103,21 @@ class TimeEntry < ActiveRecord::Base
     if options[:from_date].present? && options[:to_date].present?
       query = query.where(entry_date: options[:from_date]..options[:to_date])
     elsif options[:month].present? && !options[:alltime] && options[:month] != 'all'
-      query = query.where("#{year_month_entry_sql} = ?", options[:month])
+      date_range = month_date_range(options[:month])
+      query = date_range ? query.where(entry_date: date_range) : query.none
     elsif options[:month] == 'all'
       # Just so you know, this is a special case for the 'all' month
     elsif !options[:alltime] && options[:from_date].blank? && options[:to_date].blank?
       # Default to current month
-      current_month = "#{Time.now.year}-#{Time.now.month.to_s.rjust(2, '0')}"
-      query = query.where("#{year_month_entry_sql} = ?", current_month)
+      current_month_start = Date.current.beginning_of_month
+      query = query.where(entry_date: current_month_start..current_month_start.end_of_month)
     end
     # Handle special case for 'all' with time limitation
     if options[:month] == 'all'
       if options[:group_by] == 'day'
-        query = query.where("entry_date > CURRENT_DATE - INTERVAL '26 days'")
+        query = query.where('entry_date > ?', Date.current - 26.days)
       elsif options[:group_by] == 'week'
-        query = query.where("entry_date > CURRENT_DATE - INTERVAL '26 weeks'")
+        query = query.where('entry_date > ?', Date.current - 26.weeks)
       end
     end
 
@@ -186,43 +191,39 @@ class TimeEntry < ActiveRecord::Base
   end
 
   def self.process_weekly_totals(query, month = nil)
+    # Truncate directly to Sunday-start weeks in PostgreSQL (DOW: Sunday = 0 .. Saturday = 6)
+    week_start_sql = '(entry_date - EXTRACT(DOW FROM entry_date)::integer)'
     total_hours = TimeEntry
-      .select("users.email, DATE_TRUNC('week', entry_date) AS date, SUM(decimal_time) AS total_hours")
+      .select("users.email, #{week_start_sql} AS date, SUM(decimal_time) AS total_hours")
       .joins(:user)
       .merge(query.except(:select, :includes, :order))
-      .group(:email, :date)
+      .group("users.email, #{week_start_sql}")
+      .order(Arel.sql('date DESC, users.email ASC'))
 
-    # Initialize a hash to store weekly hours
     weekly_hours = {}
 
-    # Aggregate hours for each user for each week
     total_hours.each do |entry|
-      week_start_object = entry.date.beginning_of_week(start_day = :sunday)
+      week_start_object = entry.date.to_date
       week_start = week_start_object.strftime('%Y-%m-%d')
 
-      if month.present? && month != 'all'
-        week_start = "#{month}-01" if week_start_object.strftime('%Y-%m') != month
+      if month.present? && month != 'all' && week_start_object.strftime('%Y-%m') != month
+        week_start = "#{month}-01"
       end
 
       weekly_hours[week_start] ||= {}
-      weekly_hours[week_start]['users'] ||= {}
-      weekly_hours[week_start]['users'][entry.email] ||= 0
-      weekly_hours[week_start]['users'][entry.email] += entry.total_hours.to_f
+      weekly_hours[week_start][entry.email] ||= 0.0
+      weekly_hours[week_start][entry.email] += entry.total_hours.to_f
     end
 
-    # Return nicer keyed structure
-    final_weekly_hours = []
-    weekly_hours.each do |date, weekly_hours_record|
-      weekly_hours_record['users'].each do |email, weekly_hours_user_record|
-        final_weekly_hours << {
+    weekly_hours.flat_map do |date, users_hours|
+      users_hours.map do |email, hours|
+        {
           date: date,
-          total_hours: weekly_hours_user_record,
+          total_hours: hours,
           email: email
         }
       end
     end
-
-    final_weekly_hours.reverse
   end
 
   def self.entry_list_by_month(users, timesheet, from_date: nil, to_date: nil)
@@ -277,6 +278,16 @@ class TimeEntry < ActiveRecord::Base
   end
 
   private
+
+  def self.month_date_range(month_str)
+    match = /\A(\d{4})-(\d{2})\z/.match(month_str.to_s)
+    return nil unless match
+
+    start_date = Date.new(match[1].to_i, match[2].to_i, 1)
+    start_date..start_date.end_of_month
+  rescue Date::Error
+    nil
+  end
 
   def self.year_month_entry_sql
     Arel.sql("TO_CHAR(entry_date, 'YYYY-MM')")

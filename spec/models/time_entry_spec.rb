@@ -10,6 +10,7 @@ RSpec.describe TimeEntry, type: :model do
     it { should validate_presence_of(:user) }
     it { should validate_presence_of(:entry_date) }
     it { should validate_presence_of(:timesheet) }
+    it { should validate_numericality_of(:decimal_time).is_greater_than_or_equal_to(0).is_less_than(100) }
   end
 
   describe 'popular' do
@@ -43,7 +44,7 @@ RSpec.describe TimeEntry, type: :model do
     end
 
     it 'returns popular categories and projects for the user' do
-      popular = TimeEntry.popular(user)
+      popular = TimeEntry.popular(user, timesheet)
 
       expect(popular['category']).to include('Category A', 'Category B', 'Category C')
       expect(popular['project']).to include('Project X', 'Project Y', 'Project Z')
@@ -198,8 +199,9 @@ RSpec.describe TimeEntry, type: :model do
       end
     end
 
-    it 'returns an empty hash without a user' do
-      expect(described_class.popular(nil)).to eq({})
+    it 'returns an empty hash without a user or timesheet' do
+      expect(described_class.popular(nil, timesheet)).to eq({})
+      expect(described_class.popular(user, nil)).to eq({})
     end
 
     it 'orders the values from the most used one' do
@@ -207,36 +209,38 @@ RSpec.describe TimeEntry, type: :model do
       add_value(project, 'Often', count: 3)
       add_value(project, 'Sometimes', count: 2)
 
-      expect(described_class.popular(user)['project']).to eq(%w[Often Sometimes Rare])
+      expect(described_class.popular(user, timesheet)['project']).to eq(%w[Often Sometimes Rare])
     end
 
     it 'uses only the entries of the given user' do
       add_value(project, 'Mine')
       add_value(project, 'Not mine', owner: create(:user), count: 5)
 
-      expect(described_class.popular(user)).to eq('project' => ['Mine'])
+      expect(described_class.popular(user, timesheet)).to eq('project' => ['Mine'])
     end
 
     it 'skips blank values and fields that are not popular' do
       add_value(project, '')
       add_value(create(:custom_field, machine_name: 'notes', customizable: timesheet, popular: false), 'Some notes')
 
-      expect(described_class.popular(user)).to eq({})
+      expect(described_class.popular(user, timesheet)).to eq({})
     end
 
-    it 'joins the values of popular fields with the same name from other timesheets' do
-      other_project = create(:custom_field, machine_name: 'project', customizable: create(:timesheet), popular: true)
+    it 'keeps popular values scoped to the requested timesheet' do
+      other_timesheet = create(:timesheet)
+      other_project = create(:custom_field, machine_name: 'project', customizable: other_timesheet, popular: true)
       add_value(project, 'First timesheet', count: 2)
       add_value(other_project, 'Second timesheet')
       add_value(other_project, 'First timesheet')
 
-      expect(described_class.popular(user)['project']).to contain_exactly('First timesheet', 'Second timesheet')
+      expect(described_class.popular(user, timesheet)).to eq('project' => ['First timesheet'])
+      expect(described_class.popular(user, other_timesheet)['project']).to contain_exactly('First timesheet', 'Second timesheet')
     end
 
     it 'returns at most 20 values of a field' do
       25.times { |index| add_value(project, "Project #{index}") }
 
-      expect(described_class.popular(user)['project'].size).to eq(20)
+      expect(described_class.popular(user, timesheet)['project'].size).to eq(20)
     end
   end
 
@@ -396,6 +400,29 @@ RSpec.describe TimeEntry, type: :model do
       result = fetch(from_date: Date.new(2026, 9, 1), to_date: Date.new(2026, 10, 31), group_by: 'week')
 
       expect(result).to eq([{ date: '2026-09-27', total_hours: 3.0, email: user.email }])
+    end
+
+    it 'groups Sunday entries with the Sunday-to-Saturday week they start' do
+      add_entry(Date.new(2026, 10, 10), 1.5) # Saturday -> week of Sunday 2026-10-04
+      add_entry(Date.new(2026, 10, 11), 2.0) # Sunday   -> week of Sunday 2026-10-11
+      add_entry(Date.new(2026, 10, 12), 3.0) # Monday   -> week of Sunday 2026-10-11
+      add_entry(Date.new(2026, 10, 17), 1.0) # Saturday -> week of Sunday 2026-10-11
+      add_entry(Date.new(2026, 10, 18), 4.0) # Sunday   -> week of Sunday 2026-10-18
+
+      result = fetch(month: '2026-10', group_by: 'week')
+
+      expect(result).to eq([
+        { date: '2026-10-18', total_hours: 4.0, email: user.email },
+        { date: '2026-10-11', total_hours: 6.0, email: user.email },
+        { date: '2026-10-04', total_hours: 1.5, email: user.email }
+      ])
+    end
+
+    it 'returns empty results for an invalid month string' do
+      add_entry(Date.new(2026, 11, 2), 2.5)
+
+      expect(fetch(month: '2026-13')).to eq([])
+      expect(fetch(month: 'invalid', aggregate: 'sum_hours')).to eq(0.0)
     end
   end
 

@@ -186,7 +186,7 @@ const actions = {
   },
   async fetchPopular(context) {
     return await context.dispatch('fetchGet', {
-      url: `${apiUrl}/time_entries/popular`,
+      url: `${apiUrl}/time_entries/popular?timesheet_uuid=${context.state.selectedTimesheet.uuid}`,
       methodName: 'fetchPopular',
     })
   },

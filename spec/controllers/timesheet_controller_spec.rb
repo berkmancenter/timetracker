@@ -669,4 +669,52 @@ RSpec.describe TimesheetsController, type: :controller do
       expect(User.exists?(member.id)).to be(true)
     end
   end
+
+  describe 'missing timesheet handling' do
+    it 'returns bad request instead of crashing for unknown timesheet ids' do
+      get :show, params: { id: 0 }
+      expect(response).to have_http_status(:bad_request)
+
+      get :users, params: { id: 0 }
+      expect(response).to have_http_status(:bad_request)
+
+      get :user, params: { id: 0, user_id: user.id }
+      expect(response).to have_http_status(:bad_request)
+
+      post :send_invitations, params: { id: 0, emails: 'a@example.com', role: 'user' }
+      expect(response).to have_http_status(:bad_request)
+
+      delete :leave, params: { id: 0 }
+      expect(response).to have_http_status(:bad_request)
+
+      post :delete_users, params: { id: 0, users: [user.id] }
+      expect(response).to have_http_status(:bad_request)
+
+      post :change_users_role, params: { id: 0, users: [user.id], role: 'user' }
+      expect(response).to have_http_status(:bad_request)
+
+      post :upsert, params: { timesheet: { id: 0, name: 'Missing', custom_fields_attributes: [{ title: 'Project', input_type: 'text' }] } }
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'handles nil emails parameter in send_invitations' do
+      timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'admin')
+
+      expect do
+        post :send_invitations, params: { id: timesheet.id, role: 'user' }, format: :json
+      end.not_to change(Invitation, :count)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'does not expose the removed add_users action or unimplemented CRUD routes' do
+      expect(TimesheetsController.action_methods).not_to include('add_users')
+      expect(ApplicationController.action_methods).not_to include('ping')
+      expect(post: '/timesheets').not_to be_routable
+      expect(delete: '/timesheets/1').not_to be_routable
+      expect(post: '/time_entries').not_to be_routable
+      expect(delete: '/users/1').not_to be_routable
+    end
+  end
 end

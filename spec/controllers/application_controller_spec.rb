@@ -19,15 +19,6 @@ RSpec.describe ApplicationController, type: :controller do
     @routes.draw do
       get '/bad_request_action', to: 'anonymous#bad_request_action'
       get '/unauthorized_action', to: 'anonymous#unauthorized_action'
-      get '/ping', to: 'anonymous#ping'
-    end
-  end
-
-  describe 'ping' do
-    it 'returns "pong"' do
-      get :ping
-      expect(response).to have_http_status(:ok)
-      expect(response.body).to eq('pong')
     end
   end
 

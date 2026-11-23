@@ -137,13 +137,26 @@ RSpec.describe TimeEntriesController, type: :controller do
   end
 
   describe 'GET #popular' do
-    it 'returns popular categories and projects for the user' do
+    it 'returns popular categories and projects for the user in the timesheet' do
       timesheet = create(:timesheet)
-      time_entry = create(:time_entry, user: user, timesheet: timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
+      create(:time_entry, user: user, timesheet: timesheet)
 
-      get :popular
+      get :popular, params: { timesheet_uuid: timesheet.uuid }
 
       expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns bad request when timesheet is missing' do
+      get :popular
+
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it 'returns unauthorized for an inaccessible timesheet' do
+      get :popular, params: { timesheet_uuid: create(:timesheet).uuid }
+
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 
@@ -293,6 +306,21 @@ RSpec.describe TimeEntriesController, type: :controller do
 
       expect(response).to have_http_status(:bad_request)
     end
+
+    it 'escapes LIKE wildcards in the search term' do
+      add_value('Bonus 50%')
+      add_value('500 hours')
+      add_value('item_1')
+      add_value('itemX1')
+
+      get :auto_complete, params: { field: 'project', term: '50%', timesheet_uuid: timesheet.uuid }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq(['Bonus 50%'])
+
+      get :auto_complete, params: { field: 'project', term: 'item_1', timesheet_uuid: timesheet.uuid }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq(['item_1'])
+    end
   end
 
   describe 'GET #entries filters' do
@@ -329,6 +357,29 @@ RSpec.describe TimeEntriesController, type: :controller do
         add_entry(Date.new(2026, 8, 31))
 
         expect(entry_ids(period: period.id)).to eq([inside.id])
+      end
+
+      it 'rejects a period that belongs to another timesheet' do
+        other_period = create(:period, timesheet: create(:timesheet))
+
+        %i[entries days months].each do |action|
+          get action, params: { timesheet_uuid: timesheet.uuid, period: other_period.id }
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+
+      it 'exports only the entries within the requested period as CSV' do
+        period = create(:period, timesheet: timesheet, name: 'Fall Term', from: Date.new(2026, 9, 1), to: Date.new(2026, 9, 30))
+        add_entry(Date.new(2026, 9, 15))
+        add_entry(Date.new(2026, 10, 15))
+
+        get :entries, params: { timesheet_uuid: timesheet.uuid, period: period.id, csv: true }
+
+        expect(response).to have_http_status(:ok)
+        header, *rows = CSV.parse(response.body)
+        expect(rows.size).to eq(1)
+        expect(header.zip(rows.first).to_h['entry_date']).to eq('2026-09-15')
+        expect(response.headers['Content-Disposition']).to include('time-entries-fall-term-')
       end
 
       it 'returns only the own entries' do
@@ -582,6 +633,14 @@ RSpec.describe TimeEntriesController, type: :controller do
       expect(entry.reload.entry_date).to eq(Date.new(2026, 11, 2))
     end
 
+    it 'returns a bad request for negative or overflowing decimal_time' do
+      post :edit, params: { timesheet_uuid: timesheet.uuid, time_entry: { decimal_time: -1, entry_date: '2026-11-05' } }
+      expect(response).to have_http_status(:bad_request)
+
+      post :edit, params: { timesheet_uuid: timesheet.uuid, time_entry: { decimal_time: 100, entry_date: '2026-11-05' } }
+      expect(response).to have_http_status(:bad_request)
+    end
+
     it 'returns unauthorized when not signed in' do
       sign_out user
 
@@ -609,17 +668,31 @@ RSpec.describe TimeEntriesController, type: :controller do
 
       expect { delete :delete, params: { id: entry.id } }.to change(CustomFieldDataItem, :count).by(-1)
     end
+
+    it 'returns bad request when deleting a missing entry' do
+      delete :delete, params: { id: 0 }
+
+      expect(response).to have_http_status(:bad_request)
+    end
   end
 
   describe 'GET #popular values' do
-    it 'returns the popular values of the user' do
+    it 'returns the popular values of the user for the requested timesheet only' do
       timesheet = create(:timesheet)
+      other_timesheet = create(:timesheet)
+      create(:users_timesheet, user: user, timesheet: timesheet, role: 'user')
+      create(:users_timesheet, user: user, timesheet: other_timesheet, role: 'user')
+
       field = create(:custom_field, customizable: timesheet, machine_name: 'project', popular: true)
+      other_field = create(:custom_field, customizable: other_timesheet, machine_name: 'project', popular: true)
       entry = create(:time_entry, user: user, timesheet: timesheet)
+      other_entry = create(:time_entry, user: user, timesheet: other_timesheet)
       create(:custom_field_data_item, owner: entry, custom_field: field, value: 'Apollo')
+      create(:custom_field_data_item, owner: other_entry, custom_field: other_field, value: 'Gemini')
 
-      get :popular
+      get :popular, params: { timesheet_uuid: timesheet.uuid }
 
+      expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to eq('project' => ['Apollo'])
     end
   end

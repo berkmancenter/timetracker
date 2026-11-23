@@ -1,6 +1,6 @@
 class TimeEntriesController < ApplicationController
-  before_action :set_timesheet, only: %i[entries edit popular days months totals]
   before_action :authenticate_user_json!
+  before_action :set_timesheet, only: %i[entries edit popular days months totals]
 
   # GET /time_entries
   # Returns a list of time entries for the current user and current month
@@ -11,12 +11,12 @@ class TimeEntriesController < ApplicationController
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
     return render_unauthorized if active_users.nil?
 
-    render_entries_csv and return if params[:csv]
+    period = find_requested_period
+    return if performed?
 
-    if params[:period].present?
-      period = Period.find(params[:period])
-      from_date = period.from
-      to_date = period.to
+    if params[:csv]
+      render_entries_csv(period: period)
+      return
     end
 
     month = params[:month]
@@ -24,8 +24,8 @@ class TimeEntriesController < ApplicationController
       timesheet: @timesheet,
       month: month,
       alltime: (month == 'all'),
-      from_date: from_date,
-      to_date: to_date,
+      from_date: period&.from,
+      to_date: period&.to,
     }), status: :ok
   end
 
@@ -62,8 +62,8 @@ class TimeEntriesController < ApplicationController
   # DELETE /time_entries/:id/delete
   # Deletes a time entry
   def delete
-    time_entry = TimeEntry.find(params[:id])
-
+    time_entry = TimeEntry.find_by(id: params[:id])
+    return render_bad_request if time_entry.nil?
     return render_unauthorized unless time_entry_owned_by_current_user?(time_entry)
 
     time_entry.destroy
@@ -74,7 +74,10 @@ class TimeEntriesController < ApplicationController
   # GET /time_entries/popular
   # Returns a list of popular values for the custom fields
   def popular
-    render json: TimeEntry.popular(current_user), status: :ok
+    return render_bad_request if @timesheet.nil?
+    return render_unauthorized unless user_can_use_timesheet?(@timesheet)
+
+    render json: TimeEntry.popular(current_user, @timesheet), status: :ok
   end
 
   # GET /time_entries/days
@@ -85,20 +88,15 @@ class TimeEntriesController < ApplicationController
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
     return render_unauthorized if active_users.nil?
 
-    if params[:period].present?
-      period = Period.find_by(id: params[:period])
-      return render_bad_request unless period
-
-      from_date = period.from
-      to_date = period.to
-    end
+    period = find_requested_period
+    return if performed?
 
     entries = TimeEntry.fetch_time_entries(active_users, {
       timesheet: @timesheet,
       month: params[:month],
       group_by: params[:mode] == 'weeks' ? 'week' : 'day',
-      from_date: from_date,
-      to_date: to_date,
+      from_date: period&.from,
+      to_date: period&.to,
       alltime: (params[:month] == 'all')
     })
 
@@ -112,19 +110,14 @@ class TimeEntriesController < ApplicationController
     return render_unauthorized unless user_can_use_timesheet?(@timesheet)
     return render_unauthorized if active_users.nil?
 
-    if params[:period].present?
-      period = Period.find_by(id: params[:period])
-      return render_bad_request unless period
-
-      from_date = period.from
-      to_date = period.to
-    end
+    period = find_requested_period
+    return if performed?
 
     render json: TimeEntry.entry_list_by_month(
       active_users,
       @timesheet,
-      from_date: from_date,
-      to_date: to_date
+      from_date: period&.from,
+      to_date: period&.to
     )
   end
 
@@ -153,10 +146,11 @@ class TimeEntriesController < ApplicationController
 
     return render_bad_request unless field_obj.present?
 
+    sanitized_term = ActiveRecord::Base.sanitize_sql_like(params[:term].to_s)
     values = TimeEntry.where(user: current_user)
                       .joins(:custom_field_data_items)
                       .where(custom_field_data_items: { custom_field_id: field_obj.id })
-                      .where('custom_field_data_items.value ILIKE ?', "%#{params[:term]}%")
+                      .where('custom_field_data_items.value ILIKE ?', "%#{sanitized_term}%")
                       .where.not('custom_field_data_items.value' => [nil, ''])
                       .group('custom_field_data_items.value')
                       .order(Arel.sql('COUNT(*) DESC'))
@@ -220,18 +214,29 @@ class TimeEntriesController < ApplicationController
     Array(selection['user_ids'] || selection[:user_ids]).map(&:to_i)
   end
 
-  def render_entries_csv
-    columns = %w[username entry_date decimal_time] + @timesheet.custom_fields.map(&:machine_name)
-    entries = fetch_entries_for_csv
+  def find_requested_period
+    return nil if params[:period].blank?
 
-    render_csv(filebase: "time-entries-#{current_month}", model: TimeEntry, objects: format_entries_for_csv(entries, columns), columns: columns)
+    period = @timesheet.periods.find_by(id: params[:period])
+    render_bad_request unless period
+    period
   end
 
-  def fetch_entries_for_csv
+  def render_entries_csv(period: nil)
+    columns = %w[username entry_date decimal_time] + @timesheet.custom_fields.map(&:machine_name)
+    entries = fetch_entries_for_csv(period: period)
+    filebase = period ? "time-entries-#{period.name.parameterize}" : "time-entries-#{current_month}"
+
+    render_csv(filebase: filebase, model: TimeEntry, objects: format_entries_for_csv(entries, columns), columns: columns)
+  end
+
+  def fetch_entries_for_csv(period: nil)
     TimeEntry.fetch_time_entries(active_users, {
       timesheet: @timesheet,
       month: current_month,
-      alltime: (current_month == 'all')
+      alltime: (current_month == 'all'),
+      from_date: period&.from,
+      to_date: period&.to
     })
   end
 

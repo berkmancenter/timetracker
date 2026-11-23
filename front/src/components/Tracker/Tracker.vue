@@ -77,7 +77,10 @@
             }
 
             this.$store.dispatch('tracker/setSelectedMonthFromRoute')
-            await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals', 'users'])
+            const itemsToReload = to.timesheet !== from.timesheet
+              ? ['popular', 'entries', 'periodTotals', 'totals', 'users']
+              : ['entries', 'periodTotals', 'totals', 'users']
+            await this.$store.dispatch('tracker/reloadViewData', itemsToReload)
           } catch {
             // Keep the current view when route data could not be refreshed
           }

@@ -1,6 +1,6 @@
 class TimesheetsController < ApplicationController
-  before_action :set_timesheet, only: %i[show send_invitations leave users user delete_users change_users_role]
   before_action :authenticate_user_json!
+  before_action :set_timesheet, only: %i[show send_invitations leave users user delete_users change_users_role]
 
   # GET /timesheets
   # Returns all timesheets for the current user
@@ -27,9 +27,14 @@ class TimesheetsController < ApplicationController
   # POST /timesheets/upsert
   # Creates or updates a timesheet
   def upsert
-    timesheet, new_record = set_or_create_timesheet
+    timesheet, new_record = find_or_initialize_timesheet
+    return render_bad_request if timesheet.nil?
 
-    return unless authorize_user_for_timesheet!(timesheet) if timesheet.persisted?
+    unless new_record
+      return unless authorize_user_for_timesheet!(timesheet)
+
+      timesheet.assign_attributes(timesheet_params.except(:id))
+    end
 
     # Check if there's at least one non-destroyed timesheet field
     has_valid_fields = timesheet_params[:custom_fields_attributes]&.any? do |field|
@@ -127,23 +132,6 @@ class TimesheetsController < ApplicationController
     render json: user.as_json(only: %i[id email first_name last_name]), status: :ok
   end
 
-  # POST /timesheets/:id/users
-  # Adds users to a timesheet
-  def add_users
-    return unless authorize_user_for_timesheet!(@timesheet)
-
-    emails = extract_emails(params[:emails])
-    role = params[:role]
-
-    unless Invitation::VALID_ROLES.include?(role)
-      return render_unprocessable_entity('Invalid role provided')
-    end
-
-    invitations = create_invitations(emails, role)
-    deliver_invitations(invitations)
-    render json: { message: 'ok' }, status: :ok
-  end
-
   # POST /timesheets/:id/delete_users
   # Deletes users from a timesheet
   def delete_users
@@ -179,6 +167,7 @@ class TimesheetsController < ApplicationController
 
   def set_timesheet
     @timesheet = Timesheet.includes(:custom_fields).find_by(id: params[:id])
+    render_bad_request if @timesheet.nil?
   end
 
   def timesheet_params
@@ -196,13 +185,11 @@ class TimesheetsController < ApplicationController
     }
   end
 
-  def set_or_create_timesheet
-    if timesheet_params[:id]
-      timesheet = Timesheet.find(timesheet_params[:id])
-      timesheet.assign_attributes(timesheet_params)
-      [timesheet, false]
+  def find_or_initialize_timesheet
+    if timesheet_params[:id].present?
+      [Timesheet.find_by(id: timesheet_params[:id]), false]
     else
-      [Timesheet.new(timesheet_params), true]
+      [Timesheet.new(timesheet_params.except(:id)), true]
     end
   end
 
@@ -212,7 +199,7 @@ class TimesheetsController < ApplicationController
 
   def extract_emails(email_string)
     email_regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
-    email_string.scan(email_regex)
+    email_string.to_s.scan(email_regex)
   end
 
   def create_invitations(emails, role)

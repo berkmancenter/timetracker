@@ -60,7 +60,7 @@ RSpec.describe Timetracker::DemoData do
 
     projects = CustomFieldDataItem.where(custom_field: lab.custom_fields.find_by!(machine_name: 'project'))
     expect(projects.distinct.pluck(:value)).to include('Platform governance', 'Lab admin')
-    expect(TimeEntry.popular(maya)['project']).to be_present
+    expect(TimeEntry.popular(maya, lab)['project']).to be_present
   end
 
   it 'gives the current term balances a story' do

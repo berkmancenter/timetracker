@@ -142,6 +142,18 @@ describe('tracker store', () => {
     })
   })
 
+  it('passes the selected timesheet uuid when fetching popular values', async () => {
+    const dispatch = vi.fn()
+    const state = freshState({ selectedTimesheet: { uuid: 'alpha' } })
+
+    await tracker.actions.fetchPopular({ state, dispatch })
+
+    expect(dispatch).toHaveBeenCalledWith('fetchGet', {
+      url: expect.stringMatching(/\/time_entries\/popular\?timesheet_uuid=alpha$/),
+      methodName: 'fetchPopular',
+    })
+  })
+
   it('does not share the request slot of users and timesheets', async () => {
     const dispatch = vi.fn()
     const state = freshState({ selectedTimesheet: { id: 3 } })

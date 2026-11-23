@@ -192,13 +192,17 @@ RSpec.describe User, type: :model do
       expect(user.user_timesheets(only_admin: true).map(&:name)).to eq(['Admin timesheet'])
     end
 
-    it 'lists the timesheets of all users for a superadmin' do
+    it 'lists the timesheets of all users for a superadmin, including ones with no members' do
+      empty_timesheet = create(:timesheet, name: 'Empty timesheet')
       superadmin = create(:user, superadmin: true)
 
-      expect(superadmin.user_timesheets.map(&:name)).to include(
-        'Admin timesheet', 'Member timesheet', 'Other timesheet'
+      rows = superadmin.user_timesheets.to_a
+      expect(rows).to all(be_a(Timesheet))
+      expect(rows.map(&:name)).to include(
+        'Admin timesheet', 'Member timesheet', 'Other timesheet', empty_timesheet.name
       )
-      expect(superadmin.user_timesheets(only_admin: true).map(&:name)).to include('Member timesheet')
+      expect(rows.map(&:roles)).to all(eq(['admin']))
+      expect(superadmin.user_timesheets(only_admin: true).map(&:name)).to include('Member timesheet', empty_timesheet.name)
     end
   end
 

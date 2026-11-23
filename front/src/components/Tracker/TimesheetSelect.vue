@@ -63,7 +63,7 @@
 
           this.redirectToSelectedMonth(this.$store)
 
-          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+          await this.$store.dispatch('tracker/reloadViewData', ['popular', 'entries', 'periodTotals', 'totals'])
         } catch {
           // Keep the selected view as-is when its data could not be refreshed
         } finally {

@@ -1,6 +1,6 @@
 require 'securerandom'
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   has_many :time_entries, dependent: :destroy
   has_many :credits, dependent: :destroy
   has_many :users_timesheets, dependent: :destroy
@@ -24,20 +24,24 @@ class User < ActiveRecord::Base
   end
 
   def user_timesheets(only_admin: false)
-    all_user_timesheets = self.timesheets
-    all_user_timesheets = all_user_timesheets.where("users_timesheets.role = 'admin'") if only_admin
-    all_user_timesheets = UsersTimesheet.joins(:timesheet).group('timesheets.id').all if self.superadmin?
+    if superadmin?
+      return Timesheet
+        .includes(:custom_fields)
+        .select("timesheets.id, timesheets.name, timesheets.uuid, timesheets.created_at, ARRAY['admin']::varchar[] AS roles")
+    end
 
-    all_user_timesheets
+    scope = timesheets.includes(:custom_fields)
+    scope = scope.where(users_timesheets: { role: 'admin' }) if only_admin
+
+    scope
       .select('
         timesheets.id,
         timesheets.name,
         timesheets.uuid,
         timesheets.created_at,
-        users_timesheets.timesheet_id,
         ARRAY_AGG(DISTINCT users_timesheets.role) AS roles
       ')
-      .group('timesheets.id, users_timesheets.timesheet_id')
+      .group('timesheets.id')
   end
 
   def cas_extra_attributes=(extra_attributes)
@@ -128,9 +132,5 @@ class User < ActiveRecord::Base
   def normalize_external_value(value)
     value = value.first if value.respond_to?(:first) && !value.is_a?(String)
     value.to_s.presence
-  end
-
-  def root_path
-    new_user_session_path
   end
 end

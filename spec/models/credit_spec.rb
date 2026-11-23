@@ -40,4 +40,12 @@ RSpec.describe Credit, type: :model do
     credit = create(:credit, period: period)
     expect(credit.period).to eq(period)
   end
+
+  it 'validates numericality of amount and uniqueness per user and period' do
+    existing = create(:credit)
+
+    expect(build(:credit, amount: -1)).not_to be_valid
+    expect(build(:credit, amount: 10_000)).not_to be_valid
+    expect(build(:credit, user: existing.user, period: existing.period)).not_to be_valid
+  end
 end

@@ -3,12 +3,6 @@ class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token, if: :header_authentication?
   after_action :set_csrf_cookie, unless: :header_authentication?
 
-  # GET /ping
-  # Used by the front-end to check if the server is up and user is authenticated
-  def ping
-    render plain: 'pong'
-  end
-
   def authenticate_user!(options = {})
     return super unless header_authentication?
     return if authenticate_user_from_headers

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_23_193418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["period_id"], name: "index_credits_on_period_id"
+    t.index ["user_id", "period_id"], name: "index_credits_on_user_id_and_period_id", unique: true
     t.index ["user_id"], name: "index_credits_on_user_id"
   end
 
@@ -32,6 +33,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "owner_type", null: false
+    t.index ["custom_field_id", "owner_type", "owner_id"], name: "index_cfdi_on_field_and_owner", unique: true
     t.index ["custom_field_id"], name: "index_custom_field_data_items_on_custom_field_id"
     t.index ["owner_type", "owner_id"], name: "index_custom_field_data_items_on_owner_type_and_owner_id"
   end
@@ -51,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.string "access_key", limit: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["customizable_type", "customizable_id", "machine_name"], name: "index_custom_fields_on_customizable_and_machine_name", unique: true
     t.index ["customizable_type", "customizable_id"], name: "index_custom_fields_on_customizable"
     t.index ["machine_name"], name: "index_custom_fields_on_machine_name"
   end
@@ -101,7 +104,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.datetime "updated_at", precision: nil
     t.bigint "timesheet_id", null: false
     t.index ["entry_date"], name: "index_time_entries_on_entry_date"
+    t.index ["timesheet_id", "user_id", "entry_date"], name: "index_time_entries_on_timesheet_user_date"
     t.index ["timesheet_id"], name: "index_time_entries_on_timesheet_id"
+    t.index ["user_id"], name: "index_time_entries_on_user_id"
   end
 
   create_table "timesheets", force: :cascade do |t|
@@ -110,6 +115,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.string "uuid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_timesheets_on_uuid", unique: true
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
@@ -129,6 +135,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.datetime "reset_password_sent_at", precision: nil
     t.string "first_name"
     t.string "last_name"
+    t.index "lower((email)::text)", name: "index_users_on_lower_email", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
+    t.index ["email"], name: "index_users_on_email"
     t.index ["superadmin"], name: "index_users_on_superadmin"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
@@ -145,12 +153,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_164726) do
     t.check_constraint "role::text = ANY (ARRAY['admin'::character varying::text, 'user'::character varying::text])", name: "users_timesheets_valid_role"
   end
 
+  add_foreign_key "credits", "periods"
+  add_foreign_key "credits", "users"
   add_foreign_key "custom_field_data_items", "custom_fields"
   add_foreign_key "invitations", "timesheets"
   add_foreign_key "invitations", "users", column: "sender_id"
   add_foreign_key "invitations", "users", column: "used_by_id"
   add_foreign_key "periods", "timesheets"
   add_foreign_key "time_entries", "timesheets"
+  add_foreign_key "time_entries", "users"
   add_foreign_key "users_timesheets", "timesheets"
   add_foreign_key "users_timesheets", "users"
 end

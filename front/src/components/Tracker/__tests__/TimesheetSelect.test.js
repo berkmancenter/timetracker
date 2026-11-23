@@ -81,7 +81,7 @@ describe('TimesheetSelect', () => {
     expect(store.dispatch).toHaveBeenCalledWith('tracker/setMonths', ['May 2026'])
     expect(store.dispatch).toHaveBeenCalledWith('tracker/setSelectedMonthFromRoute')
     expect(mocks.redirectToSelectedMonth).toHaveBeenCalledWith(store)
-    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['popular', 'entries', 'periodTotals', 'totals'])
     expect(emit).toHaveBeenCalledWith('spinnerStop')
   })
 

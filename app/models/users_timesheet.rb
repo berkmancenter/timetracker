@@ -1,4 +1,4 @@
-class UsersTimesheet < ActiveRecord::Base
+class UsersTimesheet < ApplicationRecord
   VALID_ROLES = %w[admin user].freeze
 
   belongs_to :user

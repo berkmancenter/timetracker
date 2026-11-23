@@ -4,7 +4,7 @@ Rails.application.routes.draw do
 
   get :ping, to: 'front#ping'
 
-  resources :time_entries do
+  resources :time_entries, only: [] do
     collection do
       get :entries
       get :popular
@@ -20,7 +20,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :users do
+  resources :users, only: %i[index] do
     collection do
       get :current_user_data
       post :sudo
@@ -29,7 +29,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :timesheets do
+  resources :timesheets, only: %i[index show] do
     collection do
       post :upsert
       post :delete
@@ -45,11 +45,10 @@ Rails.application.routes.draw do
       post :change_users_role
     end
 
-    resources :periods do
+    resources :periods, only: %i[index show] do
       member do
         get :credits
         get :stats
-        post :stats
         post :set_credits
         post :clone
       end
