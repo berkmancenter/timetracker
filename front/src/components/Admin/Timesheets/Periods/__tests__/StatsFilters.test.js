@@ -66,6 +66,28 @@ describe('StatsFilters', () => {
     expect(wrapper.emitted('update:modelValue')[0][0]).toBe(false)
   })
 
+  it('finds users by the name shown in the stats table', () => {
+    const wrapper = mount(StatsFilters, {
+      props: {
+        modelValue: true,
+        periodStats: [
+          { user_id: 1, first_name: 'Ada', last_name: 'Lovelace', email: 'al@example.com' },
+          { user_id: 2, first_name: 'Grace', last_name: 'Hopper', email: 'gh@example.com' },
+        ],
+      },
+      global: {
+        stubs: {
+          Modal: { template: '<div><slot /></div>' },
+        },
+      },
+    })
+
+    wrapper.vm.filterValues.identifier = 'lovelace'
+    wrapper.vm.applyFilters()
+
+    expect(wrapper.emitted('filter-applied')[0][0].map(item => item.user_id)).toEqual([1])
+  })
+
   it('resets all filters', () => {
     const wrapper = mountFilters()
     wrapper.vm.filterValues.identifier = 'ada'

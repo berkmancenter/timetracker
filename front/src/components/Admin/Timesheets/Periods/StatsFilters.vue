@@ -158,6 +158,8 @@
 
 <script>
 import Modal from '@/components/Shared/Modal.vue'
+// The same identifier as in the stats table, so searching by a shown name works
+import { getUserIdentifier } from '@/lib/user.js'
 
 export default {
   name: 'StatsFilters',
@@ -216,7 +218,7 @@ export default {
     applyFilters() {
       const filteredItems = this.periodStats.filter(item => {
         // Identifier filter
-        if (this.filterValues.identifier && !this.getUserIdentifier(item).toLowerCase().includes(this.filterValues.identifier.toLowerCase())) {
+        if (this.filterValues.identifier && !getUserIdentifier(item).toLowerCase().includes(this.filterValues.identifier.toLowerCase())) {
           return false
         }
 
@@ -313,9 +315,6 @@ export default {
         this.filterValues.customFields[field.id] = ''
       })
     },
-    getUserIdentifier(user) {
-      return user.email || user.username || user.name || `ID: ${user.user_id}`
-    }
   }
 }
 </script>

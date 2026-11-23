@@ -106,7 +106,10 @@
     },
     data() {
       return {
-        filteredItems: [],
+        // Rows of the selected Users/Admins/All tab
+        roleFilteredItems: [],
+        // Rows matching the filter modal, null when no filter was applied
+        filterMatches: null,
         apiUrl: import.meta.env.VITE_API_URL,
         showFilterModal: false,
         downloadIcon,
@@ -145,7 +148,17 @@
       },
       customFields() {
         return this.$store.state.admin.periodStats?.period?.custom_fields || []
-      }
+      },
+      // Both the role tab and the filter modal apply, changing one keeps the other
+      filteredItems() {
+        if (this.filterMatches === null) {
+          return this.roleFilteredItems
+        }
+
+        const matches = new Set(this.filterMatches)
+
+        return this.roleFilteredItems.filter(item => matches.has(item))
+      },
     },
     created() {
       this.initialDataLoad()
@@ -168,7 +181,7 @@
         this.mitt.emit('spinnerStop')
       },
       superAdminFilterChanged(users) {
-        this.filteredItems = users
+        this.roleFilteredItems = users
       },
       getCsv() {
         const usersIds = this.filteredItems
@@ -205,7 +218,7 @@
         this.showFilterModal = true
       },
       applyFilters(filteredData) {
-        this.filteredItems = filteredData
+        this.filterMatches = filteredData
       }
     },
   }

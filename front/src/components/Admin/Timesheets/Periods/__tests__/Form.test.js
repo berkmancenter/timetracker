@@ -64,6 +64,22 @@ describe('Admin Periods Form', () => {
     expect(wrapper.vm.title).toBe('Edit period')
   })
 
+  it('keeps the same dates in time zones west of UTC', async () => {
+    const timeZone = process.env.TZ
+    process.env.TZ = 'America/New_York'
+
+    try {
+      const store = createStore({ id: 2, name: 'Fall', from: '2026-11-01', to: '2026-11-30', custom_fields: [] })
+      mountForm({ id: '2', store })
+
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith('admin/setPeriod', expect.objectContaining({ from: 'November 1, 2026', to: 'November 30, 2026' }))
+    } finally {
+      process.env.TZ = timeZone
+    }
+  })
+
   it('saves a period and redirects', async () => {
     const { wrapper, store, push, awn } = mountForm()
 

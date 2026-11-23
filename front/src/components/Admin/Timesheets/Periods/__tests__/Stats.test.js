@@ -106,7 +106,24 @@ describe('Admin Period Stats', () => {
     wrapper.vm.openFilterModal()
     expect(wrapper.vm.showFilterModal).toBe(true)
 
+    wrapper.vm.superAdminFilterChanged(filtered)
     wrapper.vm.applyFilters(filtered)
     expect(wrapper.vm.filteredItems).toEqual(filtered)
+  })
+
+  it('applies the role tab and the filter modal together', () => {
+    const { wrapper } = mountStats()
+    const ada = { user_id: 1, roles: ['user'] }
+    const grace = { user_id: 2, roles: ['admin'] }
+    const linus = { user_id: 3, roles: ['user'] }
+
+    // "Users" tab, then a filter which matches Ada and Grace
+    wrapper.vm.superAdminFilterChanged([ada, linus])
+    wrapper.vm.applyFilters([ada, grace])
+    expect(wrapper.vm.filteredItems.map(item => item.user_id)).toEqual([1])
+
+    // Changing the tab keeps the filter
+    wrapper.vm.superAdminFilterChanged([ada, grace, linus])
+    expect(wrapper.vm.filteredItems.map(item => item.user_id)).toEqual([1, 2])
   })
 })

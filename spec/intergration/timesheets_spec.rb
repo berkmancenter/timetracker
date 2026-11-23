@@ -64,6 +64,24 @@ feature 'Timesheets' do
     expect(page).not_to have_content('Test timesheet')
   end
 
+  scenario 'removing a field from a timesheet works', js: true do
+    membership = signed_in_user_with_timesheet
+    timesheet = membership.timesheet
+
+    visit front_path("admin/timesheets/#{timesheet.id}/edit")
+
+    expect(page).to have_selector('.custom-fields-field', count: 3)
+    project_box = all('.custom-fields-field').find { |box| box.find('input[id^="field-title-"]').value == 'Project' }
+    within(project_box) { find('[title="Remove field"]').click }
+
+    expect(page).to have_selector('.custom-fields-field', count: 2)
+    click_on 'Submit'
+
+    expect(page).to have_content('Timesheet has been saved.')
+    expect(timesheet.custom_fields.reload.pluck(:machine_name)).to contain_exactly('category', 'description')
+    expect(timesheet.custom_fields.order(:order).pluck(:order)).to eq([1, 2])
+  end
+
   scenario 'the browser back button to another timesheet shows the months of that timesheet', js: true do
     membership = signed_in_user_with_timesheet
     first_timesheet = membership.timesheet

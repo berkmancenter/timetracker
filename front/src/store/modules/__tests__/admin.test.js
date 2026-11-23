@@ -42,11 +42,34 @@ describe('admin store', () => {
   })
 
   it('marks removed custom fields for Rails nested attributes', () => {
-    const field = { id: 5 }
+    const field = { id: 5, order: 1 }
+    const state = freshState()
+    state.timesheet = { custom_fields: [field] }
 
-    admin.mutations.removeCustomField(freshState(), field)
+    admin.mutations.removeCustomField(state, { field, modelName: 'timesheet' })
 
-    expect(field._destroy).toBe(1)
+    expect(field._destroy).toBe(true)
+  })
+
+  it('keeps the order of the remaining fields sequential after a remove', () => {
+    const fields = [
+      { id: 1, order: 1 },
+      { id: 2, order: 2 },
+      { id: 3, order: 3 },
+    ]
+    const state = freshState()
+    state.period = { custom_fields: fields }
+
+    admin.mutations.removeCustomField(state, { field: fields[1], modelName: 'period' })
+
+    expect(fields[1]._destroy).toBe(true)
+    expect(fields[0].order).toBe(1)
+    expect(fields[2].order).toBe(2)
+
+    // A new field goes after the 2 remaining ones, the removed field is not counted
+    admin.mutations.addCustomField(state, 'period')
+
+    expect(state.period.custom_fields[3].order).toBe(3)
   })
 
   it('serializes custom fields when saving a timesheet', async () => {

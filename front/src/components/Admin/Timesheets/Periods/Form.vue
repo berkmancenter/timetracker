@@ -49,6 +49,7 @@
   import Icon from '@/components/Shared/Icon.vue'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
   import CustomFields from '@/components/Shared/CustomFields.vue'
+  import dayjs from 'dayjs'
 
   export default {
     name: 'AdminPeriodsForm',
@@ -122,17 +123,10 @@
             periodId: this.$route.params.id,
           })
 
-          response.from = new Date(response.from).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })
-
-          response.to = new Date(response.to).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })
+          // dayjs reads "2026-05-01" as a local date. new Date() reads it as UTC
+          // midnight, which is the day before in time zones west of UTC.
+          response.from = dayjs(response.from).format('MMMM D, YYYY')
+          response.to = dayjs(response.to).format('MMMM D, YYYY')
 
           this.$store.dispatch('admin/setPeriod', response)
 

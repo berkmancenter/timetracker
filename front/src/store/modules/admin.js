@@ -70,11 +70,19 @@ const mutations = {
       state[modelName].custom_fields = []
     }
 
-    field.order = state[modelName].custom_fields.length + 1
+    field.order = state[modelName].custom_fields.filter(item => !item._destroy).length + 1
     state[modelName].custom_fields.push(field)
   },
-  removeCustomField(state, field) {
-    field._destroy = 1
+  removeCustomField(state, { field, modelName }) {
+    field._destroy = true
+
+    // Keep the order of the remaining fields without gaps, the move up/down buttons need it
+    state[modelName].custom_fields
+      .filter(item => !item._destroy)
+      .sort((a, b) => a.order - b.order)
+      .forEach((item, index) => {
+        item.order = index + 1
+      })
   },
 }
 
@@ -317,8 +325,8 @@ const actions = {
   addCustomField(context, modelName) {
     context.commit('addCustomField', modelName)
   },
-  removeCustomField(context, field) {
-    context.commit('removeCustomField', field)
+  removeCustomField(context, data) {
+    context.commit('removeCustomField', data)
   },
 }
 

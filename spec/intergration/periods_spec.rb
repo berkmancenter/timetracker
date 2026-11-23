@@ -32,6 +32,77 @@ feature 'Timesheet periods' do
     expect(period.reload.name).to eq('Updated November reporting')
   end
 
+  scenario 'editing a period keeps its dates in time zones west of UTC', js: true do
+    membership = signed_in_user_with_timesheet
+    period = create(
+      :period,
+      timesheet: membership.timesheet,
+      name: 'Fall period',
+      from: Date.new(2026, 11, 1),
+      to: Date.new(2026, 11, 30)
+    )
+    emulate_time_zone('America/New_York')
+
+    visit front_path("admin/timesheets/#{membership.timesheet.id}/periods/#{period.id}/edit")
+
+    within(find('.admin-periods-form form > .field', text: 'From')) do
+      expect(page).to have_field(with: 'November 1, 2026')
+    end
+    within(find('.admin-periods-form form > .field', text: 'To')) do
+      expect(page).to have_field(with: 'November 30, 2026')
+    end
+    click_on 'Save'
+
+    expect(page).to have_content('Period has been saved.')
+    expect(period.reload).to have_attributes(from: Date.new(2026, 11, 1), to: Date.new(2026, 11, 30))
+  end
+
+  scenario 'statistics filters find users by the shown name and keep the role tab', js: true do
+    admin_membership = signed_in_user_with_timesheet
+    timesheet = admin_membership.timesheet
+    admin_membership.user.update!(first_name: 'Alan', last_name: 'Turing')
+    ada = create(:user, first_name: 'Ada', last_name: 'Lovelace', email: 'al@example.com')
+    grace = create(:user, first_name: 'Grace', last_name: 'Hopper', email: 'gh@example.com')
+    create(:users_timesheet, user: ada, timesheet: timesheet, role: 'user')
+    create(:users_timesheet, user: grace, timesheet: timesheet, role: 'user')
+    period = create(:period, timesheet: timesheet, from: Date.new(2026, 11, 1), to: Date.new(2026, 11, 30))
+    create(:credit, user: admin_membership.user, period: period, amount: 40)
+    create(:credit, user: ada, period: period, amount: 35)
+    create(:credit, user: grace, period: period, amount: 10)
+    table = '.admin-periods-stats-table tbody'
+
+    visit front_path("admin/timesheets/#{timesheet.id}/periods/#{period.id}/stats")
+
+    # The "Users" tab is selected at the start, so the admin is not listed
+    expect(page).to have_selector(table, text: 'Ada Lovelace')
+    expect(page).not_to have_selector(table, text: 'Alan Turing')
+
+    # The name is shown in the table, so it can be searched
+    find('.tracker-action-button', text: 'Filter list').click
+    find('input[placeholder="Search by identifier"]').set('lovelace')
+    click_on 'Apply filters'
+
+    expect(page).to have_selector(table, text: 'Ada Lovelace')
+    expect(page).not_to have_selector(table, text: 'Grace Hopper')
+
+    find('.tracker-action-button', text: 'Filter list').click
+    click_on 'Reset Filters'
+    find('.timetracker-period-stats-filter-form > .mt-2', exact_text: 'Hours').find('input[placeholder="Min"]').set('30')
+    click_on 'Apply filters'
+
+    # The filter keeps the "Users" tab
+    expect(page).to have_selector(table, text: 'Ada Lovelace')
+    expect(page).not_to have_selector(table, text: 'Grace Hopper')
+    expect(page).not_to have_selector(table, text: 'Alan Turing')
+
+    # And the tab keeps the filter
+    find('.tabs a', text: 'All').click
+
+    expect(page).to have_selector(table, text: 'Alan Turing')
+    expect(page).to have_selector(table, text: 'Ada Lovelace')
+    expect(page).not_to have_selector(table, text: 'Grace Hopper')
+  end
+
   scenario 'an admin clones and removes a period', js: true do
     membership = signed_in_user_with_timesheet
     period = create(
