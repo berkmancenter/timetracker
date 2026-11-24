@@ -5,8 +5,9 @@ each of them does. [.env.sample](../.env.sample) has a starting point.
 
 ## Environment files
 
-In Docker, [docker/entrypoint.sh](../docker/entrypoint.sh) reads
-`.env.$APP_ENV` (e.g. `.env.production`) on every container start:
+In the development and test containers,
+[docker/entrypoint.sh](../docker/entrypoint.sh) reads `.env.$APP_ENV`
+(`.env.development`, `.env.test`) on every start:
 
 - when the file is missing, it's made from `.env.sample`, with every
   "development" replaced by the environment name;
@@ -20,13 +21,29 @@ Docker Compose itself reads `.env` for the database container
 Without Docker, Rails loads `.env.<RAILS_ENV>` and `.env` (dotenv), variables
 already set in the environment win.
 
+### Production
+
+The production image (the default target of
+[docker/Dockerfile](../docker/Dockerfile)) has the Rails assets and the
+front-end built in, its entrypoint doesn't make env files or build anything.
+Make `.env.production` from `.env.sample` yourself, with a new
+`SECRET_KEY_BASE` and `SMTP_ADDRESS`, then:
+
+```bash
+docker compose -f docker/docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+With `--env-file` Compose takes from the file the database settings and the
+[front-end build settings](#front-end), the app container gets the whole file
+as its environment. `APP_PORT` (default 6868) is the port on the host.
+
 ## Application
 
 | Variable | Default | |
 | --- | --- | --- |
 | `APP_ENV` | | `development`, `test` or `production`, picks the env file in Docker |
 | `RAILS_ENV` | `development` | the Rails environment, the same as `APP_ENV` |
-| `SECRET_KEY_BASE` | | signs the session cookies in production (development and test make their own). The Docker entrypoint puts a new one in new env files, and in env files without one or with the public key that `.env.sample` used to have (this signs everybody out once). Without Docker make one with `bin/rails secret` |
+| `SECRET_KEY_BASE` | | signs the session cookies in production (development and test make their own). The development and test containers put a new one in new env files, and in env files without one or with the public key that `.env.sample` used to have (this signs everybody out once). For production make one with `bin/rails secret`, production containers don't start with the public key |
 | `FRONT_URL` | `https://example.com` | the address of the site, used for the links in invitation emails (`<FRONT_URL>/join/<code>`) and as SAML base URL |
 | `ALLOWED_HOST` | | when set, production only answers requests for this host name |
 | `CORS_ALLOWED_ORIGINS` | | comma separated origins allowed to call the app from another origin with cookies, e.g. the Vite dev server `http://127.0.0.1:6767` |
@@ -147,11 +164,14 @@ reset, confirmation).
 ## Front-end
 
 The Vue front-end gets these at build time: change them, then build it again
-(`bin/compile-front.sh`, or restart the container).
+(`bin/compile-front.sh`, or restart the container). The production image gets
+them as build arguments when it's built (`docker build --build-arg`, or the
+`--env-file` of the production Compose file), `VITE_ENVIRONMENT` is always
+`production` there.
 
 | Variable | Default | |
 | --- | --- | --- |
-| `VITE_API_URL` | | the address of the app the front-end talks to, e.g. `http://127.0.0.1:6868` |
+| `VITE_API_URL` | | the address of the app the front-end talks to, e.g. `http://127.0.0.1:6868`, empty: the address of the page |
 | `VITE_AUTH_TYPE` | | the same as `DEVISE_AUTH_TYPE` |
 | `VITE_BASE_PATH` | `/` | when the app runs in a sub folder, e.g. `/timetracker/` |
 | `VITE_ENVIRONMENT` | | `development`: requests send cookies to another origin too (for the Vite dev server) |

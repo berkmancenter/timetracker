@@ -4,6 +4,7 @@ gem 'activerecord-import'
 gem 'activerecord-session_store'
 gem 'bootsnap'
 gem 'csv'
+gem 'dartsass-sprockets'
 gem 'devise'
 gem 'devise_cas_authenticatable', require: false, git: 'https://github.com/berkmancenter/devise_cas_authenticatable.git'
 gem 'devise_saml_authenticatable', require: false
@@ -11,17 +12,13 @@ gem 'dotenv-rails'
 gem 'i18n'
 gem 'mime-types'
 gem 'pg'
+gem 'puma'
 gem 'rack'
 gem 'rack-cors'
 gem 'rails', '~> 8.1', '>= 8.1.4.1'
 gem 'rake'
 gem 'sprockets-rails'
-
-group :development, :test, :assets do
-  gem 'puma'
-  gem 'dartsass-sprockets'
-  gem 'terser'
-end
+gem 'terser'
 
 group :development do
   gem 'bundle-audit'

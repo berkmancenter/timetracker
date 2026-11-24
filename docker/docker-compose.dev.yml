@@ -30,6 +30,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      target: dev
     ports:
       - '6868:3000'
       - '6767:5173' # Vite dev server (yarn dev in front/)

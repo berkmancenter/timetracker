@@ -48,8 +48,8 @@ in there first.
 
 The Rails assets are compiled on request in development, precompiled ones in
 `public/assets` would be used instead of your changes
-(`bin/rails assets:clobber` removes them). Production containers run both
-scripts on start.
+(`bin/rails assets:clobber` removes them). Production images precompile both
+during `docker build`.
 
 ### Tests
 

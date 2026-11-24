@@ -50,7 +50,7 @@ if [ "$ready" != "true" ]; then
 fi
 
 run() {
-  "${compose[@]}" exec -T app bash -c ". /usr/local/nvm/nvm.sh && $1"
+  "${compose[@]}" exec -T app bash -c "$1"
 }
 
 args=""

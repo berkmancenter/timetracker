@@ -1,85 +1,167 @@
-# This Dockerfile supports multiple environments
+# Multi-stage Dockerfile with two targets:
+#   - dev:        development and test (Node, Yarn, Chromium, Mailcatcher, all gems)
+#   - production: default slim runtime image (precompiled Rails + Vue assets, prod gems only, no Node/Chromium/sudo)
 
 ARG RUBY_VERSION=3.4.13
+ARG NODE_VERSION=22
 
-FROM ruby:${RUBY_VERSION}
+# ---------------------------------------------------------------------------
+# 1. Minimal Ruby runtime base
+# ---------------------------------------------------------------------------
+FROM ruby:${RUBY_VERSION}-slim AS base
 
-ARG APP_ENV=production
-ARG APP_VERSION=2.4.4
-ARG BUILD_IMAGE
 ARG USERNAME=timetracker
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-WORKDIR /root
-
-# Install NVM and Node.js
-ARG NODE_VERSION=22.23.5
-ENV NVM_DIR=/usr/local/nvm
-ENV NODE_PATH=$NVM_DIR/v$NODE_VERSION/lib/node_modules
-ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
-RUN mkdir $NVM_DIR
-RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
-    && . $NVM_DIR/nvm.sh \
-    && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION \
-    && nvm use default
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    tzdata git build-essential patch ruby-dev zlib1g-dev liblzma-dev default-jre \
-    sudo vim nano tmux wget
-
-# Install Chromium (ARM-compatible)
-RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-driver \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libpq5 \
+    libyaml-0-2 \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Retrieve application code
-COPY . .
-RUN if [ "$BUILD_IMAGE" = "true" ]; then \
-      rm -rf ./{*,.*} \
-      && wget https://github.com/berkmancenter/timetracker/archive/refs/tags/${APP_VERSION}.tar.gz \
-      && tar -xzf ${APP_VERSION}.tar.gz --strip-components=1 \
-      && rm ${APP_VERSION}.tar.gz; \
-    fi
-
-# Root context
-RUN npm install --global yarn
-
-# Create a user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
+    && mkdir -p /app /home/$USERNAME/hist \
+    && chown -R $USERNAME:$USERNAME /app /home/$USERNAME/hist
 
-USER $USERNAME
+WORKDIR /app
 
-RUN sudo chown -R $USERNAME:$USERNAME /app
+# ---------------------------------------------------------------------------
+# 2. Front-end builder (Node + Yarn)
+# ---------------------------------------------------------------------------
+FROM node:${NODE_VERSION}-slim AS frontend-builder
 
-# Install node modules
-COPY package.json yarn.lock ./
+WORKDIR /app/front
+
+COPY front/package.json front/yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-# Install and cache gems
-RUN sudo gem update --system
-RUN bundle install
-RUN sudo gem install mailcatcher
+COPY front/ ./
 
-# Precompile bootsnap code for faster boot times
-RUN bundle exec bootsnap precompile app/ lib/
+ARG VITE_API_URL=""
+ARG VITE_AUTH_TYPE="db"
+ARG VITE_BASE_PATH="/"
+ARG VITE_ENVIRONMENT="production"
 
-# To be able to create a .bash_history
-WORKDIR /home/timetracker/hist
-RUN sudo chown -R $USERNAME:$USERNAME /home/timetracker/hist
+ENV VITE_API_URL=${VITE_API_URL} \
+    VITE_AUTH_TYPE=${VITE_AUTH_TYPE} \
+    VITE_BASE_PATH=${VITE_BASE_PATH} \
+    VITE_ENVIRONMENT=${VITE_ENVIRONMENT}
 
-# Code mounted as a volume
-WORKDIR /app
+RUN mkdir -p /app/public \
+    && yarn run build --base="${VITE_BASE_PATH:-/}" \
+    && mv dist/index.html /app/public/index_f.html \
+    && cp -R dist/front_assets /app/public/front_assets
+
+# ---------------------------------------------------------------------------
+# 3. Production Ruby builder (prod gems, Rails assets, bootsnap)
+# ---------------------------------------------------------------------------
+FROM base AS ruby-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    libffi-dev \
+    liblzma-dev \
+    libpq-dev \
+    libssl-dev \
+    libyaml-dev \
+    pkg-config \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node is only needed during asset precompilation (ExecJS/Terser)
+COPY --from=frontend-builder /usr/local/bin/node /usr/local/bin/node
+
+ENV RAILS_ENV=production \
+    BUNDLE_WITHOUT="development:test"
+
+# The Bundler version from Gemfile.lock, the Ruby image comes with an older one
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler --no-document -v "$(awk '/^BUNDLED WITH/ { getline; print $1 }' Gemfile.lock)" \
+    && bundle install \
+    && rm -rf /usr/local/bundle/cache/*.gem /usr/local/bundle/ruby/*/cache/*.gem
+
+COPY . .
+COPY --from=frontend-builder /app/front/node_modules/bulma /app/front/node_modules/bulma
+
+# Leave in /app only what the production image needs, it copies all of it
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile \
+    && bundle exec bootsnap precompile --gemfile app/ lib/ \
+    && rm -rf front spec tmp/cache/assets
+
+# ---------------------------------------------------------------------------
+# 4. Development & test image
+# ---------------------------------------------------------------------------
+FROM base AS dev
+
+ARG USERNAME=timetracker
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    chromium \
+    chromium-driver \
+    curl \
+    git \
+    libffi-dev \
+    liblzma-dev \
+    libpq-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libyaml-dev \
+    pkg-config \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Bring Node and Yarn from frontend-builder without touching Ruby in /usr/local
+COPY --from=frontend-builder /usr/local/bin/node /usr/local/bin/node
+COPY --from=frontend-builder /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && npm install --global yarn
+
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler --no-document -v "$(awk '/^BUNDLED WITH/ { getline; print $1 }' Gemfile.lock)" \
+    && bundle install \
+    && gem install mailcatcher
+
+COPY --chown=${USERNAME}:${USERNAME} . .
+COPY --from=frontend-builder --chown=${USERNAME}:${USERNAME} /app/front/node_modules /app/front/node_modules
+
+RUN bundle exec bootsnap precompile --gemfile app/ lib/ \
+    && chown -R ${USERNAME}:${USERNAME} /app/tmp /app/log /usr/local/bundle
+
 COPY docker/entrypoint.sh /usr/bin/timetracker-entrypoint
+RUN chmod +x /usr/bin/timetracker-entrypoint
 
-# Start the server by default, this can be overwritten at runtime
+USER ${USERNAME}
+
 ENTRYPOINT ["timetracker-entrypoint"]
-CMD ["sh", "-c", "./bin/rails server"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
+
+# ---------------------------------------------------------------------------
+# 5. Production runtime image (default)
+# ---------------------------------------------------------------------------
+FROM base AS production
+
+ARG USERNAME=timetracker
+
+ENV RAILS_ENV=production \
+    APP_ENV=production \
+    BUNDLE_WITHOUT="development:test"
+
+COPY --from=ruby-builder /usr/local/bundle /usr/local/bundle
+COPY --from=ruby-builder --chown=${USERNAME}:${USERNAME} /app /app
+COPY --from=frontend-builder --chown=${USERNAME}:${USERNAME} /app/public/index_f.html /app/public/index_f.html
+COPY --from=frontend-builder --chown=${USERNAME}:${USERNAME} /app/public/front_assets /app/public/front_assets
+
+COPY docker/entrypoint.sh /usr/bin/timetracker-entrypoint
+RUN chmod +x /usr/bin/timetracker-entrypoint
+
+USER ${USERNAME}
+
+EXPOSE 3000
+ENTRYPOINT ["timetracker-entrypoint"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
