@@ -25,7 +25,7 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
 
   # Raise exceptions instead of rendering exception templates.
-  config.action_dispatch.show_exceptions = false
+  config.action_dispatch.show_exceptions = :none
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
@@ -59,9 +59,6 @@ Rails.application.configure do
   # Don't cache anything in tests - this can cause data persistence between
   # test runs, resulting in random failures.
   config.cache_store = :null_store
-
-  # Store uploaded files on the local file system in a temporary directory.
-  config.active_storage.service = :test
 
   config.maintain_test_schema = false
 end
