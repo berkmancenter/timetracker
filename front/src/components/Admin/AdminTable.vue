@@ -27,15 +27,22 @@
   table.table.admin-table {
     width: 100%;
 
+    th {
+      vertical-align: middle;
+    }
+
     th.admin-table-sortable {
+      position: relative;
+      padding-right: 1.5rem;
       cursor: pointer;
       user-select: none;
-      white-space: nowrap;
 
       &::after {
         content: '';
-        float: right;
-        margin-top: 7px;
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
         border-width: 0 4px 4px;
         border-style: solid;
         border-color: #404040 transparent;

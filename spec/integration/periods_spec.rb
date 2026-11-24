@@ -274,4 +274,61 @@ feature 'Timesheet periods' do
     expect(page).to have_selector('.tracker-entries-entry', text: 'Integration project')
     expect(page).to have_link('Go back to list period stats')
   end
+
+  scenario 'statistics table headers do not overlap each other', js: true do
+    admin_membership = signed_in_user_with_timesheet
+    timesheet = admin_membership.timesheet
+    member = create(:user, first_name: 'Jonas', last_name: 'Weber', email: 'jonas@demo.timetracker.test')
+    create(:users_timesheet, user: member, timesheet: timesheet, role: 'user')
+    period = create(
+      :period,
+      timesheet: timesheet,
+      name: 'Current term',
+      from: Date.new(2026, 8, 1),
+      to: Date.new(2026, 8, 31)
+    )
+    funding = create(:custom_field, customizable: period, machine_name: 'funding_source', title: 'Funding source')
+    supervisor = create(:custom_field, customizable: period, machine_name: 'supervisor', title: 'Supervisor')
+    create(:credit, user: member, period: period, amount: 136)
+    create(:time_entry, user: member, timesheet: timesheet, entry_date: Date.new(2026, 8, 20), decimal_time: 80)
+    create(:time_entry, user: member, timesheet: timesheet, entry_date: Date.new(2026, 8, 21), decimal_time: 72.5)
+    create(:custom_field_data_item, custom_field: funding, owner: member, value: 'Department fellowship')
+    create(:custom_field_data_item, custom_field: supervisor, owner: member, value: 'Maya Chen')
+
+    visit front_path("admin/timesheets/#{timesheet.id}/periods/#{period.id}/stats")
+
+    expect(page).to have_selector('.admin-periods-stats-table thead th', text: 'Supervisor')
+    expect(page).to have_selector('.admin-periods-stats-table tbody td', text: 'Department fellowship')
+
+    header_metrics = page.evaluate_script(<<~JS)
+      Array.from(document.querySelectorAll('.admin-periods-stats-table thead th')).map((th) => {
+        const cellRect = th.getBoundingClientRect()
+        const style = window.getComputedStyle(th)
+        const range = document.createRange()
+        range.selectNodeContents(th)
+        const textRect = range.getBoundingClientRect()
+
+        return {
+          text: th.textContent.trim(),
+          cellLeft: cellRect.left,
+          cellRight: cellRect.right,
+          paddingRight: parseFloat(style.paddingRight),
+          textLeft: textRect.left,
+          textRight: textRect.right,
+          scrollWidth: th.scrollWidth,
+          clientWidth: th.clientWidth,
+        }
+      })
+    JS
+
+    expect(header_metrics.length).to eq(9)
+    header_metrics.each do |header|
+      expect(header['textRight']).to be <= (header['cellRight'] - header['paddingRight'] + 1),
+        "Header #{header['text'].inspect} overflows its cell content box: #{header.inspect}"
+    end
+    header_metrics.each_cons(2) do |left_header, right_header|
+      expect(left_header['textRight']).to be < right_header['textLeft'],
+        "Header #{left_header['text'].inspect} overlaps #{right_header['text'].inspect}: #{left_header.inspect} vs #{right_header.inspect}"
+    end
+  end
 end

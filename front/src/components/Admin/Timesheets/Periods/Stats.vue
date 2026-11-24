@@ -34,12 +34,12 @@
       <thead>
         <tr class="no-select">
           <th class="admin-periods-stats-table-email admin-table-sortable" :aria-sort="ariaSortFor('identifier')" @click="sortBy('identifier')">Identifier</th>
-          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('credits')" @click="sortBy('credits')">Hours</th>
-          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('total_hours')" @click="sortBy('total_hours')">Total hours</th>
-          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('should_hours')" @click="sortBy('should_hours')">Should have now</th>
-          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('balance')" @click="sortBy('balance')">Balance</th>
-          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('balance_percent')" @click="sortBy('balance_percent')">Balance percentage</th>
-          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('last_entry_date')" @click="sortBy('last_entry_date')">Last entry date</th>
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('credits')" @click="sortBy('credits')">Hours</th>
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('total_hours')" @click="sortBy('total_hours')">Total hours</th>
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('should_hours')" @click="sortBy('should_hours')">Should have now</th>
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('balance')" @click="sortBy('balance')">Balance</th>
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('balance_percent')" @click="sortBy('balance_percent')">Balance percentage</th>
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('last_entry_date')" @click="sortBy('last_entry_date')">Last entry date</th>
           <th v-for="field in customFields"
               :key="field.id"
               class="admin-periods-stats-table-custom-field admin-table-sortable"
@@ -284,10 +284,6 @@
     }
 
     &-table {
-      &-narrow-cell {
-        max-width: 6rem;
-      }
-
       &-email {
         min-width: 10rem;
       }
