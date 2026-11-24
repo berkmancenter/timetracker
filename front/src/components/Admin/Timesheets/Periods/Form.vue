@@ -46,7 +46,6 @@
 </template>
 
 <script>
-  import Icon from '@/components/Shared/Icon.vue'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
   import CustomFields from '@/components/Shared/CustomFields.vue'
   import dayjs from 'dayjs'
@@ -54,14 +53,8 @@
   export default {
     name: 'AdminPeriodsForm',
     components: {
-      Icon,
       Breadcrumbs,
       CustomFields,
-    },
-    data() {
-      return {
-        timesheets: [],
-      }
     },
     computed: {
       title() {
@@ -85,7 +78,7 @@
 
         breadcrumbs.push({
           text: 'Periods',
-          link: `/admin/timesheets/${this.$store.state.admin?.timesheet?.id}/periods`,
+          link: `/admin/timesheets/${this.$route.params.timesheet_id}/periods`,
         })
 
         if (this.$route.params.id) {
@@ -111,7 +104,6 @@
     },
     methods: {
       async initialDataLoad() {
-        this.timesheets = await this.$store.dispatch('admin/fetchAdminTimesheets')
         const timesheet = await this.$store.dispatch('admin/fetchTimesheet', this.$route.params.timesheet_id)
         this.$store.dispatch('admin/setTimesheet', timesheet)
 

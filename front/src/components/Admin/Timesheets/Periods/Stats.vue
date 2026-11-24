@@ -30,36 +30,35 @@
 
     <SuperAdminFilter :users="$store.state.admin.periodStats?.stats" @change="superAdminFilterChanged" />
 
-    <AdminTable :tableClasses="['admin-periods-stats-table']" :forceSortingRefresh="$store.state.admin.periodStats?.period?.custom_fields">
+    <AdminTable :tableClasses="['admin-periods-stats-table']">
       <thead>
         <tr class="no-select">
-          <th class="admin-periods-stats-table-email">Identifier</th>
-          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Hours</th>
-          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Total hours</th>
-          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Should have now</th>
-          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance</th>
-          <th data-sort-method="number" class="admin-periods-stats-table-narrow-cell">Balance percentage</th>
-          <th class="admin-periods-stats-table-narrow-cell">Last entry date</th>
+          <th class="admin-periods-stats-table-email admin-table-sortable" :aria-sort="ariaSortFor('identifier')" @click="sortBy('identifier')">Identifier</th>
+          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('credits')" @click="sortBy('credits')">Hours</th>
+          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('total_hours')" @click="sortBy('total_hours')">Total hours</th>
+          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('should_hours')" @click="sortBy('should_hours')">Should have now</th>
+          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('balance')" @click="sortBy('balance')">Balance</th>
+          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('balance_percent')" @click="sortBy('balance_percent')">Balance percentage</th>
+          <th class="admin-periods-stats-table-narrow-cell admin-table-sortable" :aria-sort="ariaSortFor('last_entry_date')" @click="sortBy('last_entry_date')">Last entry date</th>
           <th v-for="field in customFields"
               :key="field.id"
-              class="admin-periods-stats-table-custom-field"
+              class="admin-periods-stats-table-custom-field admin-table-sortable"
+              :aria-sort="ariaSortFor(`custom_field_${field.id}`)"
+              @click="sortBy(`custom_field_${field.id}`)"
           >
             {{ field.title }}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="periodStat in filteredItems" @click="openPeriodUserInTracker(periodStat)">
+        <tr v-for="periodStat in sortedItems" :key="periodStat.user_id" @click="openPeriodUserInTracker(periodStat)">
           <td>{{ getUserIdentifier(periodStat) }}</td>
           <td class="no-break">{{ periodStat.credits }}</td>
           <td class="no-break">{{ periodStat.total_hours }}</td>
           <td class="no-break">{{ periodStat.should_hours }}</td>
-          <td class="admin-periods-stats-period-balance no-break" :class="{ 'admin-periods-stats-period-negative-balance': periodStat.balance < 0 }">{{ periodStat.balance }}</td>
+          <td class="admin-periods-stats-period-balance no-break" :class="{ 'admin-periods-stats-period-negative-balance': Number(periodStat.balance) < 0 }">{{ periodStat.balance }}</td>
           <td class="no-break">{{ periodStat.balance_percent }}</td>
-          <td class="no-break">
-            <div class="is-hidden">{{ periodStat.last_entry_date }}</div>
-            {{ formatLastEntryDate(periodStat.last_entry_date) }}
-          </td>
+          <td class="no-break">{{ formatLastEntryDate(periodStat.last_entry_date) }}</td>
           <td v-for="field in customFields"
               :key="`${periodStat.user_id}-${field.id}`"
               class="no-break"
@@ -92,8 +91,16 @@
   import filterIcon from '@/images/filters.svg'
   import downloadIcon from '@/images/download_main.svg'
 
-  import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
+  import { ariaSort, nextSortState, sortRows } from '@/lib/table-sort.js'
   import { getUserIdentifier } from '@/lib/user.js'
+
+  const NUMERIC_SORT_KEYS = new Set([
+    'credits',
+    'total_hours',
+    'should_hours',
+    'balance',
+    'balance_percent',
+  ])
 
   export default {
     name: 'AdminPeriodsStats',
@@ -114,7 +121,7 @@
         showFilterModal: false,
         downloadIcon,
         filterIcon,
-        formatIsoDateTimeToLocaleString,
+        sort: { key: null, direction: 'asc' },
         getUserIdentifier,
       }
     },
@@ -133,7 +140,7 @@
 
         breadcrumbs.push({
           text: 'Periods',
-          link: `/admin/timesheets/${this.$store.state.admin?.timesheet?.id}/periods`,
+          link: `/admin/timesheets/${this.$route.params.timesheet_id}/periods`,
         })
 
         breadcrumbs.push({
@@ -159,11 +166,42 @@
 
         return this.roleFilteredItems.filter(item => matches.has(item))
       },
+      sortedItems() {
+        const key = this.sort.key
+        if (!key) {
+          return this.filteredItems
+        }
+
+        let type = 'string'
+        if (NUMERIC_SORT_KEYS.has(key)) {
+          type = 'number'
+        } else if (key === 'last_entry_date') {
+          type = 'date'
+        } else if (key.startsWith('custom_field_')) {
+          const field = this.customFields.find((item) => `custom_field_${item.id}` === key)
+          if (field?.input_type === 'number') {
+            type = 'number'
+          }
+        }
+
+        return sortRows(this.filteredItems, {
+          key,
+          direction: this.sort.direction,
+          type,
+          getValue: key === 'identifier' ? getUserIdentifier : undefined,
+        })
+      },
     },
     created() {
       this.initialDataLoad()
     },
     methods: {
+      sortBy(key) {
+        this.sort = nextSortState(this.sort, key)
+      },
+      ariaSortFor(key) {
+        return ariaSort(this.sort, key)
+      },
       initialDataLoad() {
         this.loadStats()
       },
@@ -184,6 +222,11 @@
         this.roleFilteredItems = users
       },
       getCsv() {
+        if (this.filteredItems.length === 0) {
+          this.awn?.warning('No records to export.')
+          return
+        }
+
         const usersIds = this.filteredItems
           .map(user => user.user_id)
           .join(',')

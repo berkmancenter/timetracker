@@ -98,4 +98,61 @@ describe('StatsFilters', () => {
     expect(wrapper.vm.filterValues.identifier).toBe('')
     expect(wrapper.vm.filterValues.customFields).toEqual({ 4: '' })
   })
+
+  it('excludes rows without last_entry_date when a date filter is set', () => {
+    const wrapper = mount(StatsFilters, {
+      props: {
+        modelValue: true,
+        periodStats: [
+          ...periodStats,
+          { user_id: 3, email: 'nobody@example.com', last_entry_date: null },
+        ],
+      },
+      global: {
+        stubs: {
+          Modal: { template: '<div><slot /></div>' },
+        },
+      },
+    })
+
+    wrapper.vm.filterValues.minLastEntryDate = '05/01/2026'
+    wrapper.vm.applyFilters()
+
+    expect(wrapper.emitted('filter-applied')[0][0].map((item) => item.user_id)).toEqual([1, 2])
+  })
+
+  it('handles unpadded dates consistently in time zones west of UTC', () => {
+    const timeZone = process.env.TZ
+    process.env.TZ = 'America/New_York'
+
+    try {
+      const wrapper = mountFilters()
+      wrapper.vm.filterValues.minLastEntryDate = '5/10/2026'
+      wrapper.vm.filterValues.maxLastEntryDate = '5/10/2026'
+      wrapper.vm.applyFilters()
+
+      expect(wrapper.emitted('filter-applied')[0][0].map((item) => item.user_id)).toEqual([1])
+    } finally {
+      process.env.TZ = timeZone
+    }
+  })
+
+  it('initializes custom field filters when customFields prop arrives later', async () => {
+    const wrapper = mount(StatsFilters, {
+      props: {
+        modelValue: true,
+        customFields: [],
+        periodStats,
+      },
+      global: {
+        stubs: {
+          Modal: { template: '<div><slot /></div>' },
+        },
+      },
+    })
+
+    await wrapper.setProps({ customFields: [{ id: 9, title: 'Department', input_type: 'text' }] })
+
+    expect(wrapper.vm.filterValues.customFields).toEqual({ 9: '' })
+  })
 })

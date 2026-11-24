@@ -35,18 +35,18 @@
     <AdminTable :tableClasses="['admin-periods-credits-table']">
       <thead>
         <tr class="no-select">
-          <th data-sort-method="none" class="no-sort">
+          <th>
             <input type="checkbox" ref="toggleAllCheckbox" @click="toggleAll()">
           </th>
-          <th>Identifier</th>
-          <th data-sort-method="none" class="no-sort">Hours</th>
-          <th v-for="field in customFields" :key="field.id" data-sort-method="none" class="no-sort">
+          <th class="admin-table-sortable" :aria-sort="ariaSortFor('identifier')" @click="sortBy('identifier')">Identifier</th>
+          <th>Hours</th>
+          <th v-for="field in customFields" :key="field.id">
             {{ field.title }}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="periodCredit in filteredItems" :key="periodCredit.user_id">
+        <tr v-for="periodCredit in sortedItems" :key="periodCredit.user_id">
           <td class="admin-table-selector">
             <input type="checkbox" v-model="periodCredit.selected">
           </td>
@@ -91,6 +91,7 @@
   import saveSelectedIcon from '@/images/selected_main.svg'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
+  import { ariaSort, nextSortState, sortRows } from '@/lib/table-sort.js'
   import { getUserIdentifier } from '@/lib/user.js'
 
   export default {
@@ -111,10 +112,19 @@
         saveSelectedIcon,
         saveSelectedDisabled: false,
         saveAllDisabled: false,
+        sort: { key: null, direction: 'asc' },
         getUserIdentifier,
       }
     },
     computed: {
+      sortedItems() {
+        return sortRows(this.filteredItems, {
+          key: this.sort.key,
+          direction: this.sort.direction,
+          type: 'string',
+          getValue: this.sort.key === 'identifier' ? getUserIdentifier : undefined,
+        })
+      },
       breadcrumbs() {
         let breadcrumbs = []
 
@@ -129,7 +139,7 @@
 
         breadcrumbs.push({
           text: 'Periods',
-          link: `/admin/timesheets/${this.$store.state.admin?.timesheet?.id}/periods`,
+          link: `/admin/timesheets/${this.$route.params.timesheet_id}/periods`,
         })
 
         breadcrumbs.push({
@@ -150,6 +160,12 @@
       this.initialDataLoad()
     },
     methods: {
+      sortBy(key) {
+        this.sort = nextSortState(this.sort, key)
+      },
+      ariaSortFor(key) {
+        return ariaSort(this.sort, key)
+      },
       initialDataLoad() {
         this.loadCredits()
       },
@@ -197,12 +213,9 @@
       toggleAll() {
         const newStatus = this.$refs.toggleAllCheckbox.checked
 
-        this.$store.state.admin.periodCredits.credits
-          .map((credit) => {
-            credit.selected = newStatus
-
-            return credit
-          })
+        this.filteredItems.forEach((credit) => {
+          credit.selected = newStatus
+        })
       },
       async saveCreditsAll() {
         this.mitt.emit('spinnerStart')
@@ -261,6 +274,9 @@
       },
       superAdminFilterChanged(users) {
         this.filteredItems = users
+        if (this.$refs.toggleAllCheckbox) {
+          this.$refs.toggleAllCheckbox.checked = false
+        }
       },
     },
   }

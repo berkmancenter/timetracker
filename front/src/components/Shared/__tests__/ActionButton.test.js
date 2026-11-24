@@ -57,4 +57,36 @@ describe('ActionButton', () => {
 
     expect(onClick).toHaveBeenCalledOnce()
   })
+
+  it('blocks clicks when disabled on link and button variants', async () => {
+    const linkClick = vi.fn()
+    const linkWrapper = mount(ActionButton, {
+      props: {
+        buttonText: 'Save',
+        disabled: true,
+        onClick: linkClick,
+      },
+    })
+
+    expect(linkWrapper.element.tagName).toBe('A')
+    expect(linkWrapper.attributes('aria-disabled')).toBe('true')
+    expect(linkWrapper.attributes('tabindex')).toBe('-1')
+    expect(linkWrapper.classes()).toContain('is-disabled')
+
+    await linkWrapper.trigger('click')
+    expect(linkClick).not.toHaveBeenCalled()
+
+    const buttonClick = vi.fn()
+    const buttonWrapper = mount(ActionButton, {
+      props: {
+        button: true,
+        buttonText: 'Save',
+        disabled: true,
+        onClick: buttonClick,
+      },
+    })
+
+    await buttonWrapper.trigger('click')
+    expect(buttonClick).not.toHaveBeenCalled()
+  })
 })

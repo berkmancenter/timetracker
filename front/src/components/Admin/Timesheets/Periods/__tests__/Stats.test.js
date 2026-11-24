@@ -46,6 +46,7 @@ function createStore() {
 function mountStats(store = createStore()) {
   const push = vi.fn()
   const emit = vi.fn()
+  const awn = { warning: vi.fn() }
   const wrapper = mount(Stats, {
     global: {
       mocks: {
@@ -53,6 +54,7 @@ function mountStats(store = createStore()) {
         $route: { params: { timesheet_id: '9', id: '2' } },
         $router: { push },
         mitt: { emit },
+        awn,
       },
       stubs: {
         Breadcrumbs: { props: ['crumbs'], template: '<nav>{{ crumbs.map(c => c.text).join(" / ") }}</nav>' },
@@ -64,7 +66,7 @@ function mountStats(store = createStore()) {
     },
   })
 
-  return { wrapper, store, push, emit }
+  return { wrapper, store, push, emit, awn }
 }
 
 describe('Admin Period Stats', () => {
@@ -125,5 +127,37 @@ describe('Admin Period Stats', () => {
     // Changing the tab keeps the filter
     wrapper.vm.superAdminFilterChanged([ada, grace, linus])
     expect(wrapper.vm.filteredItems.map(item => item.user_id)).toEqual([1, 2])
+  })
+
+  it('blocks CSV export and warns when no records match filters', () => {
+    const { wrapper, awn } = mountStats()
+    wrapper.vm.superAdminFilterChanged([])
+
+    wrapper.vm.getCsv()
+
+    expect(awn.warning).toHaveBeenCalledWith('No records to export.')
+  })
+
+  it('sorts stats by numeric, date, and custom field columns', async () => {
+    const { wrapper } = mountStats()
+    const rows = [
+      { user_id: 1, email: 'z@example.com', credits: 10, balance: -2, last_entry_date: null, custom_field_4: 'Beta' },
+      { user_id: 2, email: 'a@example.com', credits: 2, balance: 5, last_entry_date: '2026-05-12', custom_field_4: 'Alpha' },
+      { user_id: 3, email: 'm@example.com', credits: 8, balance: -10, last_entry_date: '2026-05-01', custom_field_4: 'Gamma' },
+    ]
+    wrapper.vm.superAdminFilterChanged(rows)
+    await wrapper.vm.$nextTick()
+
+    wrapper.vm.sortBy('credits')
+    expect(wrapper.vm.sortedItems.map((r) => r.user_id)).toEqual([2, 3, 1])
+
+    wrapper.vm.sortBy('balance')
+    expect(wrapper.vm.sortedItems.map((r) => r.user_id)).toEqual([3, 1, 2])
+
+    wrapper.vm.sortBy('last_entry_date')
+    expect(wrapper.vm.sortedItems.map((r) => r.user_id)).toEqual([3, 2, 1])
+
+    wrapper.vm.sortBy('custom_field_4')
+    expect(wrapper.vm.sortedItems.map((r) => r.user_id)).toEqual([2, 1, 3])
   })
 })

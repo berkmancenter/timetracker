@@ -13,7 +13,6 @@ function createStore(period = { id: 2, name: 'Spring', from: '2026-05-01', to: '
     },
   }
   const dispatch = vi.fn(async (action) => {
-    if (action === 'admin/fetchAdminTimesheets') return [state.admin.timesheet]
     if (action === 'admin/fetchTimesheet') return state.admin.timesheet
     if (action === 'admin/fetchPeriod') return period
     if (action === 'admin/savePeriod') return response
@@ -40,7 +39,6 @@ function mountForm({ id, store = createStore() } = {}) {
         Breadcrumbs: { props: ['crumbs'], template: '<nav>{{ crumbs.map(c => c.text).join(" / ") }}</nav>' },
         CustomFields: { template: '<div class="custom-fields-stub" />' },
         DatePicker: { template: '<input>' },
-        Icon: true,
       },
     },
   })
@@ -56,12 +54,13 @@ describe('Admin Periods Form', () => {
     await flushPromises()
 
     expect(store.dispatch).toHaveBeenCalledWith('admin/clearPeriod')
-    expect(store.dispatch).toHaveBeenCalledWith('admin/fetchAdminTimesheets')
+    expect(store.dispatch).not.toHaveBeenCalledWith('admin/fetchAdminTimesheets')
     expect(store.dispatch).toHaveBeenCalledWith('admin/fetchTimesheet', '9')
     expect(store.dispatch).toHaveBeenCalledWith('admin/fetchPeriod', { timesheetId: '9', periodId: '2' })
     expect(store.dispatch).toHaveBeenCalledWith('admin/setPeriod', expect.objectContaining({ from: 'May 1, 2026', to: 'May 31, 2026' }))
     expect(emit).toHaveBeenCalledWith('spinnerStop')
     expect(wrapper.vm.title).toBe('Edit period')
+    expect(wrapper.vm.breadcrumbs.find((c) => c.text === 'Periods')?.link).toBe('/admin/timesheets/9/periods')
   })
 
   it('keeps the same dates in time zones west of UTC', async () => {

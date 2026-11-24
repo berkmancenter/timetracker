@@ -2,13 +2,16 @@
   <component
     :is="tagName"
     class="tracker-action-button button"
-    :class="{ 
+    :class="{
       'tracker-action-button-active': active,
       'tracker-action-button-icon-left': iconPosition === 'left' && hasButtonText,
-      'tracker-action-button-icon-right': iconPosition === 'right' && hasButtonText
+      'tracker-action-button-icon-right': iconPosition === 'right' && hasButtonText,
+      'is-disabled': disabled,
     }"
     @click="handleClick"
-    v-bind:disabled="disabled ? true : null"
+    :disabled="button && disabled ? true : null"
+    :aria-disabled="disabled ? 'true' : null"
+    :tabindex="!button && disabled ? -1 : null"
   >
     <Icon :src="icon" :interactive="false" v-if="icon && iconPosition === 'left'" />
     <div>{{ buttonText }}</div>
@@ -57,9 +60,15 @@ export default {
     }
   },
   methods: {
-    handleClick() {
+    handleClick(event) {
+      if (this.disabled) {
+        event?.preventDefault()
+        event?.stopPropagation()
+        return
+      }
+
       if (typeof this.onClick === 'function') {
-        this.onClick()
+        this.onClick(event)
       }
     },
   },
@@ -72,6 +81,11 @@ export default {
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
+
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   > * {
     height: 100%;

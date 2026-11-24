@@ -72,16 +72,36 @@ describe('Admin Period Credits', () => {
     expect(wrapper.vm.customFields).toEqual([{ id: 4, title: 'Project', input_type: 'text' }])
   })
 
-  it('toggles all credits and updates custom field values', async () => {
+  it('toggles only visible filtered credits and resets toggle-all on tab change', async () => {
     const { wrapper, store } = mountCredits()
     await flushPromises()
+    const [first, second] = store.state.admin.periodCredits.credits
+    second.selected = false
+    wrapper.vm.superAdminFilterChanged([first])
 
     wrapper.vm.$refs.toggleAllCheckbox.checked = true
     wrapper.vm.toggleAll()
-    expect(store.state.admin.periodCredits.credits.every((credit) => credit.selected)).toBe(true)
+    expect(first.selected).toBe(true)
+    expect(second.selected).toBe(false)
 
-    wrapper.vm.updateCustomFieldValue(store.state.admin.periodCredits.credits[0], { id: 4 }, 'Research')
-    expect(store.state.admin.periodCredits.credits[0].custom_field_4).toBe('Research')
+    wrapper.vm.superAdminFilterChanged([second])
+    expect(wrapper.vm.$refs.toggleAllCheckbox.checked).toBe(false)
+
+    wrapper.vm.updateCustomFieldValue(first, { id: 4 }, 'Research')
+    expect(first.custom_field_4).toBe('Research')
+  })
+
+  it('sorts rows by identifier when header is clicked', async () => {
+    const { wrapper, store } = mountCredits()
+    await flushPromises()
+    wrapper.vm.superAdminFilterChanged(store.state.admin.periodCredits.credits)
+
+    const identifierHeader = wrapper.find('th.admin-table-sortable')
+    await identifierHeader.trigger('click')
+    expect(wrapper.vm.sortedItems.map((c) => c.email)).toEqual(['ada@example.com', 'grace@example.com'])
+
+    await identifierHeader.trigger('click')
+    expect(wrapper.vm.sortedItems.map((c) => c.email)).toEqual(['grace@example.com', 'ada@example.com'])
   })
 
   it('saves all visible credits', async () => {

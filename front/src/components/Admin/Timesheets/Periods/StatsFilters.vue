@@ -161,6 +161,28 @@ import Modal from '@/components/Shared/Modal.vue'
 // The same identifier as in the stats table, so searching by a shown name works
 import { getUserIdentifier } from '@/lib/user.js'
 
+function parseFilterDateToIso(input) {
+  if (!input) return null
+
+  const match = String(input).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if (!match) return null
+
+  const month = Number(match[1])
+  const day = Number(match[2])
+  const year = Number(match[3])
+  const candidate = new Date(Date.UTC(year, month - 1, day))
+
+  if (
+    candidate.getUTCFullYear() !== year ||
+    candidate.getUTCMonth() !== month - 1 ||
+    candidate.getUTCDate() !== day
+  ) {
+    return null
+  }
+
+  return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
 export default {
   name: 'StatsFilters',
   components: {
@@ -199,11 +221,17 @@ export default {
       }
     }
   },
-  created() {
-    // Initialize customFields object with empty values
-    this.customFields.forEach(field => {
-      this.filterValues.customFields[field.id] = ''
-    })
+  watch: {
+    customFields: {
+      immediate: true,
+      handler(fields) {
+        fields.forEach(field => {
+          if (!(field.id in this.filterValues.customFields)) {
+            this.filterValues.customFields[field.id] = ''
+          }
+        })
+      },
+    },
   },
   methods: {
     getInputType(field) {
@@ -216,6 +244,9 @@ export default {
       }
     },
     applyFilters() {
+      const minDateIso = parseFilterDateToIso(this.filterValues.minLastEntryDate)
+      const maxDateIso = parseFilterDateToIso(this.filterValues.maxLastEntryDate)
+
       const filteredItems = this.periodStats.filter(item => {
         // Identifier filter
         if (this.filterValues.identifier && !getUserIdentifier(item).toLowerCase().includes(this.filterValues.identifier.toLowerCase())) {
@@ -254,28 +285,23 @@ export default {
           return false
         }
 
-        // Last entry date filters
-        if (this.filterValues.minLastEntryDate && item.last_entry_date) {
-          const minDateParts = this.filterValues.minLastEntryDate.split('/')
-          if (minDateParts.length === 3) {
-            const minDate = new Date(`${minDateParts[2]}-${minDateParts[0]}-${minDateParts[1]}`)
-            const itemDate = new Date(item.last_entry_date)
-            if (itemDate < minDate) return false
+        // Last entry date filters (compare YYYY-MM-DD strings to avoid timezone drift)
+        if (minDateIso || maxDateIso) {
+          if (!item.last_entry_date) {
+            return false
           }
-        }
-        if (this.filterValues.maxLastEntryDate && item.last_entry_date) {
-          const maxDateParts = this.filterValues.maxLastEntryDate.split('/')
-          if (maxDateParts.length === 3) {
-            const maxDate = new Date(`${maxDateParts[2]}-${maxDateParts[0]}-${maxDateParts[1]}`)
-            const itemDate = new Date(item.last_entry_date)
-            if (itemDate > maxDate) return false
+          if (minDateIso && item.last_entry_date < minDateIso) {
+            return false
+          }
+          if (maxDateIso && item.last_entry_date > maxDateIso) {
+            return false
           }
         }
 
         // Custom fields filters
         for (const fieldId in this.filterValues.customFields) {
           const filterValue = this.filterValues.customFields[fieldId]
-          if (filterValue !== '') {
+          if (filterValue !== '' && filterValue !== null && filterValue !== undefined) {
             const fieldKey = `custom_field_${fieldId}`
             const itemValue = item[fieldKey] || ''
             
