@@ -69,8 +69,8 @@ PostgreSQL, settings in [config/database.yml](../config/database.yml).
 ## Authentication
 
 `DEVISE_AUTH_TYPE` picks how people sign in: `db` (default), `cas`, `saml` or
-`headers`. The front-end needs the same value in `VITE_AUTH_TYPE`, it uses it
-to sign out the right way.
+`headers`. Rails puts it in the front-end page, the front-end uses it to sign
+out the right way (`VITE_AUTH_TYPE` is only for the Vite dev server).
 
 ### Database (`db`)
 
@@ -172,7 +172,7 @@ them as build arguments when it's built (`docker build --build-arg`, or the
 | Variable | Default | |
 | --- | --- | --- |
 | `VITE_API_URL` | | the address of the app the front-end talks to, e.g. `http://127.0.0.1:6868`, empty: the address of the page |
-| `VITE_AUTH_TYPE` | | the same as `DEVISE_AUTH_TYPE` |
+| `VITE_AUTH_TYPE` | | the same as `DEVISE_AUTH_TYPE`, only used on the Vite dev server (pages from Rails say how people sign in) |
 | `VITE_BASE_PATH` | `/` | when the app runs in a sub folder, e.g. `/timetracker/` |
 | `VITE_ENVIRONMENT` | | `development`: requests send cookies to another origin too (for the Vite dev server) |
 

@@ -9,9 +9,21 @@ RSpec.describe FrontController, type: :controller do
         sign_in user
       end
 
-      it 'renders the index_f.html template' do
+      it 'renders the index_f.html page' do
         get :index
-        expect(response.body).to eq(File.read(Rails.root.join('public', 'index_f.html')))
+        page = File.read(Rails.root.join('public', 'index_f.html'))
+
+        expect(response.body).to include(page.split('</head>').last)
+        expect(response.media_type).to eq('text/html')
+      end
+
+      it 'tells the front-end how people sign in' do
+        allow(Rails.application.config).to receive(:devise_auth_type).and_return('cas')
+
+        get :index
+
+        meta = Nokogiri::HTML(response.body).at('head meta[name="timetracker-auth-type"]')
+        expect(meta['content']).to eq('cas')
       end
 
       it 'does not use a layout' do

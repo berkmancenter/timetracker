@@ -50,4 +50,24 @@ describe('shared store', () => {
     await expect(shared.actions.fetchUser({})).resolves.toEqual(data)
     expect(mocks.fetchIt).toHaveBeenCalledWith(expect.stringMatching(/\/users\/current_user_data$/))
   })
+
+  it('signs out through CAS when the page says CAS is used', async () => {
+    const meta = document.createElement('meta')
+    meta.name = 'timetracker-auth-type'
+    meta.content = 'cas'
+    document.head.appendChild(meta)
+    const submit = vi.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(() => {})
+
+    try {
+      await shared.actions.logout({})
+
+      expect(submit).toHaveBeenCalledTimes(1)
+      expect(submit.mock.contexts[0].action).toMatch(/\/users\/cas_logout$/)
+      expect(mocks.fetchIt).not.toHaveBeenCalled()
+    } finally {
+      submit.mockRestore()
+      meta.remove()
+      document.body.innerHTML = ''
+    }
+  })
 })

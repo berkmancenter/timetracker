@@ -1,8 +1,8 @@
 import fetchIt, { csrfToken } from '@/lib/fetch-it'
+import { authType } from '@/lib/app-settings'
 import store2 from 'store2'
 
 const apiUrl = import.meta.env.VITE_API_URL
-const authType = import.meta.env.VITE_AUTH_TYPE
 
 const state = {
   user: {
@@ -35,7 +35,7 @@ const actions = {
     return data
   },
   async logout(context) {
-    switch (authType) {
+    switch (authType()) {
       case 'cas':
         submitLogoutForm(`${apiUrl}/users/cas_logout`)
 

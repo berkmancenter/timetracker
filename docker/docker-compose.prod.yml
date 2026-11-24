@@ -26,7 +26,6 @@ services:
       target: production
       args:
         VITE_API_URL: ${VITE_API_URL:-}
-        VITE_AUTH_TYPE: ${VITE_AUTH_TYPE:-db}
         VITE_BASE_PATH: ${VITE_BASE_PATH:-/}
         VITE_ENVIRONMENT: production
     ports:

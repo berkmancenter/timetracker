@@ -40,13 +40,13 @@ RUN yarn install --frozen-lockfile
 
 COPY front/ ./
 
+# Build settings of the front-end. How people sign in isn't one of them, the
+# server adds it to the page (FrontController), so the image works for all.
 ARG VITE_API_URL=""
-ARG VITE_AUTH_TYPE="db"
 ARG VITE_BASE_PATH="/"
 ARG VITE_ENVIRONMENT="production"
 
 ENV VITE_API_URL=${VITE_API_URL} \
-    VITE_AUTH_TYPE=${VITE_AUTH_TYPE} \
     VITE_BASE_PATH=${VITE_BASE_PATH} \
     VITE_ENVIRONMENT=${VITE_ENVIRONMENT}
 
