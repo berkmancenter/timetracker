@@ -5,4 +5,8 @@ const metaContent = (name) => document.querySelector(`meta[name="${name}"]`)?.co
 
 const authType = () => metaContent('timetracker-auth-type') || import.meta.env.VITE_AUTH_TYPE
 
-export { authType }
+// Version of the front-end in this page, the server's one (/ping) differs
+// after a deploy. Not set on the Vite dev server.
+const frontVersion = () => metaContent('timetracker-version')
+
+export { authType, frontVersion }

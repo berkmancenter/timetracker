@@ -59,5 +59,8 @@ Rails.application.routes.draw do
     end
   end
 
-  match '*unmatched', to: 'front#index', via: %i[get]
+  # Pages of the front-end. Its files are left out: a missing one (an old tab
+  # asks for a file of the build before a deploy) gets 404, not the page.
+  match '*unmatched', to: 'front#index', via: %i[get],
+                      constraints: ->(request) { !request.path_info.start_with?('/front_assets/') }
 end

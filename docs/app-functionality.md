@@ -177,6 +177,25 @@ in [Authentication](configuration.md#authentication)):
 
 ## Operational endpoints
 
-- `GET /ping` answers `pong` to a signed-in user. The front-end calls it every
-  minute and reloads the page when the session ended, so the user lands on the
-  sign in page.
+- `GET /ping` answers the version of the front-end (`{"version": "3f9a1c0b7d2e"}`)
+  to a signed-in user and 401 to anyone else, without a redirect to sign in.
+  The version is a digest of the front-end page, so every build has a new one,
+  the page gets it too (`timetracker-version` meta tag).
+
+## Sessions, connection and new versions
+
+The front-end pings the server every minute:
+
+- The session ended (401, or a redirect to a sign in page of an auth proxy):
+  the page is reloaded, so the user lands on the sign in page.
+- The server can't be reached (no network, the app restarts, a proxy answers
+  5xx, no answer in 10 seconds): the page stays, a notice says changes can't be saved, the ping is tried
+  every 10 seconds until the server is back.
+- A new version was deployed: a notice says so with a reload button, and the
+  next page the user opens is loaded from the server, not in place. Nothing
+  typed on the current page gets lost.
+
+The files of the old front-end are gone after a deploy (they get 404), so a tab
+opened before it can't open a page whose files it didn't load yet. Then the
+page is loaded from the server, if the server can be reached, not again within
+10 seconds, so a broken deploy doesn't load the page forever.

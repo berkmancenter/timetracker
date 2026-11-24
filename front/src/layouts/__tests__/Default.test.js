@@ -52,6 +52,7 @@ function mountLayout({ routeName = 'tracker.index', sidebar = 'full', sideMenuSt
         },
         Spinner: { template: '<div class="spinner-stub" />' },
         ModalsContainer: { template: '<div class="modals-container-stub" />' },
+        ServerNotice: { template: '<div class="server-notice-stub" />' },
         Icon: { template: '<i class="icon-stub" />' },
         VDropdown: {
           template: '<div class="dropdown-stub"><slot /><slot name="popper" /></div>',

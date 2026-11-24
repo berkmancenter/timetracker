@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { authType } from '../app-settings'
+import { authType, frontVersion } from '../app-settings'
 
 const addMeta = (name, content) => {
   const meta = document.createElement('meta')
@@ -26,5 +26,21 @@ describe('authType', () => {
     vi.stubEnv('VITE_AUTH_TYPE', 'saml')
 
     expect(authType()).toBe('saml')
+  })
+})
+
+describe('frontVersion', () => {
+  afterEach(() => {
+    document.head.innerHTML = ''
+  })
+
+  it('uses the version the server put in the page', () => {
+    addMeta('timetracker-version', '3f9a1c0b7d2e')
+
+    expect(frontVersion()).toBe('3f9a1c0b7d2e')
+  })
+
+  it('has no version when the page does not come from the server', () => {
+    expect(frontVersion()).toBeUndefined()
   })
 })

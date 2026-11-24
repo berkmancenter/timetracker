@@ -26,6 +26,16 @@ RSpec.describe FrontController, type: :controller do
         expect(meta['content']).to eq('cas')
       end
 
+      it 'tells the front-end its version, the same one ping answers' do
+        get :index
+        meta = Nokogiri::HTML(response.body).at('head meta[name="timetracker-version"]')
+
+        get :ping
+
+        expect(meta['content']).to match(/\A\h{12}\z/)
+        expect(response.parsed_body['version']).to eq(meta['content'])
+      end
+
       it 'does not use a layout' do
         get :index
         expect(response).to render_template(layout: nil)
@@ -45,19 +55,56 @@ RSpec.describe FrontController, type: :controller do
   end
 
   describe 'GET #ping' do
-    it 'answers pong to a signed in user' do
+    let(:page_path) { Rails.root.join('public', 'index_f.html') }
+
+    it 'answers the version of the front-end to a signed in user' do
       sign_in user
 
       get :ping
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to eq('pong')
+      expect(response.parsed_body).to eq('version' => Digest::SHA256.hexdigest(File.read(page_path)).first(12))
     end
 
-    it 'redirects an unauthenticated user to sign in' do
+    it 'answers another version when the front-end was built again' do
+      sign_in user
+      allow(File).to receive(:read).and_call_original
+      allow(File).to receive(:read).with(page_path).and_return('<html>first build</html>')
+      get :ping
+      first_version = response.parsed_body['version']
+
+      allow(File).to receive(:read).with(page_path).and_return('<html>second build</html>')
       get :ping
 
-      expect(response).to redirect_to(new_user_session_path)
+      expect(response.parsed_body['version']).not_to eq(first_version)
+    end
+
+    it 'answers no version when the front-end is not built' do
+      sign_in user
+      allow(File).to receive(:read).and_call_original
+      allow(File).to receive(:read).with(page_path).and_raise(Errno::ENOENT)
+
+      get :ping
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq('version' => nil)
+    end
+
+    it 'answers 401 to an unauthenticated user, without a redirect to sign in' do
+      get :ping
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).to eq('message' => 'Unauthorized')
+    end
+  end
+
+  describe 'routes' do
+    it 'sends pages of the front-end to it' do
+      expect(get: '/admin/timesheets').to route_to('front#index', unmatched: 'admin/timesheets')
+    end
+
+    it 'does not send missing front-end files to the front-end page' do
+      expect(get: '/front_assets/Tracker-old.js').not_to be_routable
     end
   end
 end

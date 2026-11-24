@@ -70,4 +70,13 @@ describe('shared store', () => {
       document.body.innerHTML = ''
     }
   })
+
+  it('remembers what the ping found out about the server', () => {
+    const state = { server: { reachable: true, newVersion: false } }
+
+    shared.mutations.setServerReachable(state, false)
+    shared.mutations.setNewVersion(state)
+
+    expect(state.server).toEqual({ reachable: false, newVersion: true })
+  })
 })

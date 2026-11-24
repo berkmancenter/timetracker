@@ -13,6 +13,11 @@ const state = {
   layout: {
     sideMenuStatus: false,
   },
+  // What the last ping found out, see plugins/server-ping.js
+  server: {
+    reachable: true,
+    newVersion: false,
+  },
 }
 
 const mutations = {
@@ -24,6 +29,12 @@ const mutations = {
   },
   setSideMenuStatus(state, status) {
     state.layout.sideMenuStatus = status
+  },
+  setServerReachable(state, reachable) {
+    state.server.reachable = reachable
+  },
+  setNewVersion(state) {
+    state.server.newVersion = true
   },
 }
 

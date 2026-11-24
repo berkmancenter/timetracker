@@ -93,6 +93,7 @@
   </div>
 
   <ModalsContainer />
+  <ServerNotice />
 </template>
 
 <script>
@@ -104,6 +105,7 @@
   import { redirectToSelectedMonth } from '@/router/index'
   import { ModalsContainer } from 'vue-final-modal'
   import Icon from '@/components/Shared/Icon.vue'
+  import ServerNotice from '@/components/Shared/ServerNotice.vue'
 
   export default {
     name: 'DefaultLayout',
@@ -111,6 +113,7 @@
       Spinner,
       ModalsContainer,
       Icon,
+      ServerNotice,
     },
     data() {
       return {
