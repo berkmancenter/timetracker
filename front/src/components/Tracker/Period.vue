@@ -27,6 +27,9 @@
       <router-link :to="periodStatsRoute" v-if="periodStatsRoute">Go back to list period stats</router-link>
     </div>
 
+    <entry-form
+      v-if="$store.state.tracker.selectedTimesheet.uuid"
+    ></entry-form>
     <entries
       v-if="$store.state.tracker.selectedTimesheet.uuid"
       :periodsView="true"
@@ -35,11 +38,13 @@
 </template>
 
 <script>
+  import EntryForm from './EntryForm.vue'
   import Entries from './Entries.vue'
 
   export default {
     name: 'TrackerPeriod',
     components: {
+      EntryForm,
       Entries,
     },
     data() {
@@ -80,7 +85,7 @@
           const user = await this.$store.dispatch('tracker/fetchUser', this.$route.params.user_id)
           this.$store.dispatch('tracker/setPeriodUser', user)
 
-          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'], this.$route.params.period_id)
+          await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
         } catch {
           // fetchGet reports real failures; cancelled requests need no user-visible error
         } finally {

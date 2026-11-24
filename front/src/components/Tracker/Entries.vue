@@ -78,8 +78,8 @@
     </div>
 
     <div class="tracker-entries-wrapper" :class="{ 'tracker-entries-sudo': $store.state.shared.user.sudoMode }">
-      <div class="tracker-entries-header">
-        <div v-for="field in $store.state.tracker.selectedTimesheet.custom_fields.filter(field => field.list)">
+      <div class="tracker-entries-header" v-if="listShortFields.length > 0 || $store.state.shared.user.sudoMode">
+        <div v-for="field in listShortFields" :key="field.id || field.machine_name">
           {{ field.title }}
         </div>
         <div v-if="$store.state.shared.user.sudoMode">Email</div>
@@ -98,14 +98,17 @@
                 <template v-for="entry in entries" :key="entry.id">
                   <div
                     class="tracker-entries-entry"
-                    :class="{ 'tracker-entries-entry-active': entry.active, 'time-entries-entry-has-description': entry.fields.description }"
+                    :class="{
+                      'tracker-entries-entry-active': entry.active,
+                      'time-entries-entry-has-description': entryLongFields(entry).length > 0 && (listShortFields.length > 0 || $store.state.shared.user.sudoMode),
+                    }"
                     @mouseenter="enterEntry(entry)"
                     @mouseleave="leaveEntry(entry)"
                     @click="openMenu(entry, $event)"
                   >
-                    <div class="tracker-entries-entry-meta">
-                      <div class="tracker-entries-entry-field" v-for="field in this.$store.state.tracker.selectedTimesheet.custom_fields.filter(field => field.list)">
-                        {{ entry.fields[field.machine_name] }}
+                    <div class="tracker-entries-entry-meta" v-if="listShortFields.length > 0 || $store.state.shared.user.sudoMode">
+                      <div class="tracker-entries-entry-field" v-for="field in listShortFields" :key="field.id || field.machine_name">
+                        {{ entry.fields?.[field.machine_name] }}
                       </div>
 
                       <div class="tracker-entries-entry-email" v-if="$store.state.shared.user.sudoMode">
@@ -114,11 +117,12 @@
                     </div>
 
                     <div
+                      v-for="field in entryLongFields(entry)"
+                      :key="field.id || field.machine_name"
                       class="tracker-entries-entry-description"
-                      title="Description"
-                      v-if="entry.fields.description"
+                      :title="field.title"
                     >
-                      {{ entry.fields.description }}
+                      {{ entry.fields[field.machine_name] }}
                     </div>
 
                     <div class="tracker-entries-entry-decimal-time">{{ entry.decimal_time }}</div>
@@ -230,7 +234,7 @@
       :order="user.email"
       @click="selectTimesheetUser(user)"
     >
-      <input type="checkbox" v-model="user.selected">
+      <input type="checkbox" v-model="user.selected" @click.stop>
       <span>{{ user.email || user.username }}</span>
     </div>
   </Modal>
@@ -295,6 +299,14 @@
       }
     },
     computed: {
+      listShortFields() {
+        const fields = this.$store.state.tracker.selectedTimesheet?.custom_fields || []
+        return fields.filter(field => field.list && field.input_type !== 'long_text')
+      },
+      listLongFields() {
+        const fields = this.$store.state.tracker.selectedTimesheet?.custom_fields || []
+        return fields.filter(field => field.list && field.input_type === 'long_text')
+      },
       entriesByDate() {
         let entriesByDate = {}
 
@@ -328,6 +340,9 @@
       },
     },
     methods: {
+      entryLongFields(entry) {
+        return this.listLongFields.filter(field => Boolean(entry.fields?.[field.machine_name]))
+      },
       isNewDay(date) {
         const dates = Object.keys(this.entriesByDate)
         const index = dates.indexOf(date)
@@ -657,7 +672,8 @@
         width: 100%;
 
         > * {
-          width: 50%;
+          flex: 1 1 0;
+          min-width: 0;
           padding: 0.5rem;
           border-right: 1px solid var(--grey-from-bulma);
 
@@ -762,21 +778,18 @@
       border-bottom: 1px solid var(--grey-from-bulma);
 
       > * {
-        width: 50%;
+        flex: 1 1 0;
+        min-width: 0;
         border-right: 1px solid var(--grey-from-bulma);
         padding: 0.5rem;
+
+        &:last-child {
+          border-right: none;
+        }
       }
     }
 
     &-sudo {
-      .tracker-entries-header,
-      .tracker-entries-entry-meta {
-        > * {
-          width: 33%;
-          flex-grow: 1;
-        }
-      }
-
       .tracker-entries-entry-meta {
         &:last-child {
           border-right: 1px solid var(--grey-from-bulma);

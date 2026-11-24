@@ -50,6 +50,9 @@ function mountPeriod(store = createStore()) {
           props: ['periodsView'],
           template: '<div class="entries-stub" :data-periods-view="periodsView" />',
         },
+        EntryForm: {
+          template: '<div class="entry-form-stub" />',
+        },
         RouterLink: {
           props: ['to'],
           template: '<a class="router-link-stub" :data-route-name="to.name"><slot /></a>',
@@ -62,7 +65,7 @@ function mountPeriod(store = createStore()) {
 }
 
 describe('Period', () => {
-  it('renders period summary and back route', async () => {
+  it('renders period summary, entry form, and back route', async () => {
     const { wrapper } = mountPeriod()
 
     await flushPromises()
@@ -71,6 +74,7 @@ describe('Period', () => {
     expect(wrapper.text()).toContain('Spring')
     expect(wrapper.text()).toContain('ada@example.com')
     expect(wrapper.find('.router-link-stub').attributes('data-route-name')).toBe('periods.stats')
+    expect(wrapper.find('.entry-form-stub').exists()).toBe(true)
     expect(wrapper.find('.entries-stub').attributes('data-periods-view')).toBe('true')
   })
 
@@ -85,7 +89,7 @@ describe('Period', () => {
     expect(store.dispatch).toHaveBeenCalledWith('tracker/setSelectedTimesheetFromRoute')
     expect(store.dispatch).toHaveBeenCalledWith('admin/fetchPeriod', { timesheetId: 'alpha', periodId: '9' })
     expect(store.dispatch).toHaveBeenCalledWith('tracker/fetchUser', '4')
-    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'], '9')
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
     expect(emit).toHaveBeenCalledWith('spinnerStop')
   })
 

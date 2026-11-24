@@ -140,6 +140,52 @@ describe('Entries', () => {
     expect(wrapper.text()).toContain('Research')
     expect(wrapper.text()).toContain('Writing')
     expect(wrapper.text()).toContain('2.5')
+    // description has list: false, so it is not rendered in the list
+    expect(wrapper.find('.tracker-entries-entry-description').exists()).toBe(false)
+  })
+
+  it('renders listed long_text custom fields dynamically regardless of machine_name', () => {
+    const store = createStore({
+      tracker: {
+        selectedTimesheet: {
+          id: 1,
+          uuid: 'alpha',
+          roles: ['admin'],
+          custom_fields: [
+            { id: 1, title: 'Project', machine_name: 'project', input_type: 'text', list: true },
+            { id: 2, title: 'Notes', machine_name: 'notes', input_type: 'long_text', list: true },
+          ],
+        },
+        entries: [
+          {
+            id: 1,
+            user_id: 10,
+            entry_date: '2026-05-18',
+            decimal_time: '2.5',
+            email: 'ada@example.com',
+            fields: { project: 'Research', notes: 'Detailed summary' },
+          },
+        ],
+      },
+    })
+
+    const { wrapper } = mountEntries(store)
+    const longField = wrapper.find('.tracker-entries-entry-description')
+
+    expect(longField.exists()).toBe(true)
+    expect(longField.attributes('title')).toBe('Notes')
+    expect(longField.text()).toBe('Detailed summary')
+  })
+
+  it('toggles a sudo user checkbox once when clicked directly', async () => {
+    const { wrapper, store } = mountEntries()
+    const alphaUser = store.state.tracker.timesheetUsers.find((user) => user.email === 'alpha@example.com')
+    expect(alphaUser.selected).toBe(true)
+
+    const checkbox = wrapper.find('.tracker-entries-months-selector-user input[type="checkbox"]')
+    await checkbox.setValue(false)
+
+    expect(alphaUser.selected).toBe(false)
   })
 
   it('hides navigation controls in periods view', () => {

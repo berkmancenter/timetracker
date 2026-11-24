@@ -187,14 +187,18 @@
 
         if (saved) {
           try {
-            const months = await this.$store.dispatch('tracker/fetchMonths')
+            if (this.$store.state.tracker.isPeriodView) {
+              await this.$store.dispatch('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+            } else {
+              const months = await this.$store.dispatch('tracker/fetchMonths')
 
-            this.$store.dispatch('tracker/setMonths', months)
-            this.$store.dispatch('tracker/setSelectedMonthFromRoute')
+              this.$store.dispatch('tracker/setMonths', months)
+              this.$store.dispatch('tracker/setSelectedMonthFromRoute')
 
-            await this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
+              await this.$store.dispatch('tracker/reloadViewData', ['popular', 'periodTotals', 'totals'])
+            }
           } catch (error) {
-            // The entry is saved, only the refresh of the months failed
+            // The entry is saved, only the refresh failed
             console.error(error)
           }
 

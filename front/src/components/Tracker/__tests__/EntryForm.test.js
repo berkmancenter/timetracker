@@ -262,6 +262,20 @@ describe('EntryForm', () => {
     expect(store.dispatch).toHaveBeenCalledWith('tracker/replaceEntry', { id: 2, decimal_time: '1.25', fields: {} })
   })
 
+  it('reloads period data without fetching months when editing inside period view', async () => {
+    const store = createStore('edit')
+    store.state.tracker.isPeriodView = true
+    const { wrapper } = mountEntryForm(store)
+    wrapper.vm.$refs.entryForm.reportValidity = vi.fn(() => true)
+
+    await wrapper.vm.submitForm()
+
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/replaceEntry', { id: 2, decimal_time: '1.25', fields: {} })
+    expect(store.dispatch).toHaveBeenCalledWith('tracker/reloadViewData', ['entries', 'periodTotals', 'totals'])
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/fetchMonths')
+    expect(store.dispatch).not.toHaveBeenCalledWith('tracker/setSelectedMonthFromRoute')
+  })
+
   it('does not submit when the form is invalid', async () => {
     const { wrapper, store } = mountEntryForm()
     wrapper.vm.$refs.entryForm.reportValidity = vi.fn(() => false)
