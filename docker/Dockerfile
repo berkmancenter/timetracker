@@ -88,7 +88,8 @@ COPY . .
 COPY --from=frontend-builder /app/front/node_modules/bulma /app/front/node_modules/bulma
 
 # Leave in /app only what the production image needs, it copies all of it
-RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile \
+RUN mkdir -p /app/log /app/tmp/pids \
+    && SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile \
     && bundle exec bootsnap precompile --gemfile app/ lib/ \
     && rm -rf front spec tmp/cache/assets
 
@@ -130,7 +131,8 @@ RUN gem install bundler --no-document -v "$(awk '/^BUNDLED WITH/ { getline; prin
 COPY --chown=${USERNAME}:${USERNAME} . .
 COPY --from=frontend-builder --chown=${USERNAME}:${USERNAME} /app/front/node_modules /app/front/node_modules
 
-RUN bundle exec bootsnap precompile --gemfile app/ lib/ \
+RUN mkdir -p /app/tmp/pids /app/log \
+    && bundle exec bootsnap precompile --gemfile app/ lib/ \
     && chown -R ${USERNAME}:${USERNAME} /app/tmp /app/log /usr/local/bundle
 
 COPY docker/entrypoint.sh /usr/bin/timetracker-entrypoint
