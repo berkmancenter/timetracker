@@ -38,7 +38,6 @@ function mountUsers(store = createStore()) {
         SuperAdminFilter: { props: ['users'], template: '<div class="filter-stub" />' },
         AdminTable: { template: '<table><slot /></table>' },
         Modal: { template: '<div />' },
-        ActionButton: true,
         Icon: true,
       },
     },
@@ -48,7 +47,7 @@ function mountUsers(store = createStore()) {
 }
 
 describe('Admin Timesheet Users', () => {
-  it('loads users and timesheet data', async () => {
+  it('loads users and timesheet data without dead checkboxes or hidden templates', async () => {
     const { wrapper, store, emit } = mountUsers()
 
     await flushPromises()
@@ -60,16 +59,25 @@ describe('Admin Timesheet Users', () => {
     expect(wrapper.vm.timesheet).toEqual(store.timesheet)
     expect(emit).toHaveBeenCalledWith('spinnerStop')
     expect(wrapper.vm.breadcrumbs.map((crumb) => crumb.text)).toEqual(['Timesheets', 'Alpha', 'Users'])
+    expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false)
+    expect(wrapper.find('.admin-timesheet-users-set-role').exists()).toBe(false)
   })
 
-  it('toggles all users', async () => {
+  it('sorts users by email and joined date', async () => {
     const { wrapper } = mountUsers()
     await flushPromises()
 
-    wrapper.vm.$refs.toggleAllCheckbox.checked = true
-    wrapper.vm.toggleAll()
+    const headers = wrapper.findAll('th.admin-table-sortable')
+    await headers[0].trigger('click')
+    expect(wrapper.vm.sortedItems.map((u) => u.email)).toEqual(['ada@example.com', 'grace@example.com'])
 
-    expect(wrapper.vm.users.every((user) => user.selected)).toBe(true)
+    await headers[0].trigger('click')
+    expect(wrapper.vm.sortedItems.map((u) => u.email)).toEqual(['grace@example.com', 'ada@example.com'])
+
+    await headers[1].trigger('click')
+    expect(wrapper.vm.sortedItems.map((u) => u.id)).toEqual([1, 2])
+    await headers[1].trigger('click')
+    expect(wrapper.vm.sortedItems.map((u) => u.id)).toEqual([2, 1])
   })
 
   it('removes a user from the timesheet', async () => {
@@ -89,11 +97,15 @@ describe('Admin Timesheet Users', () => {
     expect(wrapper.vm.removeUserFromTimesheetModalStatus).toBe(false)
   })
 
-  it('changes a user role', async () => {
+  it('pre-selects current role and changes a user role', async () => {
     const { wrapper, store, awn } = mountUsers()
     await flushPromises()
 
+    wrapper.vm.changeUsersRoleModalOpen(store.users[0])
+    expect(wrapper.vm.changeUsersRoleSelected).toBe('user')
+
     wrapper.vm.changeUsersRoleModalOpen(store.users[1])
+    expect(wrapper.vm.changeUsersRoleSelected).toBe('admin')
     wrapper.vm.changeUsersRoleSelected = 'user'
     await wrapper.vm.changeUsersRole()
 

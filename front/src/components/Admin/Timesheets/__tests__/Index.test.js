@@ -42,7 +42,7 @@ function mountIndex(store = createStore()) {
         ActionButton: { props: ['buttonText'], template: '<button>{{ buttonText }}</button>' },
         AdminTable: { template: '<table><slot /></table>' },
         Icon: { template: '<img>' },
-        Modal: { template: '<div />' },
+        Modal: { props: ['title'], template: '<div class="modal-stub" :data-title="title"><slot /></div>' },
       },
     },
   })
@@ -51,7 +51,7 @@ function mountIndex(store = createStore()) {
 }
 
 describe('Admin Timesheets Index', () => {
-  it('loads and renders ordered timesheets', async () => {
+  it('loads and renders ordered timesheets and supports column sorting', async () => {
     const { wrapper, store, emit } = mountIndex()
 
     await flushPromises()
@@ -62,6 +62,25 @@ describe('Admin Timesheets Index', () => {
     expect(emit).toHaveBeenCalledWith('spinnerStop')
     expect(wrapper.vm.orderedTimesheets.map((timesheet) => timesheet.name)).toEqual(['Alpha', 'Zebra'])
     expect(wrapper.text()).toContain('Alpha')
+
+    const headers = wrapper.findAll('th.admin-table-sortable')
+    await headers[0].trigger('click')
+    expect(wrapper.vm.orderedTimesheets.map((timesheet) => timesheet.name)).toEqual(['Zebra', 'Alpha'])
+
+    await headers[1].trigger('click')
+    expect(wrapper.vm.orderedTimesheets.map((timesheet) => timesheet.name)).toEqual(['Alpha', 'Zebra'])
+    await headers[1].trigger('click')
+    expect(wrapper.vm.orderedTimesheets.map((timesheet) => timesheet.name)).toEqual(['Zebra', 'Alpha'])
+  })
+
+  it('uses the right modal title and empty state colspan', () => {
+    const store = createStore()
+    store.state.admin.timesheets = []
+    const { wrapper } = mountIndex(store)
+
+    const modalTitles = wrapper.findAll('.modal-stub').map((node) => node.attributes('data-title'))
+    expect(modalTitles).toEqual(['Remove timesheet', 'Leave timesheet'])
+    expect(wrapper.find('tbody td').attributes('colspan')).toBe('3')
   })
 
   it('opens and confirms remove timesheet workflow', async () => {

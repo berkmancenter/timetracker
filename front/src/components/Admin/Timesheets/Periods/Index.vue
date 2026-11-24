@@ -8,7 +8,7 @@
 
     <form class="form">
       <div class="mb-4">
-        <router-link :to="`/admin/timesheets/${this.$store.state.admin.timesheet.id}/periods/new`">
+        <router-link :to="`/admin/timesheets/${$route.params.timesheet_id}/periods/new`">
           <ActionButton
             class="is-success"
             :icon="addIcon"
@@ -22,10 +22,10 @@
       <AdminTable :tableClasses="['admin-periods-table']">
         <thead>
           <tr class="no-select">
-            <th>Name</th>
-            <th>From</th>
-            <th>To</th>
-            <th data-sort-method="none" class="no-sort">Actions</th>
+            <th class="admin-table-sortable" :aria-sort="ariaSortFor('name')" @click="sortBy('name')">Name</th>
+            <th class="admin-table-sortable" :aria-sort="ariaSortFor('from')" @click="sortBy('from')">From</th>
+            <th class="admin-table-sortable" :aria-sort="ariaSortFor('to')" @click="sortBy('to')">To</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -42,7 +42,7 @@
             <td class="no-break">{{ period.to }}</td>
             <td class="admin-table-actions">
               <div>
-                <router-link title="Edit period" :to="`/admin/timesheets/${this.$route.params.timesheet_id}/periods/${period.id}/edit`">
+                <router-link title="Edit period" :to="`/admin/timesheets/${$route.params.timesheet_id}/periods/${period.id}/edit`">
                   <Icon :src="editIcon" />
                 </router-link>
                 <a title="Clone period" @click.prevent="clonePeriod(period)">
@@ -51,14 +51,14 @@
                 <a title="Delete period" @click.prevent="deletePeriodConfirm(period)">
                   <Icon :src="minusIcon" />
                 </a>
-                <router-link title="Set period hours" :to="`/admin/timesheets/${this.$route.params.timesheet_id}/periods/${period.id}/credits`">
+                <router-link title="Set period hours" :to="`/admin/timesheets/${$route.params.timesheet_id}/periods/${period.id}/credits`">
                   <Icon :src="hoursIcon" />
                 </router-link>
               </div>
             </td>
           </tr>
           <tr v-if="$store.state.admin.periods.length === 0">
-            <td colspan="7">No periods found.</td>
+            <td colspan="4">No periods found.</td>
           </tr>
         </tbody>
       </AdminTable>
@@ -77,7 +77,6 @@
 
 <script>
   import minusIcon from '@/images/minus.svg'
-  import statsIcon from '@/images/stats.svg'
   import hoursIcon from '@/images/hours.svg'
   import editIcon from '@/images/edit.svg'
   import cloneIcon from '@/images/clone.svg'
@@ -89,7 +88,7 @@
   import Icon from '@/components/Shared/Icon.vue'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
-  import orderBy from 'lodash/orderBy'
+  import { ariaSort, nextSortState, sortRows } from '@/lib/table-sort.js'
 
   export default {
     name: 'AdminPeriods',
@@ -103,7 +102,6 @@
     data() {
       return {
         minusIcon,
-        statsIcon,
         hoursIcon,
         editIcon,
         cloneIcon,
@@ -111,6 +109,7 @@
 
         deletePeriodModalStatus: false,
         deletePeriodCurrent: null,
+        sort: { key: 'name', direction: 'asc' },
       }
     },
     created() {
@@ -118,7 +117,12 @@
     },
     computed: {
       orderedPeriods() {
-        return orderBy(this.$store.state.admin.periods, 'name')
+        const type = this.sort.key === 'from' || this.sort.key === 'to' ? 'date' : 'string'
+        return sortRows(this.$store.state.admin.periods, {
+          key: this.sort.key,
+          direction: this.sort.direction,
+          type,
+        })
       },
       breadcrumbs() {
         let breadcrumbs = []
@@ -140,6 +144,12 @@
       },
     },
     methods: {
+      sortBy(key) {
+        this.sort = nextSortState(this.sort, key)
+      },
+      ariaSortFor(key) {
+        return ariaSort(this.sort, key)
+      },
       async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
@@ -196,14 +206,21 @@
           return
         }
 
-        const url = `/admin/timesheets/${this.$route.params.timesheet_id}/periods/${id}/stats`
+        const location = {
+          name: 'periods.stats',
+          params: {
+            timesheet_id: this.$route.params.timesheet_id,
+            id,
+          },
+        }
 
         if (event.button === 1) {
-          // Middle click: open in new tab
-          window.open(url, '_blank')
+          // Middle click: open in new tab using router-resolved URL so VITE_BASE_PATH is respected
+          const { href } = this.$router.resolve(location)
+          window.open(href, '_blank')
         } else if (event.button === 0) {
           // Left click: navigate in current tab
-          this.$router.push(url)
+          this.$router.push(location)
         }
       },
     },

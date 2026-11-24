@@ -1,101 +1,19 @@
 <template>
   <div class="admin-table-wrapper">
-    <table class="table table-hovered admin-table" :class="tableClasses" :ref="tableRefName">
+    <table class="table table-hovered admin-table" :class="tableClasses">
       <slot></slot>
     </table>
   </div>
 </template>
 
 <script>
-  import 'tablesort/tablesort.css'
-  import Tablesort from 'tablesort'
-
   export default {
     name: 'AdminTable',
     props: {
-      tableRefName: {
-        type: String,
-        required: false,
-        default: 'adminTable',
-      },
       tableClasses: {
         type: Array,
         required: false,
-        default: [],
-      },
-      forceSortingRefresh: {
-        type: Array,
-        required: false,
-        default: [],
-      },
-    },
-    data() {
-      return {
-        tablesort: null,
-      }
-    },
-    mounted() {
-      this.initTableSorting()
-    },
-    methods: {
-      initTableSorting() {
-        this.initNumberSorting()
-        this.initTableSort()
-      },
-      initNumberSorting() {
-        // Copied from tablesort.number.js as it doesn't work with ES6 modules
-
-        let cleanNumber = function(i) {
-          return i.replace(/[^\-?0-9.]/g, '')
-        }
-
-        let compareNumber = function(a, b) {
-          a = parseFloat(a)
-          b = parseFloat(b)
-
-          a = isNaN(a) ? 0 : a
-          b = isNaN(b) ? 0 : b
-
-          return a - b
-        }
-
-        Tablesort.extend('number', function(item) {
-          return item.match(/^[-+]?[£\x24Û¢´€]?\d+\s*([,\.]\d{0,2})/) || // Prefixed currency
-            item.match(/^[-+]?\d+\s*([,\.]\d{0,2})?[£\x24Û¢´€]/) || // Suffixed currency
-            item.match(/^[-+]?(\d)*-?([,\.]){0,1}-?(\d)+([E,e][\-+][\d]+)?%?$/) // Number
-        }, function(a, b) {
-          a = cleanNumber(a)
-          b = cleanNumber(b)
-
-          return compareNumber(b, a)
-        })
-      },
-      initTableSort() {
-        // Check if tablesort is already initialized and remove previous
-        // listeners to avoid duplicate sorting. The library doesn't
-        // support re-initialization ¯\_(ツ)_/¯.
-        if (this.tablesort) {
-          const ths = this.$refs[this.tableRefName].querySelectorAll('th')
-          ths.forEach(th => {
-            // Remove click listeners added by tablesort
-            const clone = th.cloneNode(true)
-            th.parentNode.replaceChild(clone, th)
-          })
-        }
-
-        this.tablesort = new Tablesort(this.$refs[this.tableRefName], {
-          descending: true,
-        })
-      },
-    },
-    watch: {
-      forceSortingRefresh: {
-        handler() {
-          this.$nextTick(() => {
-            this.initTableSort()
-          })
-        },
-        deep: true,
+        default: () => [],
       },
     },
   }
@@ -108,6 +26,39 @@
 
   table.table.admin-table {
     width: 100%;
+
+    th.admin-table-sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+
+      &::after {
+        content: '';
+        float: right;
+        margin-top: 7px;
+        border-width: 0 4px 4px;
+        border-style: solid;
+        border-color: #404040 transparent;
+        visibility: hidden;
+        opacity: 0.4;
+      }
+
+      &:hover::after {
+        visibility: visible;
+      }
+
+      &[aria-sort='ascending']::after {
+        visibility: visible;
+        opacity: 0.9;
+        border-bottom: none;
+        border-width: 4px 4px 0;
+      }
+
+      &[aria-sort='descending']::after {
+        visibility: visible;
+        opacity: 0.9;
+      }
+    }
 
     td {
       word-break: break-word;

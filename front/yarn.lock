@@ -1303,11 +1303,6 @@ tabbable@^6.5.2:
   resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-6.5.2.tgz#5ef16ebfc9bb600ecb48dfb0e699ebf067ffe97e"
   integrity sha512-XgdnB1nGU6KU4VgMnZPaZCx7M1hBrLyEiZYau2G2gq9UT0d7d4FUBlNX7vvPlm/B1vk1PjrzJBx9Lbv4fsqS9g==
 
-tablesort@^5.3.0:
-  version "5.7.1"
-  resolved "https://registry.yarnpkg.com/tablesort/-/tablesort-5.7.1.tgz#72ed3e79171ecd9cdb4522145610f834f0066f0e"
-  integrity sha512-wm+xSponmlN1spiuwGlrvNGoG8fEso+y86OOjS+Pl0Qsje/cOVSfUvELcXILWc8/sgEdY/NGMPo0qhFGyYKnwQ==
-
 tinybench@^6.2.3:
   version "6.2.4"
   resolved "https://registry.yarnpkg.com/tinybench/-/tinybench-6.2.4.tgz#56d00d2a3908d739b56f6c2fc647b87eb8adbadb"

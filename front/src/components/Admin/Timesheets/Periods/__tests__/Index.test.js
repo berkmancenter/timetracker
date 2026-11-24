@@ -28,6 +28,9 @@ function createStore(response = { ok: true }) {
 
 function mountIndex(store = createStore()) {
   const push = vi.fn()
+  const resolve = vi.fn(({ params }) => ({
+    href: `/subpath/admin/timesheets/${params.timesheet_id}/periods/${params.id}/stats`,
+  }))
   const emit = vi.fn()
   const awn = { success: vi.fn(), warning: vi.fn() }
   const wrapper = mount(Index, {
@@ -35,7 +38,7 @@ function mountIndex(store = createStore()) {
       mocks: {
         $store: store,
         $route: { params: { timesheet_id: '9' } },
-        $router: { push },
+        $router: { push, resolve },
         mitt: { emit },
         awn,
       },
@@ -50,11 +53,11 @@ function mountIndex(store = createStore()) {
     },
   })
 
-  return { wrapper, store, push, emit, awn }
+  return { wrapper, store, push, resolve, emit, awn }
 }
 
 describe('Admin Periods Index', () => {
-  it('loads periods and timesheet data', async () => {
+  it('loads periods and timesheet data and supports column sorting', async () => {
     const { wrapper, store, emit } = mountIndex()
 
     await flushPromises()
@@ -65,6 +68,23 @@ describe('Admin Periods Index', () => {
     expect(store.dispatch).toHaveBeenCalledWith('admin/setTimesheet', store.state.admin.timesheet)
     expect(emit).toHaveBeenCalledWith('spinnerStop')
     expect(wrapper.vm.orderedPeriods.map((period) => period.name)).toEqual(['Alpha period', 'Zeta'])
+
+    const headers = wrapper.findAll('th.admin-table-sortable')
+    await headers[0].trigger('click')
+    expect(wrapper.vm.orderedPeriods.map((period) => period.name)).toEqual(['Zeta', 'Alpha period'])
+
+    await headers[1].trigger('click')
+    expect(wrapper.vm.orderedPeriods.map((period) => period.from)).toEqual(['2026-04-01', '2026-05-01'])
+    await headers[1].trigger('click')
+    expect(wrapper.vm.orderedPeriods.map((period) => period.from)).toEqual(['2026-05-01', '2026-04-01'])
+  })
+
+  it('uses the right empty state colspan', () => {
+    const store = createStore()
+    store.state.admin.periods = []
+    const { wrapper } = mountIndex(store)
+
+    expect(wrapper.find('tbody td').attributes('colspan')).toBe('4')
   })
 
   it('deletes a period', async () => {
@@ -88,14 +108,29 @@ describe('Admin Periods Index', () => {
     expect(awn.success).toHaveBeenCalledWith('Period "Zeta" has been cloned.')
   })
 
-  it('navigates to period stats unless an action cell was clicked', () => {
-    const { wrapper, push } = mountIndex()
+  it('navigates to period stats and resolves base path on middle click', () => {
+    const { wrapper, push, resolve } = mountIndex()
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
 
-    wrapper.vm.goToPeriodStats(2, { button: 0, target: { closest: () => null } })
-    expect(push).toHaveBeenCalledWith('/admin/timesheets/9/periods/2/stats')
+    try {
+      wrapper.vm.goToPeriodStats(2, { button: 0, target: { closest: () => null } })
+      expect(push).toHaveBeenCalledWith({
+        name: 'periods.stats',
+        params: { timesheet_id: '9', id: 2 },
+      })
 
-    push.mockClear()
-    wrapper.vm.goToPeriodStats(2, { button: 0, target: { closest: () => ({}) } })
-    expect(push).not.toHaveBeenCalled()
+      wrapper.vm.goToPeriodStats(2, { button: 1, target: { closest: () => null } })
+      expect(resolve).toHaveBeenCalledWith({
+        name: 'periods.stats',
+        params: { timesheet_id: '9', id: 2 },
+      })
+      expect(openSpy).toHaveBeenCalledWith('/subpath/admin/timesheets/9/periods/2/stats', '_blank')
+
+      push.mockClear()
+      wrapper.vm.goToPeriodStats(2, { button: 0, target: { closest: () => ({}) } })
+      expect(push).not.toHaveBeenCalled()
+    } finally {
+      openSpy.mockRestore()
+    }
   })
 })

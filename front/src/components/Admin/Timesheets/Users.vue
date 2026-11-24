@@ -12,19 +12,13 @@
       <AdminTable :tableClasses="['admin-timesheet-users-table']">
         <thead>
           <tr class="no-select">
-            <th data-sort-method="none" class="no-sort">
-              <input type="checkbox" ref="toggleAllCheckbox" @click="toggleAll()">
-            </th>
-            <th>Email</th>
-            <th>Joined</th>
-            <th data-sort-method="none" class="no-sort">Actions</th>
+            <th class="admin-table-sortable" :aria-sort="ariaSortFor('email')" @click="sortBy('email')">Email</th>
+            <th class="admin-table-sortable" :aria-sort="ariaSortFor('joined')" @click="sortBy('joined')">Joined</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in filteredItems" :key="user.id">
-            <td class="admin-table-selector">
-              <input type="checkbox" v-model="user.selected">
-            </td>
+          <tr v-for="user in sortedItems" :key="user.id">
             <td>{{ user.email }}</td>
             <td class="no-break">{{ formatIsoDateTimeToLocaleString(user.joined) }}</td>
             <td class="admin-table-actions">
@@ -39,32 +33,12 @@
             </td>
           </tr>
           <tr v-if="filteredItems.length === 0">
-            <td colspan="4">No users found.</td>
+            <td colspan="3">No users found.</td>
           </tr>
         </tbody>
       </AdminTable>
     </form>
   </div>
-
-  <div ref="adminTimesheetUsersSetRoleTemplate" class="is-hidden">
-      <div class="content admin-timesheet-users-set-role">
-        <div class="is-size-5 mb-4">Choose role to set</div>
-
-        <div class="field">
-          <div class="control" v-for="(option, index) in roles" :key="index">
-            <label class="radio">
-              <input
-                type="radio"
-                name="adminTimesheetUsersSetRole"
-                :value="option"
-                class="mb-2"
-              >
-              {{ option }}
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
 
   <Modal
     v-model="removeUserFromTimesheetModalStatus"
@@ -72,7 +46,7 @@
     @confirm="removeUserFromTimesheet()"
     @cancel="removeUserFromTimesheetModalStatus = false"
   >
-    <p>Are you sure you remove <span class="has-text-weight-bold">{{ removeUserFromTimesheetCurrent.email }}</span> from the timesheet?</p>
+    <p>Are you sure you remove <span class="has-text-weight-bold">{{ removeUserFromTimesheetCurrent?.email }}</span> from the timesheet?</p>
     <div class="notification is-danger is-light mt-2">They won't be able to use it any more.</div>
   </Modal>
 
@@ -82,7 +56,7 @@
     @confirm="changeUsersRole()"
     @cancel="changeUsersRoleModalStatus = false"
   >
-    <p>Changing the user role for <span class="has-text-weight-bold">{{ changeUsersRoleCurrent.email }}</span>.</p>
+    <p>Changing the user role for <span class="has-text-weight-bold">{{ changeUsersRoleCurrent?.email }}</span>.</p>
     <p class="mt-2">Choose role to set:</p>
 
     <div class="field">
@@ -105,15 +79,12 @@
 <script>
   import Icon from '@/components/Shared/Icon.vue'
   import minusIcon from '@/images/minus.svg'
-  import yesIcon from '@/images/yes.svg'
-  import noIcon from '@/images/no.svg'
-  import listIcon from '@/images/list_main.svg'
   import toggleAdminIcon from '@/images/toggle_admin.svg'
   import AdminTable from '@/components/Admin/AdminTable.vue'
   import SuperAdminFilter from '@/components/Admin/SuperAdminFilter.vue'
   import Modal from '@/components/Shared/Modal.vue'
-  import ActionButton from '@/components/Shared/ActionButton.vue'
   import { formatIsoDateTimeToLocaleString } from '@/lib/date-time.js'
+  import { ariaSort, nextSortState, sortRows } from '@/lib/table-sort.js'
   import Breadcrumbs from '@/components/Shared/Breadcrumbs.vue'
 
   export default {
@@ -123,15 +94,11 @@
       AdminTable,
       SuperAdminFilter,
       Modal,
-      ActionButton,
       Breadcrumbs,
     },
     data() {
       return {
         minusIcon,
-        yesIcon,
-        noIcon,
-        listIcon,
         toggleAdminIcon,
         users: [],
         filteredItems: [],
@@ -140,17 +107,25 @@
           'admin',
           'user',
         ],
-        setRoleSelectedRole: 'user',
         removeUserFromTimesheetModalStatus: false,
         removeUserFromTimesheetCurrent: null,
         changeUsersRoleModalStatus: false,
         changeUsersRoleCurrent: null,
         changeUsersRoleSelected: 'admin',
+        sort: { key: null, direction: 'asc' },
         formatIsoDateTimeToLocaleString,
         timesheet: {},
       }
     },
     computed: {
+      sortedItems() {
+        const type = this.sort.key === 'joined' ? 'date' : 'string'
+        return sortRows(this.filteredItems, {
+          key: this.sort.key,
+          direction: this.sort.direction,
+          type,
+        })
+      },
       breadcrumbs() {
         return [
           {
@@ -170,6 +145,12 @@
       this.initialDataLoad()
     },
     methods: {
+      sortBy(key) {
+        this.sort = nextSortState(this.sort, key)
+      },
+      ariaSortFor(key) {
+        return ariaSort(this.sort, key)
+      },
       async initialDataLoad() {
         this.mitt.emit('spinnerStart')
 
@@ -205,18 +186,9 @@
 
         this.removeUserFromTimesheetModalStatus = false
       },
-      toggleAll() {
-        const newStatus = this.$refs.toggleAllCheckbox.checked
-
-        this.users
-          .map((user) => {
-            user.selected = newStatus
-
-            return user
-          })
-      },
       changeUsersRoleModalOpen(user) {
         this.changeUsersRoleCurrent = user
+        this.changeUsersRoleSelected = user.roles?.includes('admin') ? 'admin' : 'user'
         this.changeUsersRoleModalStatus = true
       },
       async changeUsersRole() {

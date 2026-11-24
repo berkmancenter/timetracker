@@ -1,20 +1,10 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it, vi } from 'vitest'
-
-const mocks = vi.hoisted(() => ({
-  tablesort: vi.fn(),
-  extend: vi.fn(),
-}))
-
-vi.mock('tablesort', () => {
-  mocks.tablesort.extend = mocks.extend
-  return { default: mocks.tablesort }
-})
+import { describe, expect, it } from 'vitest'
 
 import AdminTable from '../AdminTable.vue'
 
 describe('AdminTable', () => {
-  it('renders table content and initializes sorting', () => {
+  it('renders table content inside a scrollable wrapper with custom classes', () => {
     const wrapper = mount(AdminTable, {
       props: {
         tableClasses: ['extra-table-class'],
@@ -24,26 +14,17 @@ describe('AdminTable', () => {
       },
     })
 
+    expect(wrapper.find('.admin-table-wrapper').exists()).toBe(true)
+    expect(wrapper.find('table').classes()).toContain('admin-table')
     expect(wrapper.find('table').classes()).toContain('extra-table-class')
     expect(wrapper.text()).toContain('Alpha')
-    expect(mocks.extend).toHaveBeenCalledWith('number', expect.any(Function), expect.any(Function))
-    expect(mocks.tablesort).toHaveBeenCalledWith(wrapper.vm.$refs.adminTable, { descending: true })
   })
 
-  it('refreshes sorting when forced', async () => {
-    const wrapper = mount(AdminTable, {
-      props: {
-        forceSortingRefresh: ['a'],
-      },
-      slots: {
-        default: '<thead><tr><th>Name</th></tr></thead>',
-      },
-    })
+  it('uses a fresh default array for tableClasses per instance', () => {
+    const first = AdminTable.props.tableClasses.default()
+    const second = AdminTable.props.tableClasses.default()
 
-    mocks.tablesort.mockClear()
-    await wrapper.setProps({ forceSortingRefresh: ['b'] })
-    await wrapper.vm.$nextTick()
-
-    expect(mocks.tablesort).toHaveBeenCalledWith(wrapper.vm.$refs.adminTable, { descending: true })
+    expect(first).toEqual([])
+    expect(first).not.toBe(second)
   })
 })
