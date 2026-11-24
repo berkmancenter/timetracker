@@ -15,14 +15,14 @@
       <div class="field">
         <label class="label">From</label>
         <div class="control">
-          <date-picker v-model:value="$store.state.admin.period.from" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="from"></date-picker>
+          <date-picker v-model="$store.state.admin.period.from" :required="true" name="from"></date-picker>
         </div>
       </div>
 
       <div class="field">
         <label class="label">To</label>
         <div class="control">
-          <date-picker v-model:value="$store.state.admin.period.to" format="MMMM D, Y" type="date" value-type="format" input-class="input" :clearable="false" :input-attr="{ required: true }" name="to"></date-picker>
+          <date-picker v-model="$store.state.admin.period.to" :required="true" name="to"></date-picker>
         </div>
       </div>
 

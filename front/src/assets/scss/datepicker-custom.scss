@@ -1,4 +1,8 @@
-.mx-datepicker {
+.tracker-datepicker {
   margin-right: 0.5rem;
   vertical-align: middle;
+
+  .dp__input_icon_pad {
+    padding-inline-start: 2.25rem;
+  }
 }

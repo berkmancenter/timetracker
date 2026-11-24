@@ -24,24 +24,20 @@
     "ldbutton": "^2.0.1",
     "lodash": "^4.17.21",
     "mitt": "^3.0.0",
-    "postcss": "^8.5.33",
     "store2": "^2.14.2",
     "vue": "^3.5.45",
-    "vue-component-type-helpers": "^3.3.14",
-    "vue-datepicker-next": "^1.0.3",
     "vue-final-modal": "^5.0.1",
-    "vue-router": "^5.5.1"
+    "vue-router": "^5.5.1",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@rollup/plugin-inject": "^5.0.3",
     "@vitejs/plugin-vue": "^6.0.11",
     "@vue/compiler-dom": "^3.5.45",
     "@vue/test-utils": "2.6.0",
     "jsdom": "31.0.1",
     "sass": "^1.108.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.1",
-    "vuex": "^4.1.0"
+    "vitest": "^5.1.1"
   },
   "resolutions": {
     "glob": "^14.0.6",

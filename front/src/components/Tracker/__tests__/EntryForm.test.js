@@ -68,7 +68,7 @@ function mountEntryForm(store = createStore(), isTouchDevice = false) {
           template: '<label class="form-field-stub">{{ label }}<slot /></label>',
         },
         DatePicker: {
-          props: ['value'],
+          props: ['modelValue'],
           template: '<input class="date-picker-stub">',
         },
         Icon: true,

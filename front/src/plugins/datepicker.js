@@ -1,8 +1,8 @@
-import DatePicker from 'vue-datepicker-next'
-import 'vue-datepicker-next/index.css'
+import '@vuepic/vue-datepicker/dist/main.css'
+import DatePicker from '@/components/Shared/DatePicker.vue'
 
 export default {
-  install: (app, options) => {
+  install: (app) => {
     app.component('date-picker', DatePicker)
-  }
+  },
 }

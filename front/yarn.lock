@@ -351,24 +351,6 @@
   resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.1.1.tgz#bdb13954851dc43ef5b03992618e0ed5e03c0598"
   integrity sha512-glFIJDvLNDtJhT9qrMFWLPbvS+skxgt4L0K8Ei2YtnhPysAJnsI7nyxSJxKj4ADeKX0OLjC4ntRkwpLOoS3rwA==
 
-"@rollup/plugin-inject@^5.0.3":
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-inject/-/plugin-inject-5.0.5.tgz#616f3a73fe075765f91c5bec90176608bed277a3"
-  integrity sha512-2+DEJbNBoPROPkgTDNe8/1YXWcqxbN5DTjASVIOx8HS+pITXushyNiBV56RB08zuptzz8gT3YfkqriTBVycepg==
-  dependencies:
-    "@rollup/pluginutils" "^5.0.1"
-    estree-walker "^2.0.2"
-    magic-string "^0.30.3"
-
-"@rollup/pluginutils@^5.0.1":
-  version "5.5.1"
-  resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-5.5.1.tgz#a6024861c0897668ef1e3911e52c2703da449237"
-  integrity sha512-P9ZvnfouRu4MSC+ilERaw6FmZs8zqKhpHxEs4aGDGWQAMzQGXnhvCSvoNwokfNvdt7t3Y5Y4p6gStQgezeIqug==
-  dependencies:
-    "@types/estree" "^1.0.0"
-    estree-walker "^2.0.2"
-    picomatch "^4.0.2"
-
 "@tybys/wasm-util@^0.10.3":
   version "0.10.5"
   resolved "https://registry.yarnpkg.com/@tybys/wasm-util/-/wasm-util-0.10.5.tgz#b3404a492dfbd65ba1c41c6f0a21f5e2d19b9053"
@@ -398,6 +380,11 @@
   version "0.0.21"
   resolved "https://registry.yarnpkg.com/@types/web-bluetooth/-/web-bluetooth-0.0.21.tgz#525433c784aed9b457aaa0ee3d92aeb71f346b63"
   integrity sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==
+
+"@types/web-bluetooth@^0.0.22":
+  version "0.0.22"
+  resolved "https://registry.yarnpkg.com/@types/web-bluetooth/-/web-bluetooth-0.0.22.tgz#d587ebfe9e4b28ff2965e5177beaf5a293ac838a"
+  integrity sha512-4O7kU0Ut0irZvFyk3EvgDrzFYBQI80Puhkb65I7eV6WTZX4iOo5zoDrEfjDBRB7x5Stz31csoHO4hAjSiRTALw==
 
 "@vitejs/plugin-vue@^6.0.11":
   version "6.0.11"
@@ -558,14 +545,14 @@
     "@vueuse/core" "^14.3.0"
     date-fns "^4.4.0"
 
-"@vueuse/core@15.0.0", "@vueuse/core@^15.0.0":
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-15.0.0.tgz#d4ca881cbee5ba653bda1a388ce441e8eed4e61d"
-  integrity sha512-Zv67h5mrk7YHDJsRObx+DXaCBz6RKBUpxqLesJ+3xZNPG6yuQs7ja7kg3veFrrouYLWAqydQ7CwGEbLVxB43Ng==
+"@vueuse/core@15.1.0", "@vueuse/core@^15.0.0":
+  version "15.1.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-15.1.0.tgz#e33a17fc754844acbd6469328a3c07a00e91917e"
+  integrity sha512-OuZ5ecLw/sikX0HFjlJM/p/PkfL0567Ntfov9G0jYlw92QqZpPVikZOoB1Mpe4unZ+7E/QQ+uFpEgAjj2FYRbw==
   dependencies:
-    "@types/web-bluetooth" "^0.0.21"
-    "@vueuse/metadata" "15.0.0"
-    "@vueuse/shared" "15.0.0"
+    "@types/web-bluetooth" "^0.0.22"
+    "@vueuse/metadata" "15.1.0"
+    "@vueuse/shared" "15.1.0"
 
 "@vueuse/core@^14.3.0":
   version "14.4.0"
@@ -577,32 +564,32 @@
     "@vueuse/shared" "14.4.0"
 
 "@vueuse/integrations@^15.0.0":
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/integrations/-/integrations-15.0.0.tgz#e5e24eec6ba467b09035ae95f90a10dad2b2bb6f"
-  integrity sha512-uWC1608pEocJPeRk1IqrEA3uYHhAGTJNibcMAdxgdK2Sy2Hypc6b+VdNO9KekCxyPc4VXK8SKDp8vsXefR/ZFg==
+  version "15.1.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/integrations/-/integrations-15.1.0.tgz#9c952fe13fbb7db67e9ebdb3896d85e2116d886f"
+  integrity sha512-wkWMVNeK8kpLzX1piF5Oo5RUEiCsPj6eAQINrlP0OUp1vWF1mFsaTKH9qK7/qiWZDfkZfkLREDeTVutcJsR2aQ==
   dependencies:
-    "@vueuse/core" "15.0.0"
-    "@vueuse/shared" "15.0.0"
+    "@vueuse/core" "15.1.0"
+    "@vueuse/shared" "15.1.0"
 
 "@vueuse/metadata@14.4.0":
   version "14.4.0"
   resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-14.4.0.tgz#a2508499b803bac14775a9c9b852b8738fc16f98"
   integrity sha512-swx/255R6JyHZFJhx845iz5CRWDZdCfvkZOpACWc5+c5WHcG24mv8gUT1WIdFQaHt6dq79rvILd9QnCWiyVm9g==
 
-"@vueuse/metadata@15.0.0":
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-15.0.0.tgz#c143e77d6e5b8f59ec345e1a524824381d33bd7b"
-  integrity sha512-sfWE5LADAKJ0KnjtGliMdSN8Ij/L7uP6rXIZlgPloAI4zvvefbw6H5Lt7KJA6RqQOYgVqWF5Guj50HHMIzygBg==
+"@vueuse/metadata@15.1.0":
+  version "15.1.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-15.1.0.tgz#72f0464a632d98564565dc958697d509b1ccbaa6"
+  integrity sha512-yHKFelRTdQdp7vdjXXEw68Wh9v8OgyxWm1v1aHbGM6Z4qbqHhB6QgB8MTNB76pZYh22wPeALCdr8qjShlxPBHA==
 
 "@vueuse/shared@14.4.0":
   version "14.4.0"
   resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-14.4.0.tgz#4e89813c7859d153d48c03d74bff78739f96723b"
   integrity sha512-JRgY90Sz8DDtPMsaDflvPMp9xYk69JZAmbuDvAquUVXKr2gEjqtzGNTTthLfckH0BzBqvnu31gb4a8TGLRe79g==
 
-"@vueuse/shared@15.0.0":
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-15.0.0.tgz#9e9332e1345c08601f67f1657e0e82597b42cdef"
-  integrity sha512-vbNXhGrbV53xPOMSyOzMHQRvhMgZf7oNDw2RChUetVxwTIEkInQ1joZ9JbT0G3z2n2AJNjvmCWeM9ySYrnvogA==
+"@vueuse/shared@15.1.0":
+  version "15.1.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-15.1.0.tgz#477e51994fcad14a2b35d82c68a380af5161ebf9"
+  integrity sha512-JAbQLO+vOULt8MPR4oRbvstBuztTTMIX4LOfCGeBvp9JSgj5OppZDing3gKDrmlyUQvYYFSPIX4dxkfJgdsxWQ==
 
 abbrev@^5.0.0:
   version "5.0.0"
@@ -751,11 +738,6 @@ date-fns@^4.4.0:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-4.4.0.tgz#806539edf45c616b2b76b5f78b88c56ed3c7e036"
   integrity sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==
 
-date-format-parse@^0.2.7:
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/date-format-parse/-/date-format-parse-0.2.7.tgz#a2f78bca857a821785b48abedd4426c65aa7b918"
-  integrity sha512-/+lyMUKoRogMuTeOVii6lUwjbVlesN9YRYLzZT/g3TEZ3uD9QnpjResujeEqUW+OSNbT7T1+SYdyEkTcRv+KDQ==
-
 dayjs@^1.11.23:
   version "1.11.23"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.23.tgz#b0a363506dde5f36cf5075e42ebe8115165a8c79"
@@ -831,9 +813,9 @@ floating-vue@^5.4.0:
     "@floating-ui/dom" "^1.8.0"
 
 focus-trap@^8.2.5:
-  version "8.2.5"
-  resolved "https://registry.yarnpkg.com/focus-trap/-/focus-trap-8.2.5.tgz#5dd31584607f1a1f8b46e7866c3def5fcc46ce99"
-  integrity sha512-VrqfyRXaHZ0EkhXlfyalszmhnSN9yjdYXwlwLSRoJrDJ0/eswY5J5Avj/Hcd/PrOHCMnsMhwx7+7+s1kmv9Asg==
+  version "8.2.6"
+  resolved "https://registry.yarnpkg.com/focus-trap/-/focus-trap-8.2.6.tgz#d5013d1cfef4ab21a3828f3c72ee4e46ce17eb26"
+  integrity sha512-4V7uTf/7Ax3ynfbey6K3o8NOfIz+go9atKNtFU+KCP5NWhyvn2M/Qk4HY+9kOi8NWujpglRGe0y6G3r/L5M/Pw==
   dependencies:
     tabbable "^6.5.2"
 
@@ -1062,7 +1044,7 @@ magic-string-ast@^1.0.2:
   dependencies:
     magic-string "^0.30.19"
 
-magic-string@^0.30.19, magic-string@^0.30.21, magic-string@^0.30.3:
+magic-string@^0.30.19, magic-string@^0.30.21:
   version "0.30.21"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.21.tgz#56763ec09a0fa8091df27879fd94d19078c00d91"
   integrity sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==
@@ -1173,7 +1155,7 @@ picocolors@^1.1.1:
   resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.1.1.tgz#3d321af3eab939b083c8f929a1d12cda81c26b6b"
   integrity sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==
 
-picomatch@^4.0.2, picomatch@^4.0.4, picomatch@^4.0.7:
+picomatch@^4.0.4, picomatch@^4.0.7:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.7.tgz#6313360034ccb36b3dc61ecbdff78121f90fe21f"
   integrity sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==
@@ -1196,7 +1178,7 @@ pkg-types@^2.3.0, pkg-types@^2.3.1:
     exsolve "^1.1.3"
     pathe "^2.0.3"
 
-postcss@^8.5.32, postcss@^8.5.33:
+postcss@^8.5.32:
   version "8.5.33"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.5.33.tgz#088a2fee1bdee7ea1ffaf8abb4288513e7097ab0"
   integrity sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==
@@ -1412,18 +1394,10 @@ vitest@^5.1.1:
     tinyglobby "^0.2.17"
     why-is-node-running "3.2.1"
 
-vue-component-type-helpers@^3.0.0, vue-component-type-helpers@^3.3.14:
+vue-component-type-helpers@^3.0.0:
   version "3.3.14"
   resolved "https://registry.yarnpkg.com/vue-component-type-helpers/-/vue-component-type-helpers-3.3.14.tgz#2cae80380617266696a33ffd8455455486894090"
   integrity sha512-Pq3+OnbCiPCHk0R7KSZrx+j/XXaUn2kSQ1epxq60w8CPbByLjC1EJgV51n4WY851sTXUVzsNMuitywdkdVyKjA==
-
-vue-datepicker-next@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/vue-datepicker-next/-/vue-datepicker-next-1.0.3.tgz#755c33ef94e9cc2d16238f2c1a9fdffc9c02cfb3"
-  integrity sha512-Brqjh896BJGVxP7d6tGDsPMu0SDAB8hAdtG7zWF8VIHJB21dk1VB9KgdajD9Y9uXbg+wHN0vmL7sbMPIyehQVQ==
-  dependencies:
-    date-format-parse "^0.2.7"
-    vue "^3.0.0"
 
 vue-demi@>=0.13.0:
   version "0.14.10"
@@ -1465,7 +1439,7 @@ vue-use-template@^0.5.2:
   resolved "https://registry.yarnpkg.com/vue-use-template/-/vue-use-template-0.5.2.tgz#4bff1a9f1c32f440ff41404df4b75853a6e7f5bf"
   integrity sha512-Cx2ctvPTZRW0x4nzmry5IklREqz9A+DSBP3/RMlAd9YRXn9yS7V//ncanav5ZxK/BNbZxe/+gcmtK+61bQzwJg==
 
-vue@^3.0.0, vue@^3.5.45:
+vue@^3.5.45:
   version "3.5.45"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.5.45.tgz#a86c2ac53d76c72f919043d4c70ccaa5d8f06a80"
   integrity sha512-3cvsib8m9c0vB24+MDKsgcW4+Da4xaBl9Z/5Tbm2pmSIsRPxcil4cdXjXlVsmJ2g64XJo5h+IRd7rsdGT9pZaw==

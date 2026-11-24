@@ -79,13 +79,9 @@
           id="time_entry_entry_date"
         >
           <date-picker
-            v-model:value="formValue['entry_date']"
-            format="MMMM D, Y"
-            type="date"
-            value-type="format"
-            input-class="input"
-            :clearable="false"
-            :input-attr="{ accesskey: 'a', required: true }"
+            v-model="formValue['entry_date']"
+            :required="true"
+            access-key="a"
             name="entry_date"
             id="time_entry_entry_date"
           ></date-picker>

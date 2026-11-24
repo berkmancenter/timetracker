@@ -323,7 +323,7 @@ feature 'Timesheets' do
     tomorrow = page.evaluate_script(
       "new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date())"
     )
-    within('.tracker-entry-form .mx-datepicker') do
+    within('.tracker-entry-form .tracker-datepicker') do
       expect(page).to have_field(with: tomorrow)
     end
   end
