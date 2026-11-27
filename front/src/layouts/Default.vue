@@ -45,7 +45,7 @@
         <spinner />
 
         <div class="top-nav-help top-nav-button">
-          <a href="https://berkman-klein-center.gitbook.io/timetracker" target="_blank">
+          <a href="https://github.com/berkmancenter/timetracker/blob/main/docs/user-manual/README.md" target="_blank">
             <Icon :src="helpIcon" />
           </a>
         </div>

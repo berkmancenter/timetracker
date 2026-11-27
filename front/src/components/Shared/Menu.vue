@@ -47,7 +47,7 @@
           {
             label: 'Help',
             external: true,
-            link: 'https://berkman-klein-center.gitbook.io/timetracker',
+            link: 'https://github.com/berkmancenter/timetracker/blob/main/docs/user-manual/README.md',
           }
         ],
       }

@@ -39,7 +39,7 @@ describe('Menu', () => {
 
     const external = wrapper.find('a[target="_blank"]')
     expect(external.text()).toBe('Help')
-    expect(external.attributes('href')).toBe('https://berkman-klein-center.gitbook.io/timetracker')
+    expect(external.attributes('href')).toBe('https://github.com/berkmancenter/timetracker/blob/main/docs/user-manual/README.md')
   })
 
   it('closes the side menu on touch devices when a link is selected', async () => {
