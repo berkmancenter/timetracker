@@ -14,13 +14,14 @@ timesheet admins compare the logged hours with the hours planned for a period.
   and demo data.
 - [README](../README.md) has the development setup, the tests and the demo
   data.
-- The [user guide](https://berkman-klein-center.gitbook.io/timetracker) shows
-  the website step by step.
+- The [user manual](user-manual/README.md) shows the website step by step,
+  with screenshots.
 
 ## Audience
 
 | If you want to... | Start with... |
 | --- | --- |
+| Learn the website step by step | [User manual](user-manual/README.md) |
 | Log your hours | [Time entries](app-functionality.md#time-entries) |
 | Start a timesheet for your team | [Timesheets and fields](app-functionality.md#timesheets-and-fields) |
 | Invite people or change their role | [Members and invitations](app-functionality.md#members-and-invitations) |

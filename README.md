@@ -12,7 +12,7 @@ Powered by Ruby on Rails, PostgreSQL and a Vue front-end.
 - [Application functionality](docs/app-functionality.md)
 - [Configuration](docs/configuration.md)
 - [Documentation index](docs/README.md)
-- [User guide](https://berkman-klein-center.gitbook.io/timetracker)
+- [User manual](docs/user-manual/README.md)
 
 ## Development
 
